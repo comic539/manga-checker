@@ -50,10 +50,12 @@ def first_toranoana_detail_url(
         )
         score = 2 if listing_matches_work(title, blob, isbn, author=author) else 0
         ranked.append((score, abs_url))
+    ranked.sort(key=lambda item: item[0], reverse=True)
     matching = [url for score, url in ranked if score]
     if matching:
         return matching[0]
-    if allow_first and ranked:
+    isbn_digits = re.sub(r"\D", "", isbn or "")
+    if (allow_first or len(isbn_digits) >= 10) and ranked:
         return ranked[0][1]
     return ""
 

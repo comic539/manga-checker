@@ -182,7 +182,8 @@ def _load_link_list(session: requests.Session, url: str, store_id: str) -> list[
         alts = " ".join(
             str(img.get("alt") or "") for img in a.find_all("img")
         )
-        blob = f"{text} {alts}"
+        card_text = _privilege_card_text(a)
+        blob = " ".join(part for part in (text, alts, card_text) if part)
         if len(blob.strip()) < 6:
             continue
         if not re.search(r"特典|限定|リーフレット|描き下ろし|カード", blob):
@@ -196,6 +197,20 @@ def _load_link_list(session: requests.Session, url: str, store_id: str) -> list[
             )
         )
     return _dedupe_hits(hits)
+
+
+def _privilege_card_text(tag) -> str:
+    """特典一覧は『特典』リンクと作品名が別要素であることが多いので、カード全体を見る。"""
+    for parent in tag.parents:
+        name = getattr(parent, "name", None)
+        if name in {"ul", "ol", "body", "html", "[document]"}:
+            break
+        if name not in {"li", "article", "section", "tr", "div"}:
+            continue
+        text = parent.get_text(" ", strip=True)
+        if 8 < len(text) <= 700 and re.search(r"特典|限定", text):
+            return text
+    return ""
 
 
 def _load_publisher_page(session: requests.Session, url: str) -> list[OfficialHit]:

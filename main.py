@@ -9,13 +9,14 @@ from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
 
-from manga_checker.catalog import fetch_months_volume_ones, write_catalog_json
+from manga_checker.catalog import fetch_months_volume_ones, load_catalog_json, write_catalog_json
 from manga_checker.dates import format_year_month, iter_month_offsets, iter_months
 from manga_checker.http import configure_ssl, make_session
 from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
 from manga_checker.publishers import publisher_sort_key
 from manga_checker.report import SITE_TITLE, write_csv, write_html
+from manga_checker.store_cache import load_checks_cache, save_checks_cache
 from manga_checker.stores import check_stores
 
 
@@ -45,12 +46,22 @@ def parse_args() -> argparse.Namespace:
         help="各月の HTML/CSV に出力する件数。0（デフォルト）で全件。確認用に件数を絞るときだけ指定",
     )
     parser.add_argument(
+        "--reuse-catalog",
+        action="store_true",
+        help="output/catalog_by_month.json があれば書誌取得を省略し、特典判定だけやり直す",
+    )
+    parser.add_argument(
         "--csv-in",
         type=Path,
         default=None,
         help="追加タイトルのCSV（title,volume,author,publisher,pubdate,isbn）",
     )
     parser.add_argument("--out-dir", type=Path, default=Path("output"), help="出力フォルダ")
+    parser.add_argument(
+        "--no-index",
+        action="store_true",
+        help="確認用に件数を絞ったときなど、リポジトリ直下の index.html を上書きしない",
+    )
     parser.add_argument(
         "--insecure",
         action="store_true",
@@ -88,9 +99,19 @@ def main() -> None:
     catalog = OfficialIndex()
     catalog.load(session)
 
-    comics_by_month = fetch_months_volume_ones(windows, extra_csv=args.csv_in, session=session)
-    args.out_dir.mkdir(parents=True, exist_ok=True)
-    write_catalog_json(args.out_dir / "catalog_by_month.json", comics_by_month)
+    catalog_json = args.out_dir / "catalog_by_month.json"
+    if args.reuse_catalog and catalog_json.exists():
+        print(f"保存済み書誌を読みます: {catalog_json.resolve()}（楽天/NDLの再取得はしません）")
+        comics_by_month = load_catalog_json(catalog_json, windows)
+    else:
+        comics_by_month = fetch_months_volume_ones(windows, extra_csv=args.csv_in, session=session)
+        args.out_dir.mkdir(parents=True, exist_ok=True)
+        write_catalog_json(catalog_json, comics_by_month)
+
+    checks_cache_path = args.out_dir / "store_checks.json"
+    checks_cache = load_checks_cache(checks_cache_path)
+    if checks_cache:
+        print(f"判定キャッシュを読みました: {checks_cache_path.resolve()}（特典あり／なしのみ再利用。未確認は再取得します）")
 
     month_panels: list[tuple[int, int, list[ComicReport]]] = []
     all_reports: list[ComicReport] = []
@@ -119,14 +140,17 @@ def main() -> None:
                     checks=check_stores(
                         comic,
                         fetch=args.fetch,
-                        delay_sec=0.45 if args.fetch else 0,
+                        delay_sec=1.5 if args.fetch else 0,
                         session=session,
                         catalog=catalog,
+                        cache=checks_cache,
                     ),
                     period_year=year,
                     period_month=month,
                 )
             )
+            if args.fetch:
+                save_checks_cache(checks_cache_path, checks_cache)
         month_panels.append((year, month, reports))
         all_reports.extend(reports)
 
@@ -143,7 +167,7 @@ def main() -> None:
         month_panels=month_panels,
         active_period=active_period,
     )
-    if html_path.resolve() != index_path.resolve():
+    if not args.no_index and html_path.resolve() != index_path.resolve():
         index_path.write_bytes(html_path.read_bytes())
     print()
     print("完了しました。")

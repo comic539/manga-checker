@@ -21,7 +21,6 @@ from urllib.parse import urlencode
 
 import requests
 
-from manga_checker.covers import amazon_cover_url, openbd_cover_fallback
 from manga_checker.dates import month_query_range, year_month_from_pubdate
 from manga_checker.http import make_session
 from manga_checker.models import Comic
@@ -294,11 +293,8 @@ def load_catalog_json(
             result.setdefault(key, [])
     for comics in result.values():
         for comic in comics:
-            if comic.cover_url or not comic.isbn:
-                continue
-            comic.cover_url = amazon_cover_url(comic.isbn) or openbd_cover_fallback(comic.isbn)
-            if comic.cover_url:
-                comic.cover_source = comic.cover_source or "openbd"
+            if comic.cover_url and "rakuten" in comic.cover_url:
+                comic.cover_source = "rakuten"
     return result
 
 

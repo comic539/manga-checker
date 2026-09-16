@@ -286,6 +286,27 @@ class DetailFetchTests(unittest.TestCase):
         self.assertEqual(by_id["gamers"].status, STATUS_NO)
         self.assertEqual(by_id["kinokuniya"].status, STATUS_NO)
 
+    def test_official_melon_yes_survives_without_fetch(self) -> None:
+        from manga_checker.official import OfficialHit, OfficialIndex
+        from manga_checker.privilege import STATUS_UNKNOWN
+        from manga_checker.stores import check_stores
+
+        comic = Comic(title="初凪ヒメリウム 1")
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        catalog.entries["melonbooks"] = [
+            OfficialHit(
+                "melonbooks",
+                "『初凪ヒメリウム』メロンブックス限定特典",
+                "https://www.melonbooks.co.jp/privilege/privilege.php",
+                ["メロン特典"],
+            )
+        ]
+        checks = check_stores(comic, fetch=False, delay_sec=0, catalog=catalog)
+        by_id = {c.store_id: c for c in checks}
+        self.assertEqual(by_id["melonbooks"].status, STATUS_YES)
+        self.assertEqual(by_id["animate"].status, STATUS_UNKNOWN)
+
     def test_toranoana_uses_item_url_and_privilege(self) -> None:
         comic = Comic(title="ヒトナー 1", isbn="9784088852317")
         search_html = """
@@ -348,4 +369,37 @@ class DetailFetchTests(unittest.TestCase):
             )
         self.assertNotIn("/item/111", check.url)
         self.assertIn("searchWord=", check.url)
+
+    def test_detail_page_matches_by_isbn_without_title(self) -> None:
+        from manga_checker.stores import _detail_page_matches
+
+        comic = Comic(title="別表記の作品 1", isbn="9784088852287")
+        html = "<html><head><title>商品</title></head><body>ISBN 978-4-08-885228-7</body></html>"
+        self.assertTrue(_detail_page_matches(comic, html))
+
+    def test_isbn_search_uses_first_product_link(self) -> None:
+        from manga_checker.animate import first_animate_detail_url
+        from manga_checker.melon import first_melon_detail_url
+
+        html_a = '<ul><li><a href="/pd/111/">別作品</a></li></ul>'
+        url_a = first_animate_detail_url(
+            html_a,
+            "https://www.animate-onlineshop.jp/products/list.php",
+            "初凪ヒメリウム",
+            isbn="9784000000000",
+        )
+        self.assertEqual(url_a, "https://www.animate-onlineshop.jp/pd/111/")
+        html_m = '<li><a href="/detail/detail.php?product_id=222">別作品</a></li>'
+        url_m = first_melon_detail_url(
+            html_m,
+            "https://www.melonbooks.co.jp/search/search.php",
+            "初凪ヒメリウム",
+            isbn="9784000000000",
+        )
+        self.assertIn("product_id=222", url_m)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
 

@@ -14,6 +14,14 @@ class TitleMatchTests(unittest.TestCase):
         self.assertTrue(titles_match("ラブソング", "ラブソング"))
         self.assertTrue(titles_match("夜は猫といっしょ", "夜は猫といっしょ (1) 著者"))
 
+    def test_title_inside_privilege_card(self) -> None:
+        self.assertTrue(
+            titles_match(
+                "初凪ヒメリウム 1",
+                "特典 【メロンブックス限定特典】 初凪ヒメリウム 描き下ろしイラストカード",
+            )
+        )
+
     def test_author_disambiguates_short_title(self) -> None:
         self.assertTrue(
             titles_match(

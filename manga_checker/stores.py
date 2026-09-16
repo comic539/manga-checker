@@ -12,13 +12,14 @@ import requests
 from bs4 import BeautifulSoup
 
 from manga_checker.animate import evaluate_animate_detail, first_animate_detail_url
-from manga_checker.http import make_session
+from manga_checker.http import get_with_retry, make_session
 from manga_checker.links import isbn_search_query
 from manga_checker.models import Comic, StoreCheck
 from manga_checker.search_title import toranoana_search_word
 from manga_checker.melon import evaluate_melon_detail, first_melon_detail_url
 from manga_checker.official import OfficialIndex, lookup_status
 from manga_checker.privilege import STATUS_UNKNOWN, STATUS_YES, evaluate_privilege
+from manga_checker.store_cache import cached_check, remember_check
 from manga_checker.title_match import listing_matches_work
 from manga_checker.toranoana import evaluate_toranoana_detail, first_toranoana_detail_url
 
@@ -163,6 +164,7 @@ def check_stores(
     delay_sec: float = 1.5,
     session: requests.Session | None = None,
     catalog: OfficialIndex | None = None,
+    cache: dict | None = None,
 ) -> list[StoreCheck]:
     session = session or make_session(
         extra_headers={"Accept-Language": "ja,en;q=0.8"}
@@ -182,7 +184,9 @@ def check_stores(
             comic.isbn,
             url,
         )
-        if official_yes == STATUS_YES and store.store_id not in DETAIL_PAGE_STORES:
+        if official_yes == STATUS_YES and (
+            store.store_id not in DETAIL_PAGE_STORES or not fetch
+        ):
             results.append(
                 StoreCheck(store.store_id, store.name, official_yes, detail, official_url)
             )
@@ -191,6 +195,10 @@ def check_stores(
             results.append(
                 StoreCheck(store.store_id, store.name, official_yes, detail, url)
             )
+            continue
+        remembered = cached_check(cache, comic, store.store_id)
+        if remembered is not None:
+            results.append(remembered)
             continue
         if store.store_id in DETAIL_PAGE_STORES or store.store_id in LISTING_FETCH_STORES:
             if not fetch:
@@ -204,7 +212,17 @@ def check_stores(
                     )
                 )
                 continue
-            results.append(_fetch_store(store, comic, url, session))
+            fetched = _fetch_store(store, comic, url, session)
+            if fetched.status == STATUS_UNKNOWN and official_yes == STATUS_YES:
+                fetched = StoreCheck(
+                    store.store_id,
+                    store.name,
+                    STATUS_YES,
+                    detail,
+                    fetched.url or official_url,
+                )
+            remember_check(cache, fetched, comic)
+            results.append(fetched)
             time.sleep(delay_sec)
             continue
         if not fetch:
@@ -218,7 +236,9 @@ def check_stores(
                 )
             )
             continue
-        results.append(_fetch_store(store, comic, url, session))
+        fetched = _fetch_store(store, comic, url, session)
+        remember_check(cache, fetched, comic)
+        results.append(fetched)
         time.sleep(delay_sec)
     return results
 
@@ -231,7 +251,7 @@ def _fetch_store(store: Store, comic: Comic, url: str, session: requests.Session
     if store.store_id == "toranoana":
         return _fetch_toranoana(comic, url, session)
     try:
-        response = session.get(url, timeout=25)
+        response = get_with_retry(session, url, timeout=25, label=f"{store.name} {comic.display_title}")
         if response.status_code >= 400:
             status, detail = evaluate_privilege(
                 "",
@@ -345,13 +365,17 @@ def _fetch_detail_attempts(
 ) -> StoreCheck:
     last_search = fallback_url
     title = match_title or comic.search_query
+    last_http = 0
     try:
         for index, (list_url, from_isbn) in enumerate(attempts):
             last_search = list_url
             if index:
                 time.sleep(0.8)
-            search_resp = session.get(list_url, timeout=25)
+            search_resp = get_with_retry(
+                session, list_url, timeout=25, label=f"{name} 検索 {comic.display_title}"
+            )
             if search_resp.status_code >= 400:
+                last_http = search_resp.status_code
                 continue
             detail_url = extract(
                 search_resp.text,
@@ -361,7 +385,7 @@ def _fetch_detail_attempts(
                 comic.author,
                 allow_first=False,
             )
-            need_detail_check = False
+            need_detail_check = bool(from_isbn and detail_url)
             if not detail_url and from_isbn:
                 detail_url = extract(
                     search_resp.text,
@@ -375,10 +399,15 @@ def _fetch_detail_attempts(
             if not detail_url:
                 continue
             time.sleep(0.8)
-            detail_resp = session.get(
-                detail_url, timeout=25, headers={"Referer": list_url}
+            detail_resp = get_with_retry(
+                session,
+                detail_url,
+                timeout=25,
+                headers={"Referer": list_url},
+                label=f"{name} 詳細 {comic.display_title}",
             )
             if detail_resp.status_code >= 400:
+                last_http = detail_resp.status_code
                 continue
             if need_detail_check and not _detail_page_matches(comic, detail_resp.text):
                 continue
@@ -387,13 +416,25 @@ def _fetch_detail_attempts(
             if store_id == "melonbooks" and status != STATUS_YES:
                 return StoreCheck(store_id, name, status, detail, last_search)
             return StoreCheck(store_id, name, status, detail, detail_url)
+        if last_http >= 400:
+            return StoreCheck(
+                store_id,
+                name,
+                STATUS_UNKNOWN,
+                f"HTTP {last_http}。ページを取得できませんでした。",
+                fallback_url,
+            )
         return StoreCheck(store_id, name, STATUS_UNKNOWN, missing, fallback_url)
     except requests.RequestException as exc:
         return StoreCheck(store_id, name, STATUS_UNKNOWN, f"取得失敗: {exc}", last_search)
 
 
 def _detail_page_matches(comic: Comic, html: str) -> bool:
-    soup = BeautifulSoup(html or "", "html.parser")
+    digits = "".join(ch for ch in (comic.isbn or "") if ch.isdigit())
+    blob = html or ""
+    if len(digits) >= 10 and digits in blob.replace("-", "").replace(" ", ""):
+        return True
+    soup = BeautifulSoup(blob, "html.parser")
     parts: list[str] = []
     for tag in soup.find_all(["h1", "title"]):
         text = tag.get_text(" ", strip=True)

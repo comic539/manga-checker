@@ -1,7 +1,15 @@
+import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-from manga_checker.catalog import _parse_ndl_item, month_range, redistribute_by_pubdate
+from manga_checker.catalog import (
+    _parse_ndl_item,
+    load_catalog_json,
+    month_range,
+    redistribute_by_pubdate,
+    write_catalog_json,
+)
 from manga_checker.models import Comic
 
 
@@ -47,6 +55,27 @@ class CatalogParseTests(unittest.TestCase):
     def test_month_range_is_first_through_last_day(self) -> None:
         self.assertEqual(month_range(2026, 8), ("2026-08-01", "2026-08-31"))
         self.assertEqual(month_range(2026, 2), ("2026-02-01", "2026-02-28"))
+
+    def test_load_catalog_json_roundtrip(self) -> None:
+        comic = Comic(
+            title="風と雲 1",
+            author="著者",
+            publisher="小学館",
+            pubdate="2026-08-28",
+            isbn="9784000000000",
+            source="rakuten",
+            cover_url="https://thumbnail.image.rakuten.co.jp/cover.jpg",
+            cover_source="openbd",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "catalog.json"
+            write_catalog_json(path, {(2026, 8): [comic], (2026, 9): []})
+            loaded = load_catalog_json(path, [(2026, 8), (2026, 9)])
+        self.assertEqual(loaded[(2026, 8)][0].title, "風と雲 1")
+        self.assertEqual(loaded[(2026, 8)][0].isbn, "9784000000000")
+        self.assertEqual(loaded[(2026, 8)][0].cover_url, "https://thumbnail.image.rakuten.co.jp/cover.jpg")
+        self.assertEqual(loaded[(2026, 8)][0].cover_source, "rakuten")
+        self.assertEqual(loaded[(2026, 9)], [])
 
 
 if __name__ == "__main__":

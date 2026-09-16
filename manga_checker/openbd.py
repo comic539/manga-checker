@@ -1,4 +1,4 @@
-"""openBD から書誌と書影を補完する。"""
+"""openBD から書誌を補完する。楽天の書影は上書きしない。"""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import time
 
 import requests
 
-from manga_checker.covers import amazon_cover_url, openbd_cover_fallback
 from manga_checker.dates import prefer_pubdate
 from manga_checker.http import make_session
 from manga_checker.models import Comic
@@ -42,8 +41,11 @@ def enrich_with_openbd(comics: list[Comic], session: requests.Session | None = N
             )
             comic.volume = comic.volume or summary.get("volume") or ""
             comic.series = comic.series or summary.get("series") or ""
-            if not comic.cover_url:
-                cover = _cover_from_record(record, isbn)
+            if comic.cover_url:
+                if "rakuten" in comic.cover_url:
+                    comic.cover_source = "rakuten"
+            else:
+                cover = _cover_from_record(record)
                 if cover:
                     comic.cover_url = cover
                     comic.cover_source = comic.cover_source or "openbd"
@@ -52,10 +54,8 @@ def enrich_with_openbd(comics: list[Comic], session: requests.Session | None = N
             time.sleep(0.3)
 
     for comic in comics:
-        if not comic.cover_url and comic.isbn:
-            comic.cover_url = amazon_cover_url(comic.isbn) or openbd_cover_fallback(comic.isbn)
-            if comic.cover_url and not comic.cover_source:
-                comic.cover_source = "openbd"
+        if comic.cover_url and "rakuten" in comic.cover_url:
+            comic.cover_source = "rakuten"
     return comics
 
 
@@ -105,7 +105,7 @@ def _onix_date_values(item: dict | str | None) -> list[str]:
     return values
 
 
-def _cover_from_record(record: dict, isbn: str) -> str:
+def _cover_from_record(record: dict) -> str:
     summary = record.get("summary") or {}
     cover = (summary.get("cover") or "").strip()
     if cover:
@@ -124,4 +124,4 @@ def _cover_from_record(record: dict, isbn: str) -> str:
             link = link.get("content") or link.get("src") or ""
         if isinstance(link, str) and link.startswith("http"):
             return link
-    return amazon_cover_url(isbn) or openbd_cover_fallback(isbn)
+    return ""

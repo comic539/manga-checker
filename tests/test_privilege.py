@@ -443,6 +443,22 @@ class AnimateDetailTests(unittest.TestCase):
         )
         self.assertEqual(url, "")
 
+    def test_isbn_search_returns_first_pd_even_without_title_match(self) -> None:
+        from manga_checker.animate import first_animate_detail_url
+
+        html = """
+        <ul class="item_list">
+          <li class="item"><a href="/pd/111/">ひと夏limited</a></li>
+        </ul>
+        """
+        url = first_animate_detail_url(
+            html,
+            "https://www.animate-onlineshop.jp/products/list.php",
+            "ヒトナー",
+            isbn="9784088852317",
+        )
+        self.assertEqual(url, "https://www.animate-onlineshop.jp/pd/111/")
+
     def test_tokuten_block_and_heading(self) -> None:
         from manga_checker.animate import evaluate_animate_detail
 

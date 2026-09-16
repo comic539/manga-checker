@@ -10,6 +10,8 @@ from manga_checker.volume import normalize_text
 
 _AUTHOR_SPLIT = re.compile(r"[,、/／・\s]+")
 _AFTER_OK = set(" 　0123456789第巻()（）[]【】「」『』~～〜・:：/／-|!！?？☆★'のと")
+# 文中照合の直前。『の』は『裏切り者のラブソング』誤ヒットを避けるため入れない
+_BEFORE_OK = set(" 　0123456789第巻()（）[]【】「」『』~～〜・:：/／-|!！?？☆★'")
 
 
 def titles_match(
@@ -34,6 +36,8 @@ def titles_match(
     )
     if any(_exact_or_prefix(bare, cand) for cand in candidates):
         return True
+    if any(_contained_title(bare, cand) for cand in candidates):
+        return True
     if author and _author_in(hay, author) and bare in hay:
         return True
     return False
@@ -45,6 +49,21 @@ def _exact_or_prefix(bare: str, hay: str) -> bool:
     if hay.startswith(bare) and _prefix_boundary(hay, len(bare)):
         return True
     return False
+
+
+def _contained_title(bare: str, hay: str) -> bool:
+    if len(bare) < 3:
+        return False
+    start = 0
+    while True:
+        idx = hay.find(bare, start)
+        if idx < 0:
+            return False
+        before_ok = idx == 0 or hay[idx - 1] in _BEFORE_OK
+        after_ok = _prefix_boundary(hay, idx + len(bare))
+        if before_ok and after_ok:
+            return True
+        start = idx + 1
 
 
 def _prefix_boundary(hay: str, end: int) -> bool:

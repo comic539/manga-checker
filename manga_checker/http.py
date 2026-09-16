@@ -12,6 +12,7 @@ CERTIFICATE_VERIFY_FAILED になることがあります。
 from __future__ import annotations
 
 import os
+import time
 import warnings
 
 import certifi
@@ -22,8 +23,10 @@ from urllib3.exceptions import InsecureRequestWarning
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/120.0.0.0 Safari/537.36"
+    "Chrome/131.0.0.0 Safari/537.36"
 )
+
+_RETRY_STATUSES = frozenset({403, 429, 502, 503, 504})
 
 _insecure_override: bool | None = None
 _fallback_warned = False
@@ -116,3 +119,38 @@ def make_session(*, extra_headers: dict[str, str] | None = None) -> requests.Ses
     session.mount("https://", adapter)
     session.mount("http://", adapter)
     return session
+
+
+def get_with_retry(
+    session: requests.Session,
+    url: str,
+    *,
+    timeout: int = 25,
+    headers: dict[str, str] | None = None,
+    label: str = "",
+    retries: int = 3,
+) -> requests.Response:
+    """書店ページ取得。403/429/503 などは待って再試行し、判定ロジックには触れない。"""
+    last_error: Exception | None = None
+    tag = label or url
+    for attempt in range(1, retries + 1):
+        try:
+            response = session.get(url, timeout=timeout, headers=headers)
+        except requests.RequestException as exc:
+            last_error = exc
+            print(f"  [HTTP] 例外 {tag}: {exc} ({attempt}/{retries})")
+            if attempt < retries:
+                time.sleep(1.5 * attempt)
+            continue
+        code = response.status_code
+        if code >= 400:
+            print(f"  [HTTP] {code} {tag}")
+        if code in _RETRY_STATUSES and attempt < retries:
+            wait = 1.5 * attempt
+            print(f"  [HTTP] {code} のため {wait:.1f}秒待って再試行します ({attempt}/{retries})")
+            time.sleep(wait)
+            continue
+        return response
+    if last_error is not None:
+        raise last_error
+    return response

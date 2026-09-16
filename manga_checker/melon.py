@@ -106,19 +106,13 @@ def first_melon_detail_url(
             score += 5
         if listing_matches_work(title, blob, isbn, author=author):
             score += 2
-        if score:
-            ranked.append((score, abs_url))
+        ranked.append((score, abs_url))
     ranked.sort(key=lambda item: item[0], reverse=True)
     matching = [url for score, url in ranked if score]
     if matching:
         return matching[0]
-    if allow_first:
-        first = ""
-        for tag in soup.find_all("a", href=True):
-            first = _melon_detail_url(str(tag.get("href") or ""), base)
-            if first:
-                break
-        return first
+    if (allow_first or len(isbn_digits) >= 10) and ranked:
+        return ranked[0][1]
     return ""
 
 

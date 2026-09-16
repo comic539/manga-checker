@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from unittest.mock import MagicMock
 
 from manga_checker.dates import (
     format_release_date,
@@ -12,7 +13,7 @@ from manga_checker.dates import (
     prefer_pubdate,
     year_month_from_pubdate,
 )
-from manga_checker.official import OfficialHit, OfficialIndex, lookup_status
+from manga_checker.official import OfficialHit, OfficialIndex, _load_link_list, lookup_status
 from manga_checker.privilege import STATUS_NO, STATUS_YES
 
 
@@ -159,3 +160,34 @@ class KikuyaLookupTests(unittest.TestCase):
         status, _, url = lookup_status(index, "kikuya", "存在しない作品", "", fallback)
         self.assertEqual(status, STATUS_NO)
         self.assertEqual(url, fallback)
+
+
+class PrivilegeListParseTests(unittest.TestCase):
+    def test_load_link_list_uses_card_title(self) -> None:
+        html = """
+        <ul>
+          <li>
+            <a href="/detail/detail.php?product_id=1">特典</a>
+            <a href="/detail/detail.php?product_id=1">初凪ヒメリウム</a>
+          </li>
+        </ul>
+        """
+        session = MagicMock()
+        response = MagicMock()
+        response.status_code = 200
+        response.text = html
+        session.get.return_value = response
+        hits = _load_link_list(session, "https://example.com/privilege", "melonbooks")
+        blob = " ".join(hit.text for hit in hits)
+        self.assertIn("初凪ヒメリウム", blob)
+        index = OfficialIndex()
+        index.loaded = True
+        index.entries["melonbooks"] = hits
+        status, _, _ = lookup_status(
+            index,
+            "melonbooks",
+            "初凪ヒメリウム 1",
+            "",
+            "https://fallback.example/",
+        )
+        self.assertEqual(status, STATUS_YES)
