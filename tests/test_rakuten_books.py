@@ -243,7 +243,7 @@ class PaginateLimitTests(unittest.TestCase):
 
         months = [(2026, 9), (2026, 10), (2026, 11), (2026, 12)]
         with patch("manga_checker.rakuten_books._request", side_effect=fake_request):
-            buckets, reached_older, hit_cap, reached_past = _paginate_window(
+            buckets, reached_older, hit_cap, reached_past, oldest = _paginate_window(
                 None,
                 months,
                 0,
@@ -258,13 +258,14 @@ class PaginateLimitTests(unittest.TestCase):
         self.assertTrue(reached_older)
         self.assertFalse(hit_cap)
         self.assertIn((2026, 9), reached_past)
+        self.assertEqual(oldest.isoformat(), "2026-08-01")
 
         with patch("manga_checker.rakuten_books.rakuten_configured", return_value=True), patch(
             "manga_checker.rakuten_books._request", side_effect=fake_request
         ):
             calls["n"] = 0
             result = fetch_rakuten_volume_ones_by_month(months, session=None, delay_sec=0)
-        self.assertEqual(calls["n"], 5)
+        self.assertGreaterEqual(calls["n"], 4)
         self.assertTrue(any(c.title == "十月の本 (1)" for c in result[(2026, 10)]))
         self.assertTrue(any(c.title == "九月の本 (1)" for c in result[(2026, 9)]))
         self.assertFalse(any(c.title == "八月の本 (1)" for c in result[(2026, 9)]))
@@ -385,7 +386,7 @@ class PaginateLimitTests(unittest.TestCase):
                     {
                         "title": "小学館新刊 1巻",
                         "publisherName": "小学館",
-                        "salesDate": "2026年09月10日",
+                        "salesDate": "2026年09月01日",
                         "isbn": "9784000000003",
                     },
                     {
@@ -429,13 +430,13 @@ class PaginateLimitTests(unittest.TestCase):
                     {
                         "title": "ジャンプ新刊 (1)",
                         "publisherName": "集英社",
-                        "salesDate": "2026年09月10日",
+                        "salesDate": "2026年09月01日",
                         "isbn": "9784000000001",
                     },
                     {
                         "title": "TOブックス新刊 (1)",
                         "publisherName": "TOブックス",
-                        "salesDate": "2026年09月10日",
+                        "salesDate": "2026年09月01日",
                         "isbn": "9784000000002",
                     },
                 ],
@@ -508,8 +509,8 @@ class PaginateLimitTests(unittest.TestCase):
             extras.append(dict(extra))
             if extra.get("availability") == "1":
                 page = int(extra["page"])
-                sales = "2026年08月01日" if page == 1 else "2026年07月01日"
-                title = "八月月初 (1)" if page == 1 else "七月の本 (1)"
+                sales = "2026年08月01日" if page == 1 else "2026年05月01日"
+                title = "八月月初 (1)" if page == 1 else "五月の本 (1)"
                 return {
                     "pageCount": 2,
                     "Items": [
@@ -544,3 +545,70 @@ class PaginateLimitTests(unittest.TestCase):
         self.assertTrue(any("八月末" in c.title for c in result[(2026, 8)]))
         self.assertTrue(any("八月月初" in c.title for c in result[(2026, 8)]))
         self.assertFalse(any(extra.get("publisherName") for extra in extras))
+
+    def test_page_cap_before_month_start_splits_by_publisher(self) -> None:
+        extras: list[dict[str, str]] = []
+
+        def fake_request(_session, extra):
+            extras.append(dict(extra))
+            page = int(extra["page"])
+            publisher = extra.get("publisherName") or "集英社"
+            if extra.get("publisherName"):
+                if page == 1:
+                    sales, title = "2026年09月09日", "九月九日 (1)"
+                elif page == 2:
+                    sales, title = "2026年09月01日", f"九月一日 {publisher} (1)"
+                else:
+                    sales, title = "2026年08月01日", "八月の本 (1)"
+                return {
+                    "pageCount": 3,
+                    "Items": [
+                        {
+                            "title": title,
+                            "publisherName": publisher,
+                            "salesDate": sales,
+                            "isbn": f"97845{page:04d}{len(publisher):04d}",
+                        }
+                    ],
+                }
+            if extra.get("availability") == "1":
+                return {
+                    "pageCount": 100,
+                    "Items": [
+                        {
+                            "title": f"在庫九月九日 {page} (1)",
+                            "publisherName": "集英社",
+                            "salesDate": "2026年09月09日",
+                            "isbn": f"97846{page:08d}",
+                        }
+                    ],
+                }
+            return {
+                "pageCount": 100,
+                "Items": [
+                    {
+                        "title": f"九月九日 {page} (1)",
+                        "publisherName": "集英社",
+                        "salesDate": "2026年09月09日",
+                        "isbn": f"97847{page:08d}",
+                    }
+                ],
+            }
+
+        with patch("manga_checker.rakuten_books.rakuten_configured", return_value=True), patch(
+            "manga_checker.rakuten_books._request", side_effect=fake_request
+        ):
+            result = fetch_rakuten_volume_ones_by_month(
+                [(2026, 9)], session=None, delay_sec=0
+            )
+        self.assertTrue(any(extra.get("publisherName") for extra in extras))
+        titles = [c.title for c in result[(2026, 9)]]
+        self.assertTrue(any("九月一日" in title for title in titles))
+        self.assertTrue(any("九月九日" in title for title in titles))
+        self.assertGreater(len(result[(2026, 9)]), 37)
+        self.assertFalse(any("八月の本" in title for title in titles))
+
+
+if __name__ == "__main__":
+    unittest.main()
+

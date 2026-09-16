@@ -21,6 +21,7 @@ from urllib.parse import urlencode
 
 import requests
 
+from manga_checker.covers import amazon_cover_url, openbd_cover_fallback
 from manga_checker.dates import month_query_range, year_month_from_pubdate
 from manga_checker.http import make_session
 from manga_checker.models import Comic
@@ -28,7 +29,6 @@ from manga_checker.openbd import enrich_with_openbd
 from manga_checker.publishers import canonical_publisher, publisher_sort_key
 from manga_checker.rakuten_books import (
     fetch_rakuten_volume_ones,
-    fetch_rakuten_volume_ones_by_month,
     rakuten_configured,
     sales_year_month,
 )
@@ -128,7 +128,7 @@ def fetch_months_volume_ones(
     extra_csv: Path | None = None,
     session: requests.Session | None = None,
 ) -> dict[tuple[int, int], list[Comic]]:
-    """対象の複数月を取得する。楽天はページ上限まで送り、未完了月は分割走査する。
+    """対象の複数月を、楽天なら1ヶ月ずつ完全取得する。
     各月は暦の初日〜末日を範囲とする。楽天が使えないときは NDL も同じ範囲で取得する。
     """
     if not months:
@@ -137,16 +137,23 @@ def fetch_months_volume_ones(
     result: dict[tuple[int, int], list[Comic]] = {key: [] for key in months}
     used_rakuten = False
     if rakuten_configured():
-        try:
-            by_month = fetch_rakuten_volume_ones_by_month(months, session=session)
-            for key, comics in by_month.items():
-                result[key].extend(comics)
-            used_rakuten = any(result[key] for key in months)
-            total = sum(len(comics) for comics in result.values())
-            print(f"楽天ブックスAPIから第1巻を合計 {total} 件取得しました（発売中・予約を含む）。")
-        except Exception as exc:
-            print(f"楽天ブックスAPIを利用できません（{exc}）。取得済みの月は残します。")
-            used_rakuten = any(result[key] for key in months)
+        for year, month in months:
+            try:
+                got = fetch_rakuten_volume_ones(year, month, session=session)
+                result[(year, month)].extend(got)
+                used_rakuten = True
+                print(
+                    f"楽天ブックスAPIから{year}年{month}月の第1巻を "
+                    f"{len(got)} 件取得しました（発売中・予約を含む）。"
+                )
+            except Exception as exc:
+                print(
+                    f"楽天ブックスAPIを利用できません（{year}年{month}月: {exc}）。"
+                    "取得済みの月は残します。"
+                )
+        total = sum(len(comics) for comics in result.values())
+        if used_rakuten:
+            print(f"楽天ブックスAPIから第1巻を合計 {total} 件取得しました。")
     else:
         print("楽天アプリIDまたはaccessKeyが未設定のため、NDL/openBDにフォールバックします。")
 
@@ -154,7 +161,7 @@ def fetch_months_volume_ones(
         for year, month in months:
             if result[(year, month)]:
                 continue
-            print(f"楽天ブックス: {year}年{month}月が空のため、単月でページ送りします。")
+            print(f"楽天ブックス: {year}年{month}月が空のため、単月で再走査します。")
             try:
                 result[(year, month)].extend(
                     fetch_rakuten_volume_ones(year, month, session=session)
@@ -227,11 +234,19 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
         f"{year:04d}-{month:02d}": [
             {
                 "title": comic.display_title,
+                "volume": comic.volume,
                 "author": comic.author,
                 "publisher": comic.publisher,
                 "pubdate": comic.pubdate,
                 "isbn": comic.isbn,
                 "source": comic.source,
+                "ndl_url": comic.ndl_url,
+                "series": comic.series,
+                "cover_url": comic.cover_url,
+                "cover_source": comic.cover_source,
+                "rakuten_item_url": comic.rakuten_item_url,
+                "title_kana": comic.title_kana,
+                "author_kana": comic.author_kana,
             }
             for comic in comics
         ]
@@ -240,6 +255,51 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"月別JSONを書き出しました: {path.resolve()}")
+
+
+def load_catalog_json(
+    path: Path,
+    months: list[tuple[int, int]] | None = None,
+) -> dict[tuple[int, int], list[Comic]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    month_set = set(months) if months else None
+    result: dict[tuple[int, int], list[Comic]] = {}
+    for key, rows in payload.items():
+        year_s, month_s = key.split("-", 1)
+        year, month = int(year_s), int(month_s)
+        if month_set is not None and (year, month) not in month_set:
+            continue
+        result[(year, month)] = [
+            Comic(
+                title=str(row.get("title") or ""),
+                volume=str(row.get("volume") or ""),
+                author=str(row.get("author") or ""),
+                publisher=str(row.get("publisher") or ""),
+                pubdate=str(row.get("pubdate") or ""),
+                isbn=str(row.get("isbn") or ""),
+                source=str(row.get("source") or "json"),
+                ndl_url=str(row.get("ndl_url") or ""),
+                series=str(row.get("series") or ""),
+                cover_url=str(row.get("cover_url") or ""),
+                cover_source=str(row.get("cover_source") or ""),
+                rakuten_item_url=str(row.get("rakuten_item_url") or ""),
+                title_kana=str(row.get("title_kana") or ""),
+                author_kana=str(row.get("author_kana") or ""),
+            )
+            for row in rows
+            if row.get("title")
+        ]
+    if months:
+        for key in months:
+            result.setdefault(key, [])
+    for comics in result.values():
+        for comic in comics:
+            if comic.cover_url or not comic.isbn:
+                continue
+            comic.cover_url = amazon_cover_url(comic.isbn) or openbd_cover_fallback(comic.isbn)
+            if comic.cover_url:
+                comic.cover_source = comic.cover_source or "openbd"
+    return result
 
 
 def _comic_matches_month(comic: Comic, year: int, month: int) -> bool:
