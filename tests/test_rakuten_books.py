@@ -46,7 +46,7 @@ class RakutenParseTests(unittest.TestCase):
         self.assertTrue(comic.cover_url.startswith("https://thumbnail.image.rakuten.co.jp"))
         self.assertTrue(is_volume_one(comic.title, comic.volume))
 
-    def test_skips_noimage(self) -> None:
+    def test_keeps_noimage_url(self) -> None:
         comic = parse_rakuten_item(
             {
                 "title": "テスト (1)",
@@ -56,8 +56,8 @@ class RakutenParseTests(unittest.TestCase):
             }
         )
         assert comic is not None
-        self.assertEqual(comic.cover_url, "")
-        self.assertEqual(comic.cover_source, "")
+        self.assertIn("noimage", comic.cover_url)
+        self.assertEqual(comic.cover_source, "rakuten")
         self.assertTrue(sales_in_month("2026年09月頃", 2026, 9))
         self.assertEqual(normalize_sales_date("2026年09月頃"), "2026-09")
 

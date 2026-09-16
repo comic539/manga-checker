@@ -192,7 +192,7 @@ def parse_rakuten_item(item: dict) -> Comic | None:
         source="rakuten",
         series=normalize_text(str(item.get("seriesName") or "")),
         cover_url=cover,
-        cover_source="rakuten" if cover else "",
+        cover_source="rakuten",
         rakuten_item_url=str(item.get("affiliateUrl") or item.get("itemUrl") or ""),
         title_kana=normalize_text(str(item.get("titleKana") or "")),
         author_kana=normalize_text(str(item.get("authorKana") or "")),
@@ -573,10 +573,6 @@ def _items(payload: dict) -> list[dict]:
 def _cover_url(item: dict) -> str:
     for key in ("largeImageUrl", "mediumImageUrl", "smallImageUrl"):
         url = str(item.get(key) or "").strip()
-        if not url:
-            continue
-        lowered = url.lower()
-        if "noimage" in lowered or "nowprinting" in lowered or "now_printing" in lowered:
-            continue
-        return url
+        if url:
+            return url
     return ""

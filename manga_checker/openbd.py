@@ -1,4 +1,4 @@
-"""openBD から書誌を補完する。楽天の書影は上書きしない。"""
+"""openBD から書誌を補完する。書影（cover_url / cover_source）には触れない。"""
 
 from __future__ import annotations
 
@@ -41,21 +41,9 @@ def enrich_with_openbd(comics: list[Comic], session: requests.Session | None = N
             )
             comic.volume = comic.volume or summary.get("volume") or ""
             comic.series = comic.series or summary.get("series") or ""
-            if comic.cover_url:
-                if "rakuten" in comic.cover_url:
-                    comic.cover_source = "rakuten"
-            else:
-                cover = _cover_from_record(record)
-                if cover:
-                    comic.cover_url = cover
-                    comic.cover_source = comic.cover_source or "openbd"
             comic.source = f"{comic.source}+openbd" if comic.source else "openbd"
         if i + 1000 < len(isbns):
             time.sleep(0.3)
-
-    for comic in comics:
-        if comic.cover_url and "rakuten" in comic.cover_url:
-            comic.cover_source = "rakuten"
     return comics
 
 
@@ -103,25 +91,3 @@ def _onix_date_values(item: dict | str | None) -> list[str]:
     if nested:
         values.extend(_onix_date_values(nested))
     return values
-
-
-def _cover_from_record(record: dict) -> str:
-    summary = record.get("summary") or {}
-    cover = (summary.get("cover") or "").strip()
-    if cover:
-        return cover
-    onix = record.get("onix") or {}
-    collateral = onix.get("CollateralDetail") or {}
-    resources = collateral.get("SupportingResource") or []
-    if isinstance(resources, dict):
-        resources = [resources]
-    for resource in resources:
-        version = resource.get("ResourceVersion") or resource
-        if isinstance(version, list):
-            version = version[0] if version else {}
-        link = version.get("ResourceLink") or ""
-        if isinstance(link, dict):
-            link = link.get("content") or link.get("src") or ""
-        if isinstance(link, str) and link.startswith("http"):
-            return link
-    return ""

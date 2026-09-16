@@ -3,7 +3,7 @@
 優先順位:
 1. 楽天ブックス書籍検索API（発売中・予約を含む。各月は初日〜末日、ページ送りは次ページがなくなるまで）
 2. 国立国会図書館サーチ OpenSearch（漫画分類 NDC 726。月初日〜末日。楽天未設定時）
-3. openBD（ISBNから書誌・書影を補完）
+3. openBD（ISBNから書誌・発売日を補完。書影は使わない）
 4. 任意の CSV（手動追加）
 """
 
@@ -229,6 +229,9 @@ def redistribute_by_pubdate(
 
 
 def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]]) -> None:
+    for comics in by_month.values():
+        for comic in comics:
+            _keep_rakuten_cover_only(comic)
     payload = {
         f"{year:04d}-{month:02d}": [
             {
@@ -293,9 +296,17 @@ def load_catalog_json(
             result.setdefault(key, [])
     for comics in result.values():
         for comic in comics:
-            if comic.cover_url and "rakuten" in comic.cover_url:
-                comic.cover_source = "rakuten"
+            _keep_rakuten_cover_only(comic)
     return result
+
+
+def _keep_rakuten_cover_only(comic: Comic) -> None:
+    url = comic.cover_url or ""
+    if "rakuten" in url:
+        comic.cover_source = "rakuten"
+        return
+    comic.cover_url = ""
+    comic.cover_source = ""
 
 
 def _comic_matches_month(comic: Comic, year: int, month: int) -> bool:

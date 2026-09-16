@@ -33,12 +33,12 @@ class OpenBdCoverTests(unittest.TestCase):
         self.assertEqual(comic.cover_source, "rakuten")
         self.assertEqual(comic.pubdate, "2026-09-10")
 
-    def test_restores_rakuten_cover_source(self) -> None:
+    def test_does_not_touch_cover_fields(self) -> None:
         comic = Comic(
             title="九月の本 1",
             isbn="9784000000000",
-            cover_url="https://thumbnail.image.rakuten.co.jp/@0_mall/book/cover.jpg",
-            cover_source="openbd",
+            cover_url="",
+            cover_source="",
         )
         session = MagicMock()
         response = MagicMock()
@@ -48,8 +48,8 @@ class OpenBdCoverTests(unittest.TestCase):
         ]
         session.post.return_value = response
         enrich_with_openbd([comic], session=session)
-        self.assertIn("rakuten.co.jp", comic.cover_url)
-        self.assertEqual(comic.cover_source, "rakuten")
+        self.assertEqual(comic.cover_url, "")
+        self.assertEqual(comic.cover_source, "")
 
     def test_does_not_invent_openbd_fallback_url(self) -> None:
         comic = Comic(title="九月の本 1", isbn="9784000000000")

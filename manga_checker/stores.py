@@ -409,7 +409,11 @@ def _fetch_detail_attempts(
             if detail_resp.status_code >= 400:
                 last_http = detail_resp.status_code
                 continue
-            if need_detail_check and not _detail_page_matches(comic, detail_resp.text):
+            if (
+                need_detail_check
+                and not from_isbn
+                and not _detail_page_matches(comic, detail_resp.text)
+            ):
                 continue
             status, detail = evaluate(detail_resp.text)
             # メロンは検索カード判定を使わず、特典ありのときだけ詳細URLを返す。

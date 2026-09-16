@@ -192,13 +192,9 @@ class DetailFetchTests(unittest.TestCase):
                 session,
             )
         self.assertTrue(any("9784088852317" in url for url in seen))
-        isbn_pos = next(i for i, url in enumerate(seen) if "9784088852317" in url)
-        title_pos = next(
-            i for i, url in enumerate(seen) if "text_type=title" in url
-        )
-        self.assertLess(isbn_pos, title_pos)
-        self.assertTrue(any("product_id=222" in url for url in seen))
-        self.assertNotIn("product_id=999", check.url)
+        self.assertTrue(any("product_id=999" in url for url in seen))
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertFalse(any("text_type=title" in url for url in seen))
 
     def test_melon_skips_unrelated_first_hit(self) -> None:
         comic = Comic(title="ヒトナー 1")

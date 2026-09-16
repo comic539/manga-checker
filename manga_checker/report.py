@@ -285,7 +285,7 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         ),
         quote=True,
     )
-    cover_attr = html.escape(comic.cover_url, quote=True)
+    cover_attr = html.escape(_rakuten_cover_url(comic), quote=True)
     return (
         f'<article class="card" id="comic-card-{card_id}" data-card-id="{card_id}" '
         f'data-search="{search_blob}" '
@@ -322,21 +322,27 @@ def _uses_rakuten(reports: list[ComicReport]) -> bool:
 
 
 def _credit_html(comic: Comic) -> str:
-    if not comic.cover_url:
+    if not _rakuten_cover_url(comic):
         return ""
-    if comic.cover_source == "rakuten" or "rakuten" in (comic.cover_url or ""):
-        return (
-            '<p class="credit">出典: 楽天ブックス</p>'
-            '<p class="credit">Supported by Rakuten Developers</p>'
-        )
-    return '<p class="credit">出典: openBD</p>'
+    return (
+        '<p class="credit">出典: 楽天ブックス</p>'
+        '<p class="credit">Supported by Rakuten Developers</p>'
+    )
+
+
+def _rakuten_cover_url(comic: Comic) -> str:
+    url = comic.cover_url or ""
+    if comic.cover_source == "rakuten" or "rakuten" in url:
+        return url
+    return ""
 
 
 def _cover_html(comic: Comic) -> str:
     placeholder = '<div class="cover ph" aria-hidden="true"><span>書影なし</span></div>'
-    if not comic.cover_url:
+    src_url = _rakuten_cover_url(comic)
+    if not src_url:
         return placeholder
-    src = html.escape(comic.cover_url, quote=True)
+    src = html.escape(src_url, quote=True)
     alt = html.escape(comic.display_title)
     return (
         '<div class="cover">'

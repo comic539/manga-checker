@@ -77,6 +77,20 @@ class CatalogParseTests(unittest.TestCase):
         self.assertEqual(loaded[(2026, 8)][0].cover_source, "rakuten")
         self.assertEqual(loaded[(2026, 9)], [])
 
+    def test_load_catalog_json_drops_amazon_covers(self) -> None:
+        comic = Comic(
+            title="風と雲 1",
+            isbn="9784000000000",
+            cover_url="https://images-na.ssl-images-amazon.com/images/P/4000000000.09.LZZZZZZZ.jpg",
+            cover_source="openbd",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "catalog.json"
+            write_catalog_json(path, {(2026, 8): [comic]})
+            loaded = load_catalog_json(path, [(2026, 8)])
+        self.assertEqual(loaded[(2026, 8)][0].cover_url, "")
+        self.assertEqual(loaded[(2026, 8)][0].cover_source, "")
+
 
 if __name__ == "__main__":
     unittest.main()
