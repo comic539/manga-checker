@@ -27,19 +27,28 @@ def load_checks_cache(path: Path) -> dict[str, dict[str, str]]:
         return {}
     result: dict[str, dict[str, str]] = {}
     for key, row in payload.items():
-        if isinstance(row, dict):
-            result[str(key)] = {
-                "status": str(row.get("status") or ""),
-                "detail": str(row.get("detail") or ""),
-                "url": str(row.get("url") or ""),
-                "store_name": str(row.get("store_name") or ""),
-            }
+        if not isinstance(row, dict):
+            continue
+        status = str(row.get("status") or "")
+        if status == STATUS_UNKNOWN:
+            continue
+        result[str(key)] = {
+            "status": status,
+            "detail": str(row.get("detail") or ""),
+            "url": str(row.get("url") or ""),
+            "store_name": str(row.get("store_name") or ""),
+        }
     return result
 
 
 def save_checks_cache(path: Path, cache: dict[str, dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+    cleaned = {
+        key: row
+        for key, row in cache.items()
+        if isinstance(row, dict) and row.get("status") != STATUS_UNKNOWN
+    }
+    path.write_text(json.dumps(cleaned, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def cached_check(cache: dict[str, dict[str, str]] | None, comic: Comic, store_id: str) -> StoreCheck | None:

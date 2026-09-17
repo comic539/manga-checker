@@ -1,4 +1,4 @@
-"""検索結果の『該当商品カード』だけを見て特典を判定する。"""
+"""検索一覧では特典判定せず、商品詳細ページの本文だけを見る。"""
 
 from __future__ import annotations
 
@@ -68,9 +68,6 @@ _NO_HIT_PHRASES = (
     "該当する商品は見つかりませんでした",
     "お探しの商品は見つかりません",
 )
-_ZERO_HIT = re.compile(
-    r"(検索結果|該当|ヒット)[^\d]{0,12}0\s*件|(?<![\d０-９])0\s*件(?!\d)|件数[：:\s]*0(?:件)?"
-)
 
 _MELON_CONCRETE = (
     "メロン限定版",
@@ -103,6 +100,103 @@ STATUS_YES = "特典あり"
 STATUS_NO = "通常/なし"
 STATUS_UNKNOWN = "未確認"
 
+_DETAIL_BLOCK_WORDS = (
+    "有償特典",
+    "購入特典",
+    "店舗特典",
+    "特典ペーパー",
+    "描き下ろし",
+    "ペーパー",
+    "特典",
+    "限定",
+)
+_DETAIL_BODY_WORDS = (
+    "有償特典",
+    "購入特典",
+    "特典ペーパー",
+    "描き下ろし",
+    "イラストカード",
+    "アニメイト特典",
+    "メロンブックス特典",
+    "とらのあな特典",
+)
+
+_DETAIL_NONE = re.compile(
+    r"特典は?[な無]し|特典はありません|特典情報はありません|特典の設定はありません|"
+    r"特典はお付けできません|特典をお付けできません"
+)
+
+_PRODUCT_HREF = re.compile(
+    r"/pd/\d+|product_id=\d+|detail\.php|/tora/ec/item/\d+|/f/dsg-01-\d+",
+    re.I,
+)
+
+
+def pick_ranked_detail_url(
+    ranked: list[tuple[int, str]], allow_first: bool = True
+) -> str:
+    if not ranked:
+        return ""
+    ordered = sorted(ranked, key=lambda item: item[0], reverse=True)
+    matching = [url for score, url in ordered if score]
+    if matching:
+        return matching[0]
+    if allow_first:
+        return ordered[0][1]
+    return ""
+
+
+def evaluate_detail_privilege(html: str) -> tuple[str, str]:
+    """商品個別ページの本文・特典ブロックだけを判定する。"""
+    if not html:
+        return STATUS_UNKNOWN, "詳細ページを取得できませんでした。"
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup.find_all(("header", "footer", "nav", "aside")):
+        tag.decompose()
+    blocks: list[str] = []
+    for node in soup.select(
+        "#tokuten, [id*='tokuten'], [class*='tokuten'], [class*='privilege'], "
+        "[id*='privilege'], .privilege-info, .item_tokuten"
+    ):
+        text = node.get_text(" ", strip=True)
+        if text:
+            blocks.append(text)
+    body = soup.get_text(" ", strip=True)
+    scope = " ".join(blocks)
+    haystack = scope or body
+    if _DETAIL_NONE.search(haystack) and not any(
+        word in haystack for word in ("描き下ろし", "ペーパー", "有償特典")
+    ):
+        return STATUS_NO, "詳細ページに特典情報はありません。"
+    words = _DETAIL_BLOCK_WORDS if scope else _DETAIL_BODY_WORDS
+    for word in words:
+        if word in haystack:
+            snippet = _snippet(haystack, word)
+            return STATUS_YES, f"詳細ページで検出: {snippet}"
+    return STATUS_NO, "詳細ページに特典情報はありません。"
+
+
+def _snippet(text: str, word: str, radius: int = 40) -> str:
+    idx = text.find(word)
+    if idx < 0:
+        return word
+    start = max(0, idx - 8)
+    end = min(len(text), idx + len(word) + radius)
+    return re.sub(r"\s+", " ", text[start:end]).strip()
+
+
+def listing_has_products(html: str) -> bool:
+    markup = html or ""
+    if _PRODUCT_HREF.search(markup):
+        return True
+    soup = BeautifulSoup(markup, "html.parser")
+    return bool(
+        soup.select(
+            ".item_list .item, .product-list-item, li.item, .product_list .product, "
+            ".item_name, .product"
+        )
+    )
+
 
 def evaluate_privilege(
     html: str,
@@ -114,51 +208,44 @@ def evaluate_privilege(
     store_id: str = "",
     http_ok: bool = True,
 ) -> tuple[str, str]:
-    """ページ全体は見ない。商品一覧の該当カードだけを判定する。"""
+    """一覧ページでは特典ありにしない。詳細URLは stores 側で辿る。"""
     if not http_ok:
         return STATUS_UNKNOWN, "ページを取得できませんでした。"
 
-    if store_id == "kinokuniya" or "kinokuniya.co.jp" in (source_url or ""):
-        return _evaluate_kinokuniya(
-            html, title_for_match=title_for_match, isbn=isbn, author=author
-        )
-    if store_id == "melonbooks" or "melonbooks.co.jp" in (source_url or ""):
-        if "detail.php" in (source_url or ""):
+    source = source_url or ""
+    if "detail.php" in source or "/pd/" in source or "/tora/ec/item/" in source:
+        if store_id == "melonbooks" or "melonbooks.co.jp" in source:
             from manga_checker.melon import evaluate_melon_detail
 
             return evaluate_melon_detail(html)
-        return (
-            STATUS_UNKNOWN,
-            "検索一覧では判定せず、一致する商品詳細ページの確認が必要です。",
-        )
+        return evaluate_detail_privilege(html)
 
-    markup = html or ""
-    if "<" not in markup:
-        markup = f'<ul class="item_list"><li class="item">{markup}</li></ul>'
-
-    if _looks_like_no_hit(markup, title_for_match, isbn):
+    if store_id == "kinokuniya" or "kinokuniya.co.jp" in source:
+        if "/f/dsg-01-" in source:
+            return evaluate_detail_privilege(html)
+        if listing_has_products(html) or _kinokuniya_product_titles(
+            html, title_for_match, isbn, author=author
+        ):
+            return STATUS_NO, "検索ヒットあり。一覧では特典判定しません。"
+        if _looks_like_no_hit(html, title_for_match, isbn):
+            return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
         return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
 
-    cards = extract_product_card_texts(markup, title_for_match, isbn, author=author)
-    if not cards:
-        return STATUS_NO, "該当作品の商品カードが見つかりませんでした。"
+    if store_id == "melonbooks" or "melonbooks.co.jp" in source:
+        if listing_has_products(html) or extract_product_card_texts(
+            html, title_for_match, isbn, author=author
+        ):
+            return STATUS_NO, "検索ヒットあり。一覧では特典判定しません。"
+        return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
 
-    hits: list[str] = []
-    negated = False
-    for card in cards:
-        if _privilege_ended(card):
-            negated = True
-            continue
-        if _is_negated(card):
-            negated = True
-            continue
-        hits.extend(privilege_keywords_in(card))
-    hits = list(dict.fromkeys(hits))
-    if hits:
-        return STATUS_YES, "商品カードで検出: " + " / ".join(hits[:4])
-    if negated:
-        return STATUS_NO, "該当商品に特典なし／配布終了の記載があります。"
-    return STATUS_NO, "該当商品カードに特典表記はありません。"
+    markup = html or ""
+    if listing_has_products(markup) or extract_product_card_texts(
+        markup, title_for_match, isbn, author=author
+    ):
+        return STATUS_NO, "検索ヒットあり。一覧では特典判定しません。"
+    if _looks_like_no_hit(markup, title_for_match, isbn):
+        return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
+    return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
 
 
 def card_has_privilege(text: str) -> list[str]:
@@ -261,7 +348,7 @@ def _privilege_ended(text: str) -> bool:
 
 def _looks_like_no_hit(html: str, title: str, isbn: str) -> bool:
     text = re.sub(r"\s+", " ", html or "")
-    has_marker = any(marker in text for marker in _NO_HIT_PHRASES) or bool(_ZERO_HIT.search(text))
+    has_marker = any(marker in text for marker in _NO_HIT_PHRASES)
     has_work = (title and title in text) or (isbn and isbn in text)
     return has_marker and not has_work
 

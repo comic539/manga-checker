@@ -51,3 +51,30 @@ class StoreCacheTests(unittest.TestCase):
         assert no is not None
         self.assertEqual(yes.status, STATUS_YES)
         self.assertEqual(no.status, STATUS_NO)
+
+    def test_load_drops_unknown_entries(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        from manga_checker.store_cache import load_checks_cache, save_checks_cache
+
+        payload = {
+            "9784|animate": {
+                "status": STATUS_UNKNOWN,
+                "detail": "古い未確認",
+                "url": "https://a",
+                "store_name": "アニメイト",
+            },
+            "9784|gamers": {
+                "status": STATUS_NO,
+                "detail": "なし",
+                "url": "https://g",
+                "store_name": "ゲーマーズ",
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cache.json"
+            path.write_text(__import__("json").dumps(payload), encoding="utf-8")
+            loaded = load_checks_cache(path)
+        self.assertNotIn("9784|animate", loaded)
+        self.assertEqual(loaded["9784|gamers"]["status"], STATUS_NO)

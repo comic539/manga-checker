@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from urllib.parse import quote, urlencode
+from urllib.parse import parse_qs, quote, urlencode, urljoin, urlparse
 
 import requests
 
@@ -18,7 +19,14 @@ from manga_checker.models import Comic, StoreCheck
 from manga_checker.search_title import toranoana_search_word
 from manga_checker.melon import evaluate_melon_detail, first_melon_detail_url
 from manga_checker.official import OfficialIndex, lookup_status
-from manga_checker.privilege import STATUS_UNKNOWN, STATUS_YES, evaluate_privilege
+from manga_checker.privilege import (
+    STATUS_NO,
+    STATUS_UNKNOWN,
+    STATUS_YES,
+    evaluate_detail_privilege,
+    evaluate_privilege,
+    pick_ranked_detail_url,
+)
 from manga_checker.store_cache import cached_check, remember_check
 from manga_checker.title_match import listing_matches_work
 from manga_checker.toranoana import evaluate_toranoana_detail, first_toranoana_detail_url
@@ -213,14 +221,6 @@ def check_stores(
                 )
                 continue
             fetched = _fetch_store(store, comic, url, session)
-            if fetched.status == STATUS_UNKNOWN and official_yes == STATUS_YES:
-                fetched = StoreCheck(
-                    store.store_id,
-                    store.name,
-                    STATUS_YES,
-                    detail,
-                    fetched.url or official_url,
-                )
             remember_check(cache, fetched, comic)
             results.append(fetched)
             time.sleep(delay_sec)
@@ -250,6 +250,10 @@ def _fetch_store(store: Store, comic: Comic, url: str, session: requests.Session
         return _fetch_animate(comic, url, session)
     if store.store_id == "toranoana":
         return _fetch_toranoana(comic, url, session)
+    if store.store_id == "gamers":
+        return _fetch_gamers(comic, url, session)
+    if store.store_id == "kinokuniya":
+        return _fetch_kinokuniya(comic, url, session)
     try:
         response = get_with_retry(session, url, timeout=25, label=f"{store.name} {comic.display_title}")
         if response.status_code >= 400:
@@ -309,7 +313,7 @@ def _fetch_animate(comic: Comic, search_url: str, session: requests.Session) -> 
         attempts=attempts,
         extract=first_animate_detail_url,
         evaluate=evaluate_animate_detail,
-        missing="検索結果から一致する商品詳細（/pd/）を特定できませんでした。",
+        missing="検索結果から一致する商品詳細を特定できませんでした。",
     )
 
 
@@ -335,18 +339,58 @@ def _fetch_melonbooks(comic: Comic, search_url: str, session: requests.Session) 
 
 
 def _fetch_toranoana(comic: Comic, search_url: str, session: requests.Session) -> StoreCheck:
+    attempts: list[tuple[str, bool]] = []
+    isbn = isbn_search_query(comic.isbn)
+    if isbn:
+        attempts.append(
+            (
+                "https://ecs.toranoana.jp/tora/ec/app/catalog/list/"
+                f"?searchWord={quote(isbn)}",
+                True,
+            )
+        )
     title_url = _toranoana_url(comic)
+    attempts.append((title_url, False))
     return _fetch_detail_attempts(
         comic,
         session,
         store_id="toranoana",
         name="とらのあな",
-        fallback_url=title_url,
-        attempts=[(title_url, False)],
+        fallback_url=search_url or title_url,
+        attempts=attempts,
         extract=first_toranoana_detail_url,
         evaluate=evaluate_toranoana_detail,
-        missing="検索結果から一致する商品詳細（/tora/ec/item/）を特定できませんでした。",
+        missing="検索結果から商品詳細（/tora/ec/item/）を特定できませんでした。",
         match_title=toranoana_search_word(comic.title, comic.volume),
+    )
+
+
+def _fetch_gamers(comic: Comic, search_url: str, session: requests.Session) -> StoreCheck:
+    return _fetch_detail_attempts(
+        comic,
+        session,
+        store_id="gamers",
+        name="ゲーマーズ",
+        fallback_url=search_url,
+        attempts=[(search_url, bool(isbn_search_query(comic.isbn)))],
+        extract=first_gamers_detail_url,
+        evaluate=evaluate_detail_privilege,
+        missing="検索結果から商品詳細を特定できませんでした。",
+    )
+
+
+def _fetch_kinokuniya(comic: Comic, search_url: str, session: requests.Session) -> StoreCheck:
+    attempts: list[tuple[str, bool]] = [(search_url, bool(isbn_search_query(comic.isbn)))]
+    return _fetch_detail_attempts(
+        comic,
+        session,
+        store_id="kinokuniya",
+        name="紀伊國屋書店",
+        fallback_url=search_url,
+        attempts=attempts,
+        extract=first_kinokuniya_detail_url,
+        evaluate=evaluate_detail_privilege,
+        missing="検索結果から商品詳細を特定できませんでした。",
     )
 
 
@@ -366,6 +410,7 @@ def _fetch_detail_attempts(
     last_search = fallback_url
     title = match_title or comic.search_query
     last_http = 0
+    had_product_hit = False
     try:
         for index, (list_url, from_isbn) in enumerate(attempts):
             last_search = list_url
@@ -383,21 +428,11 @@ def _fetch_detail_attempts(
                 title,
                 comic.isbn,
                 comic.author,
-                allow_first=False,
+                allow_first=True,
             )
-            need_detail_check = bool(from_isbn and detail_url)
-            if not detail_url and from_isbn:
-                detail_url = extract(
-                    search_resp.text,
-                    list_url,
-                    title,
-                    comic.isbn,
-                    comic.author,
-                    allow_first=True,
-                )
-                need_detail_check = True
             if not detail_url:
                 continue
+            had_product_hit = True
             time.sleep(0.8)
             detail_resp = get_with_retry(
                 session,
@@ -409,17 +444,16 @@ def _fetch_detail_attempts(
             if detail_resp.status_code >= 400:
                 last_http = detail_resp.status_code
                 continue
-            if (
-                need_detail_check
-                and not from_isbn
-                and not _detail_page_matches(comic, detail_resp.text)
-            ):
-                continue
             status, detail = evaluate(detail_resp.text)
-            # メロンは検索カード判定を使わず、特典ありのときだけ詳細URLを返す。
-            if store_id == "melonbooks" and status != STATUS_YES:
-                return StoreCheck(store_id, name, status, detail, last_search)
             return StoreCheck(store_id, name, status, detail, detail_url)
+        if had_product_hit:
+            return StoreCheck(
+                store_id,
+                name,
+                STATUS_NO,
+                "検索ヒットあり。詳細ページへ進めなかったため特典なしと扱います。",
+                fallback_url,
+            )
         if last_http >= 400:
             return StoreCheck(
                 store_id,
@@ -449,3 +483,104 @@ def _detail_page_matches(comic: Comic, html: str) -> bool:
     return listing_matches_work(
         comic.search_query, heading, comic.isbn, comic.author
     ) or listing_matches_work(comic.search_query, body, comic.isbn, comic.author)
+
+
+_GAMERS_PD = re.compile(r"/pd/(\d+)/?", re.I)
+_GAMERS_PID = re.compile(r"(?:[?&]product_id=)(\d+)", re.I)
+_KINO_DSG = re.compile(r"/f/dsg-01-(\d+)", re.I)
+
+
+def first_gamers_detail_url(
+    html: str,
+    page_url: str,
+    title: str = "",
+    isbn: str = "",
+    author: str = "",
+    allow_first: bool = False,
+) -> str:
+    soup = BeautifulSoup(html or "", "html.parser")
+    base = page_url or "https://www.gamers.co.jp/"
+    ranked: list[tuple[int, str]] = []
+    seen: set[str] = set()
+    isbn_digits = re.sub(r"\D", "", isbn or "")
+    for tag in soup.find_all("a", href=True):
+        abs_url = _gamers_detail_url(str(tag.get("href") or ""), base)
+        if not abs_url or abs_url in seen:
+            continue
+        seen.add(abs_url)
+        parent = tag.find_parent(["li", "div", "article", "td", "section"]) or tag
+        blob = " ".join(
+            part for part in (tag.get_text(" ", strip=True), parent.get_text(" ", strip=True)) if part
+        )
+        blob_digits = re.sub(r"\D", "", blob)
+        score = 0
+        if isbn_digits and isbn_digits in blob_digits:
+            score += 5
+        if listing_matches_work(title, blob, isbn, author=author):
+            score += 2
+        ranked.append((score, abs_url))
+    return pick_ranked_detail_url(ranked, allow_first=True)
+
+
+def _gamers_detail_url(href: str, base: str) -> str:
+    if not href:
+        return ""
+    abs_url = urljoin(base, href).split("#")[0]
+    pd = _GAMERS_PD.search(abs_url)
+    if pd:
+        return f"https://www.gamers.co.jp/pd/{pd.group(1)}/"
+    parsed = urlparse(abs_url)
+    query = parse_qs(parsed.query)
+    product_id = (query.get("product_id") or [""])[0]
+    if not product_id:
+        match = _GAMERS_PID.search(abs_url)
+        if match:
+            product_id = match.group(1)
+    if not product_id:
+        return ""
+    if "detail.php" in parsed.path.lower() or query.get("product_id"):
+        return f"https://www.gamers.co.jp/products/detail.php?product_id={product_id}"
+    return f"https://www.gamers.co.jp/products/detail.php?product_id={product_id}"
+
+
+def first_kinokuniya_detail_url(
+    html: str,
+    page_url: str,
+    title: str = "",
+    isbn: str = "",
+    author: str = "",
+    allow_first: bool = False,
+) -> str:
+    page = (page_url or "").split("?")[0]
+    if _KINO_DSG.search(page):
+        if "見つかりません" in (html or "") and not listing_matches_work(
+            title, html or "", isbn, author=author
+        ):
+            return ""
+        return page
+    soup = BeautifulSoup(html or "", "html.parser")
+    base = page_url or "https://www.kinokuniya.co.jp/"
+    ranked: list[tuple[int, str]] = []
+    seen: set[str] = set()
+    isbn_digits = re.sub(r"\D", "", isbn or "")
+    for tag in soup.find_all("a", href=True):
+        abs_url = urljoin(base, str(tag.get("href") or "")).split("#")[0]
+        match = _KINO_DSG.search(abs_url)
+        if not match:
+            continue
+        canon = f"https://www.kinokuniya.co.jp/f/dsg-01-{match.group(1)}"
+        if canon in seen:
+            continue
+        seen.add(canon)
+        parent = tag.find_parent(["li", "div", "article", "td", "section"]) or tag
+        blob = " ".join(
+            part for part in (tag.get_text(" ", strip=True), parent.get_text(" ", strip=True)) if part
+        )
+        blob_digits = re.sub(r"\D", "", blob)
+        score = 0
+        if isbn_digits and isbn_digits in blob_digits:
+            score += 5
+        if listing_matches_work(title, blob, isbn, author=author):
+            score += 2
+        ranked.append((score, canon))
+    return pick_ranked_detail_url(ranked, allow_first=True)

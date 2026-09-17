@@ -1,24 +1,18 @@
-"""アニメイトの検索結果 → 商品詳細ページ（/pd/数字/）の特典判定。"""
+"""アニメイトの検索結果 → 商品詳細ページの特典判定。"""
 
 from __future__ import annotations
 
 import re
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
-from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
+from manga_checker.privilege import evaluate_detail_privilege, pick_ranked_detail_url
 from manga_checker.title_match import listing_matches_work
 
 _PD_PATH = re.compile(r"/pd/(\d+)/?", re.I)
-_DETAIL_HITS = (
-    "特典について",
-    "アニメイト特典",
-    "描き下ろしイラストカード",
-    "イラストカード",
-    "描き下ろし",
-)
-_NONE = re.compile(r"特典は?[な無]し|特典はありません|特典の設定はありません")
+_PRODUCT_ID = re.compile(r"(?:[?&]product_id=)(\d+)", re.I)
+_DETAIL_PATH = re.compile(r"/products/detail\.php", re.I)
 
 
 def first_animate_detail_url(
@@ -29,13 +23,14 @@ def first_animate_detail_url(
     author: str = "",
     allow_first: bool = False,
 ) -> str:
-    """検索結果から作品に一致する /pd/ URL を返す。"""
+    """検索結果から商品詳細 URL（/pd/ または product_id）を返す。"""
     soup = BeautifulSoup(html or "", "html.parser")
     base = page_url or "https://www.animate-onlineshop.jp/"
     ranked: list[tuple[int, str]] = []
     seen: set[str] = set()
+    isbn_digits = re.sub(r"\D", "", isbn or "")
     for tag in soup.find_all("a", href=True):
-        abs_url = _animate_pd_url(str(tag.get("href") or ""), base)
+        abs_url = _animate_detail_url(str(tag.get("href") or ""), base)
         if not abs_url or abs_url in seen:
             continue
         seen.add(abs_url)
@@ -43,66 +38,39 @@ def first_animate_detail_url(
         blob = " ".join(
             part for part in (tag.get_text(" ", strip=True), parent.get_text(" ", strip=True)) if part
         )
-        score = 2 if listing_matches_work(title, blob, isbn, author=author) else 0
+        blob_digits = re.sub(r"\D", "", blob)
+        score = 0
+        if isbn_digits and isbn_digits in blob_digits:
+            score += 5
+        if listing_matches_work(title, blob, isbn, author=author):
+            score += 2
         ranked.append((score, abs_url))
-    ranked.sort(key=lambda item: item[0], reverse=True)
-    matching = [url for score, url in ranked if score]
-    if matching:
-        return matching[0]
-    isbn_digits = re.sub(r"\D", "", isbn or "")
-    if (allow_first or len(isbn_digits) >= 10) and ranked:
-        return ranked[0][1]
-    return ""
+    return pick_ranked_detail_url(ranked, allow_first=True)
 
 
 def evaluate_animate_detail(html: str) -> tuple[str, str]:
-    if not html:
-        return STATUS_UNKNOWN, "詳細ページを取得できませんでした。"
-    soup = BeautifulSoup(html, "html.parser")
-    blocks: list[str] = []
-    for node in soup.select(
-        "#tokuten, [id='tokuten'], [id*='tokuten'], "
-        "[class*='tokuten'], .item_tokuten, [class*='privilege']"
-    ):
-        text = node.get_text(" ", strip=True)
-        if text:
-            blocks.append(text)
-    heading = soup.find(string=re.compile(r"特典について|アニメイト特典"))
-    if heading:
-        parent = heading.find_parent(["div", "section", "table", "dl", "li", "td"]) or heading.parent
-        if parent:
-            text = parent.get_text(" ", strip=True)
-            if text:
-                blocks.append(text)
-    combined = " ".join(blocks)
-    raw = html or ""
-    scope = combined or soup.get_text(" ", strip=True)
-    if combined and _NONE.search(combined) and not any(word in combined for word in _DETAIL_HITS[2:]):
-        return STATUS_NO, "詳細ページに特典情報はありません。"
-    for word in _DETAIL_HITS:
-        if word in scope or word in raw:
-            snippet = _snippet(scope if word in scope else raw, word)
-            return STATUS_YES, f"詳細ページで検出: {snippet}"
-    if re.search(r"tokuten", raw, re.I) and not _NONE.search(scope):
-        return STATUS_YES, "詳細ページで検出: tokuten"
-    if soup.select_one("#tokuten") and combined and not _NONE.search(combined):
-        return STATUS_YES, "詳細ページの #tokuten ブロックを検出"
-    return STATUS_NO, "詳細ページに特典情報はありません。"
+    return evaluate_detail_privilege(html)
 
 
-def _animate_pd_url(href: str, base: str) -> str:
-    match = _PD_PATH.search(href or "")
-    if not match:
+def _animate_detail_url(href: str, base: str) -> str:
+    if not href:
         return ""
-    abs_url = urljoin(base, href).split("#")[0].split("?")[0]
-    product_id = match.group(1)
-    return f"https://www.animate-onlineshop.jp/pd/{product_id}/"
-
-
-def _snippet(text: str, word: str, radius: int = 40) -> str:
-    idx = text.find(word)
-    if idx < 0:
-        return word
-    start = max(0, idx - 8)
-    end = min(len(text), idx + len(word) + radius)
-    return re.sub(r"\s+", " ", text[start:end]).strip()
+    abs_url = urljoin(base, href).split("#")[0]
+    pd = _PD_PATH.search(abs_url)
+    if pd:
+        return f"https://www.animate-onlineshop.jp/pd/{pd.group(1)}/"
+    parsed = urlparse(abs_url)
+    query = parse_qs(parsed.query)
+    product_id = (query.get("product_id") or [""])[0]
+    if not product_id:
+        match = _PRODUCT_ID.search(abs_url)
+        if match:
+            product_id = match.group(1)
+    if product_id and (_DETAIL_PATH.search(parsed.path) or query.get("product_id")):
+        return (
+            "https://www.animate-onlineshop.jp/products/detail.php"
+            f"?product_id={product_id}"
+        )
+    if product_id:
+        return f"https://www.animate-onlineshop.jp/pd/{product_id}/"
+    return ""

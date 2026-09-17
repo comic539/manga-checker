@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from urllib.parse import parse_qs, urlparse
 
 from manga_checker.models import Comic
-from manga_checker.privilege import STATUS_NO, STATUS_YES
+from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
 from manga_checker.stores import STORES, _fetch_animate, _fetch_melonbooks, _fetch_toranoana
 
 
@@ -123,8 +123,7 @@ class DetailFetchTests(unittest.TestCase):
                 session,
             )
         self.assertEqual(check.status, STATUS_NO)
-        self.assertIn("search.php", check.url)
-        self.assertNotIn("product_id=222", check.url)
+        self.assertIn("product_id=222", check.url)
 
     def test_melon_picks_matching_title_not_related_privilege_card(self) -> None:
         comic = Comic(title="息子の彼女 1")
@@ -156,7 +155,7 @@ class DetailFetchTests(unittest.TestCase):
         self.assertTrue(any("product_id=1" in url for url in fetched))
         self.assertFalse(any("product_id=9" in url for url in fetched))
         self.assertEqual(check.status, STATUS_NO)
-        self.assertIn("search.php", check.url)
+        self.assertIn("product_id=1", check.url)
 
     def test_melon_isbn_search_is_tried_before_title(self) -> None:
         comic = Comic(title="ヒトナー 1", isbn="9784088852317")
@@ -216,8 +215,8 @@ class DetailFetchTests(unittest.TestCase):
                 "https://www.melonbooks.co.jp/search/search.php?name=x",
                 session,
             )
-        self.assertNotIn("product_id=999", check.url)
-        self.assertIn("search.php", check.url)
+        self.assertIn("product_id=999", check.url)
+        self.assertEqual(check.status, STATUS_NO)
 
     def test_melon_detects_privilege_on_detail(self) -> None:
         comic = Comic(title="初凪ヒメリウム 1")
@@ -279,8 +278,8 @@ class DetailFetchTests(unittest.TestCase):
         self.assertEqual(by_id["animate"].status, STATUS_YES)
         self.assertIn("product_id=333", by_id["melonbooks"].url)
         self.assertEqual(by_id["melonbooks"].status, STATUS_YES)
-        self.assertEqual(by_id["gamers"].status, STATUS_NO)
-        self.assertEqual(by_id["kinokuniya"].status, STATUS_NO)
+        self.assertEqual(by_id["gamers"].status, STATUS_UNKNOWN)
+        self.assertEqual(by_id["kinokuniya"].status, STATUS_UNKNOWN)
 
     def test_official_melon_yes_survives_without_fetch(self) -> None:
         from manga_checker.official import OfficialHit, OfficialIndex
@@ -337,7 +336,7 @@ class DetailFetchTests(unittest.TestCase):
                 "https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=x",
                 session,
             )
-        self.assertTrue(any("searchWord=" in url and "9784088852317" not in url for url in seen))
+        self.assertTrue(any("searchWord=" in url for url in seen))
         self.assertEqual(check.status, STATUS_YES)
         self.assertEqual(check.url, "https://ecs.toranoana.jp/tora/ec/item/200012817361/")
 
@@ -363,8 +362,8 @@ class DetailFetchTests(unittest.TestCase):
                 "https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=x",
                 session,
             )
-        self.assertNotIn("/item/111", check.url)
-        self.assertIn("searchWord=", check.url)
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertIn("/item/111", check.url)
 
     def test_detail_page_matches_by_isbn_without_title(self) -> None:
         from manga_checker.stores import _detail_page_matches
@@ -393,6 +392,68 @@ class DetailFetchTests(unittest.TestCase):
             isbn="9784000000000",
         )
         self.assertIn("product_id=222", url_m)
+
+    def test_search_hit_but_detail_blocked_is_no(self) -> None:
+        comic = Comic(title="初凪ヒメリウム 1", isbn="9784000000000")
+        search_html = '<ul><li><a href="/pd/222/">初凪ヒメリウム 1</a></li></ul>'
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            if "/pd/" in url:
+                resp.status_code = 403
+                resp.text = "forbidden"
+            else:
+                resp.status_code = 200
+                resp.text = search_html
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_animate(
+                comic,
+                "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+
+    def test_empty_search_is_unknown(self) -> None:
+        comic = Comic(title="存在しない作品 1", isbn="9999999999999")
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.text = "<p>該当する商品はございません</p>"
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_animate(
+                comic,
+                "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_UNKNOWN)
+
+    def test_search_http_error_is_unknown(self) -> None:
+        comic = Comic(title="初凪ヒメリウム 1", isbn="9784000000000")
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 429
+            resp.text = "busy"
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_animate(
+                comic,
+                "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_UNKNOWN)
 
 
 if __name__ == "__main__":

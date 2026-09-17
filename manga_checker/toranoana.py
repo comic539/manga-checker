@@ -7,7 +7,12 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
+from manga_checker.privilege import (
+    STATUS_NO,
+    STATUS_UNKNOWN,
+    STATUS_YES,
+    pick_ranked_detail_url,
+)
 from manga_checker.title_match import listing_matches_work
 
 _ITEM_PATH = re.compile(r"/tora/ec/item/(\d+)/?", re.I)
@@ -39,6 +44,7 @@ def first_toranoana_detail_url(
     base = page_url or "https://ecs.toranoana.jp/"
     ranked: list[tuple[int, str]] = []
     seen: set[str] = set()
+    isbn_digits = re.sub(r"\D", "", isbn or "")
     for tag in soup.find_all("a", href=True):
         abs_url = _toranoana_item_url(str(tag.get("href") or ""), base)
         if not abs_url or abs_url in seen:
@@ -48,16 +54,14 @@ def first_toranoana_detail_url(
         blob = " ".join(
             part for part in (tag.get_text(" ", strip=True), parent.get_text(" ", strip=True)) if part
         )
-        score = 2 if listing_matches_work(title, blob, isbn, author=author) else 0
+        blob_digits = re.sub(r"\D", "", blob)
+        score = 0
+        if isbn_digits and isbn_digits in blob_digits:
+            score += 5
+        if listing_matches_work(title, blob, isbn, author=author):
+            score += 2
         ranked.append((score, abs_url))
-    ranked.sort(key=lambda item: item[0], reverse=True)
-    matching = [url for score, url in ranked if score]
-    if matching:
-        return matching[0]
-    isbn_digits = re.sub(r"\D", "", isbn or "")
-    if (allow_first or len(isbn_digits) >= 10) and ranked:
-        return ranked[0][1]
-    return ""
+    return pick_ranked_detail_url(ranked, allow_first=True)
 
 
 def evaluate_toranoana_detail(html: str) -> tuple[str, str]:

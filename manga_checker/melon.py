@@ -7,7 +7,12 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
-from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
+from manga_checker.privilege import (
+    STATUS_NO,
+    STATUS_UNKNOWN,
+    STATUS_YES,
+    pick_ranked_detail_url,
+)
 from manga_checker.title_match import listing_matches_work
 
 _DETAIL_HREF = re.compile(r"detail\.php", re.I)
@@ -107,13 +112,7 @@ def first_melon_detail_url(
         if listing_matches_work(title, blob, isbn, author=author):
             score += 2
         ranked.append((score, abs_url))
-    ranked.sort(key=lambda item: item[0], reverse=True)
-    matching = [url for score, url in ranked if score]
-    if matching:
-        return matching[0]
-    if (allow_first or len(isbn_digits) >= 10) and ranked:
-        return ranked[0][1]
-    return ""
+    return pick_ranked_detail_url(ranked, allow_first=True)
 
 
 def evaluate_melon_detail(html: str) -> tuple[str, str]:
