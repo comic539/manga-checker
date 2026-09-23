@@ -25,7 +25,9 @@ from manga_checker.privilege import (
     STATUS_YES,
     evaluate_detail_privilege,
     evaluate_privilege,
+    listing_has_products,
     pick_ranked_detail_url,
+    search_is_no_hit,
 )
 from manga_checker.store_cache import cached_check, remember_check
 from manga_checker.title_match import listing_matches_work
@@ -89,14 +91,14 @@ def _melon_isbn_url(comic: Comic) -> str:
         return ""
     return (
         "https://www.melonbooks.co.jp/search/search.php?"
-        + urlencode({"name": isbn, "text_type": "all", "category_id": "4"})
+        + urlencode({"name": isbn, "text_type": "all"})
     )
 
 
 def _melon_title_url(comic: Comic) -> str:
     return (
         "https://www.melonbooks.co.jp/search/search.php?"
-        + urlencode({"name": _q(comic), "text_type": "title", "category_id": "4"})
+        + urlencode({"name": _q(comic), "text_type": "title"})
     )
 
 
@@ -111,12 +113,16 @@ def _kumazawa_url(comic: Comic) -> str:
     )
 
 
+def _toranoana_list_url(word: str, *, books: bool = False) -> str:
+    query = f"?searchWord={quote(word)}"
+    if books:
+        query += "&searchCategoryCode=bok"
+    return "https://ecs.toranoana.jp/tora/ec/app/catalog/list/" + query
+
+
 def _toranoana_url(comic: Comic) -> str:
     word = toranoana_search_word(comic.title, comic.volume)
-    return (
-        "https://ecs.toranoana.jp/tora/ec/app/catalog/list/"
-        f"?searchWord={quote(word)}"
-    )
+    return _toranoana_list_url(word, books=True)
 
 
 STORES: list[Store] = [
@@ -323,7 +329,10 @@ def _fetch_melonbooks(comic: Comic, search_url: str, session: requests.Session) 
     isbn_url = _melon_isbn_url(comic)
     if isbn_url:
         attempts.append((isbn_url, True))
-    attempts.append((_melon_title_url(comic), False))
+        attempts.append((isbn_url + "&category_id=4", True))
+    title_url = _melon_title_url(comic)
+    attempts.append((title_url, False))
+    attempts.append((title_url + "&category_id=4", False))
     session.cookies.set("adult_check", "1", domain="www.melonbooks.co.jp")
     return _fetch_detail_attempts(
         comic,
@@ -342,15 +351,13 @@ def _fetch_toranoana(comic: Comic, search_url: str, session: requests.Session) -
     attempts: list[tuple[str, bool]] = []
     isbn = isbn_search_query(comic.isbn)
     if isbn:
-        attempts.append(
-            (
-                "https://ecs.toranoana.jp/tora/ec/app/catalog/list/"
-                f"?searchWord={quote(isbn)}",
-                True,
-            )
-        )
+        attempts.append((_toranoana_list_url(isbn, books=True), True))
+        attempts.append((_toranoana_list_url(isbn, books=False), True))
+    word = toranoana_search_word(comic.title, comic.volume)
     title_url = _toranoana_url(comic)
     attempts.append((title_url, False))
+    if word:
+        attempts.append((_toranoana_list_url(word, books=False), False))
     return _fetch_detail_attempts(
         comic,
         session,
@@ -379,8 +386,22 @@ def _fetch_gamers(comic: Comic, search_url: str, session: requests.Session) -> S
     )
 
 
+def _kinokuniya_list_url(query: str) -> str:
+    return (
+        "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp"
+        f"?qsd=true&ptk=01&q={quote(query)}"
+    )
+
+
 def _fetch_kinokuniya(comic: Comic, search_url: str, session: requests.Session) -> StoreCheck:
-    attempts: list[tuple[str, bool]] = [(search_url, bool(isbn_search_query(comic.isbn)))]
+    attempts: list[tuple[str, bool]] = []
+    isbn = isbn_search_query(comic.isbn)
+    if isbn:
+        attempts.append((f"https://www.kinokuniya.co.jp/f/dsg-01-{isbn}", True))
+        attempts.append((_kinokuniya_list_url(isbn), True))
+    attempts.append((_kinokuniya_list_url(_q(comic)), False))
+    if search_url and all(search_url != url for url, _ in attempts):
+        attempts.append((search_url, bool(isbn)))
     return _fetch_detail_attempts(
         comic,
         session,
@@ -391,6 +412,8 @@ def _fetch_kinokuniya(comic: Comic, search_url: str, session: requests.Session) 
         extract=first_kinokuniya_detail_url,
         evaluate=evaluate_detail_privilege,
         missing="検索結果から商品詳細を特定できませんでした。",
+        timeout=15,
+        retries=1,
     )
 
 
@@ -406,24 +429,42 @@ def _fetch_detail_attempts(
     evaluate,
     missing: str,
     match_title: str = "",
+    timeout: int = 25,
+    retries: int = 3,
 ) -> StoreCheck:
     last_search = fallback_url
     title = match_title or comic.search_query
     last_http = 0
     had_product_hit = False
+    saw_search_page = False
+    last_error: Exception | None = None
     try:
         for index, (list_url, from_isbn) in enumerate(attempts):
             last_search = list_url
             if index:
                 time.sleep(0.8)
-            search_resp = get_with_retry(
-                session, list_url, timeout=25, label=f"{name} 検索 {comic.display_title}"
-            )
-            if search_resp.status_code >= 400:
+            try:
+                search_resp = get_with_retry(
+                    session,
+                    list_url,
+                    timeout=timeout,
+                    retries=retries,
+                    label=f"{name} 検索 {comic.display_title}",
+                )
+            except requests.RequestException as exc:
+                last_error = exc
+                continue
+            html = search_resp.text or ""
+            if search_resp.status_code < 400 or search_is_no_hit(html):
+                saw_search_page = True
+            if search_resp.status_code < 400:
+                last_http = 0
+            else:
                 last_http = search_resp.status_code
+            if search_is_no_hit(html) and not listing_has_products(html):
                 continue
             detail_url = extract(
-                search_resp.text,
+                html,
                 list_url,
                 title,
                 comic.isbn,
@@ -431,16 +472,23 @@ def _fetch_detail_attempts(
                 allow_first=True,
             )
             if not detail_url:
+                if listing_has_products(html):
+                    had_product_hit = True
                 continue
             had_product_hit = True
             time.sleep(0.8)
-            detail_resp = get_with_retry(
-                session,
-                detail_url,
-                timeout=25,
-                headers={"Referer": list_url},
-                label=f"{name} 詳細 {comic.display_title}",
-            )
+            try:
+                detail_resp = get_with_retry(
+                    session,
+                    detail_url,
+                    timeout=timeout,
+                    retries=retries,
+                    headers={"Referer": list_url},
+                    label=f"{name} 詳細 {comic.display_title}",
+                )
+            except requests.RequestException as exc:
+                last_error = exc
+                continue
             if detail_resp.status_code >= 400:
                 last_http = detail_resp.status_code
                 continue
@@ -454,6 +502,14 @@ def _fetch_detail_attempts(
                 "検索ヒットあり。詳細ページへ進めなかったため特典なしと扱います。",
                 fallback_url,
             )
+        if saw_search_page:
+            return StoreCheck(
+                store_id,
+                name,
+                STATUS_UNKNOWN,
+                "検索ヒットが見つかりませんでした。",
+                fallback_url,
+            )
         if last_http >= 400:
             return StoreCheck(
                 store_id,
@@ -461,6 +517,10 @@ def _fetch_detail_attempts(
                 STATUS_UNKNOWN,
                 f"HTTP {last_http}。ページを取得できませんでした。",
                 fallback_url,
+            )
+        if last_error is not None:
+            return StoreCheck(
+                store_id, name, STATUS_UNKNOWN, f"取得失敗: {last_error}", last_search
             )
         return StoreCheck(store_id, name, STATUS_UNKNOWN, missing, fallback_url)
     except requests.RequestException as exc:

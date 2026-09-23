@@ -160,7 +160,7 @@ class CatalogFallbackTests(unittest.TestCase):
         ]
         with patch("manga_checker.catalog.rakuten_configured", return_value=False), patch(
             "manga_checker.catalog.fetch_ndl_comics", return_value=ndl_comics
-        ), patch("manga_checker.catalog.enrich_with_openbd", side_effect=lambda comics, session=None: comics), patch(
+        ), patch(
             "manga_checker.catalog.fill_missing_pubdates", side_effect=lambda comics, session=None: comics
         ):
             result = fetch_month_volume_ones(year=2026, month=9)

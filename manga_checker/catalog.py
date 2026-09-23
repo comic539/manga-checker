@@ -3,8 +3,9 @@
 優先順位:
 1. 楽天ブックス書籍検索API（発売中・予約を含む。各月は初日〜末日、ページ送りは次ページがなくなるまで）
 2. 国立国会図書館サーチ OpenSearch（漫画分類 NDC 726。月初日〜末日。楽天未設定時）
-3. openBD（ISBNから書誌・発売日を補完。書影は使わない）
-4. 任意の CSV（手動追加）
+3. 任意の CSV（手動追加）
+
+書影は楽天ブックスAPIのみ。openBDからは取得しない。
 """
 
 from __future__ import annotations
@@ -24,7 +25,6 @@ import requests
 from manga_checker.dates import month_query_range, year_month_from_pubdate
 from manga_checker.http import make_session
 from manga_checker.models import Comic
-from manga_checker.openbd import enrich_with_openbd
 from manga_checker.publishers import canonical_publisher, publisher_sort_key
 from manga_checker.rakuten_books import (
     fetch_rakuten_volume_ones,
@@ -110,7 +110,6 @@ def fetch_month_volume_ones(
     if extra_csv and extra_csv.exists():
         comics.extend(load_csv(extra_csv))
     comics = _dedupe(comics)
-    comics = enrich_with_openbd(comics, session=session)
     comics = fill_missing_pubdates(comics, session=session)
     comics.sort(key=lambda c: publisher_sort_key(c.publisher, c.pubdate, c.display_title))
     by_pub = Counter(canonical_publisher(c.publisher) for c in comics)
@@ -192,7 +191,6 @@ def fetch_months_volume_ones(
     for key in months:
         result[key] = _dedupe(result[key])
         all_comics.extend(result[key])
-    enrich_with_openbd(all_comics, session=session)
     fill_missing_pubdates(all_comics, session=session)
     result = redistribute_by_pubdate(result, months)
     for year, month in months:

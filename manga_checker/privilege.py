@@ -67,6 +67,8 @@ _NO_HIT_PHRASES = (
     "検索結果はありません",
     "該当する商品は見つかりませんでした",
     "お探しの商品は見つかりません",
+    "条件に一致する商品は見つかりませんでした",
+    "一致する商品は見つかりませんでした",
 )
 
 _MELON_CONCRETE = (
@@ -187,15 +189,23 @@ def _snippet(text: str, word: str, radius: int = 40) -> str:
 
 def listing_has_products(html: str) -> bool:
     markup = html or ""
+    if search_is_no_hit(markup):
+        return False
     if _PRODUCT_HREF.search(markup):
         return True
     soup = BeautifulSoup(markup, "html.parser")
     return bool(
         soup.select(
-            ".item_list .item, .product-list-item, li.item, .product_list .product, "
-            ".item_name, .product"
+            ".item_list .item, .product-list-item, ul.item_list li.item, "
+            ".product_list > .product, .product_list .product_item"
         )
     )
+
+
+def search_is_no_hit(html: str) -> bool:
+    """検索結果ページが『0件』と明示しているか。"""
+    text = html or ""
+    return any(phrase in text for phrase in _NO_HIT_PHRASES)
 
 
 def evaluate_privilege(

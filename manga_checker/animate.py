@@ -45,6 +45,18 @@ def first_animate_detail_url(
         if listing_matches_work(title, blob, isbn, author=author):
             score += 2
         ranked.append((score, abs_url))
+    for match in _PD_PATH.finditer(html or ""):
+        abs_url = f"https://www.animate-onlineshop.jp/pd/{match.group(1)}/"
+        if abs_url not in seen:
+            seen.add(abs_url)
+            ranked.append((0, abs_url))
+    for tag in soup.find_all(attrs={"data-product_id": True}):
+        pid = str(tag.get("data-product_id") or "")
+        if pid.isdigit():
+            abs_url = f"https://www.animate-onlineshop.jp/pd/{pid}/"
+            if abs_url not in seen:
+                seen.add(abs_url)
+                ranked.append((0, abs_url))
     return pick_ranked_detail_url(ranked, allow_first=True)
 
 
