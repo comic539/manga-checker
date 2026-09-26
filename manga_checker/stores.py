@@ -492,6 +492,10 @@ def _fetch_detail_attempts(
             if detail_resp.status_code >= 400:
                 last_http = detail_resp.status_code
                 continue
+            if store_id == "gamers" and not _detail_page_matches(
+                comic, detail_resp.text or ""
+            ):
+                continue
             status, detail = evaluate(detail_resp.text)
             return StoreCheck(store_id, name, status, detail, detail_url)
         if had_product_hit:
@@ -548,6 +552,41 @@ def _detail_page_matches(comic: Comic, html: str) -> bool:
 _GAMERS_PD = re.compile(r"/pd/(\d+)/?", re.I)
 _GAMERS_PID = re.compile(r"(?:[?&]product_id=)(\d+)", re.I)
 _KINO_DSG = re.compile(r"/f/dsg-01-(\d+)", re.I)
+_GAMERS_CHROME = re.compile(
+    r"popular_keyword|swiper|bnr_|banner|fp_fair|global.?nav|gnav|"
+    r"header_nav|footer_nav",
+    re.I,
+)
+_GAMERS_LISTING = re.compile(r"list_product|search_item_list|item_list", re.I)
+
+
+def _gamers_node_ident(node) -> str:
+    if node is None or not getattr(node, "get", None):
+        return ""
+    classes = " ".join(str(c) for c in (node.get("class") or []))
+    return f"{classes} {node.get('id') or ''}"
+
+
+def _is_gamers_chrome_link(tag) -> bool:
+    for parent in (tag, *getattr(tag, "parents", [])):
+        name = getattr(parent, "name", None)
+        if not name:
+            break
+        if name in ("header", "footer", "nav", "aside"):
+            return True
+        ident = _gamers_node_ident(parent)
+        if _GAMERS_CHROME.search(ident):
+            return True
+    return False
+
+
+def _is_gamers_listing_link(tag) -> bool:
+    for parent in (tag, *getattr(tag, "parents", [])):
+        if not getattr(parent, "name", None):
+            break
+        if _GAMERS_LISTING.search(_gamers_node_ident(parent)):
+            return True
+    return False
 
 
 def first_gamers_detail_url(
@@ -564,6 +603,8 @@ def first_gamers_detail_url(
     seen: set[str] = set()
     isbn_digits = re.sub(r"\D", "", isbn or "")
     for tag in soup.find_all("a", href=True):
+        if _is_gamers_chrome_link(tag):
+            continue
         abs_url = _gamers_detail_url(str(tag.get("href") or ""), base)
         if not abs_url or abs_url in seen:
             continue
@@ -578,8 +619,10 @@ def first_gamers_detail_url(
             score += 5
         if listing_matches_work(title, blob, isbn, author=author):
             score += 2
+        if _is_gamers_listing_link(tag):
+            score += 1
         ranked.append((score, abs_url))
-    return pick_ranked_detail_url(ranked, allow_first=True)
+    return pick_ranked_detail_url(ranked, allow_first=allow_first)
 
 
 def _gamers_detail_url(href: str, base: str) -> str:

@@ -148,6 +148,28 @@ def pick_ranked_detail_url(
     return ""
 
 
+_CAMPAIGN_FAIR = re.compile(r"特典箱フェア")
+
+
+def _strip_campaign_fair(soup: BeautifulSoup) -> None:
+    """ゲーマーズの『特典箱フェア』案内は店舗特典ではない。"""
+    for node in soup.select("#fp_fair, [id*='fp_fair']"):
+        node.decompose()
+    for heading in soup.find_all(["h2", "h3", "h4", "p", "strong"]):
+        text = heading.get_text(" ", strip=True)
+        if "特典箱フェア" not in text:
+            continue
+        parent = heading.find_parent(["div", "section", "article"]) or heading
+        parent.decompose()
+
+
+def _is_campaign_fair_text(text: str) -> bool:
+    if not text or not _CAMPAIGN_FAIR.search(text):
+        return False
+    remainder = _CAMPAIGN_FAIR.sub(" ", text)
+    return not any(word in remainder for word in ("描き下ろし", "ゲーマーズ特典", "店舗特典", "購入特典"))
+
+
 def evaluate_detail_privilege(html: str) -> tuple[str, str]:
     """商品個別ページの本文・特典ブロックだけを判定する。"""
     if not html:
@@ -155,17 +177,26 @@ def evaluate_detail_privilege(html: str) -> tuple[str, str]:
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup.find_all(("header", "footer", "nav", "aside")):
         tag.decompose()
+    _strip_campaign_fair(soup)
     blocks: list[str] = []
     for node in soup.select(
         "#tokuten, [id*='tokuten'], [class*='tokuten'], [class*='privilege'], "
         "[id*='privilege'], .privilege-info, .item_tokuten"
     ):
         text = node.get_text(" ", strip=True)
-        if text:
+        if text and not _is_campaign_fair_text(text):
             blocks.append(text)
     body = soup.get_text(" ", strip=True)
-    scope = " ".join(blocks)
-    haystack = scope or body
+    attrs: list[str] = []
+    for tag in soup.find_all(True):
+        for attr in ("alt", "title", "aria-label"):
+            value = str(tag.get(attr) or "").strip()
+            if value and not _is_campaign_fair_text(value):
+                attrs.append(value)
+    attr_blob = " ".join(attrs)
+    scope = " ".join(dict.fromkeys([*blocks, attr_blob] if attr_blob else blocks))
+    haystack = scope or f"{body} {attr_blob}".strip()
+    haystack = _CAMPAIGN_FAIR.sub(" ", haystack)
     if _DETAIL_NONE.search(haystack) and not any(
         word in haystack for word in ("描き下ろし", "ペーパー", "有償特典")
     ):

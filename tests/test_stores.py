@@ -4,7 +4,13 @@ from urllib.parse import parse_qs, urlparse
 
 from manga_checker.models import Comic
 from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
-from manga_checker.stores import STORES, _fetch_animate, _fetch_melonbooks, _fetch_toranoana
+from manga_checker.stores import (
+    STORES,
+    _fetch_animate,
+    _fetch_gamers,
+    _fetch_melonbooks,
+    _fetch_toranoana,
+)
 
 
 class StoreListTests(unittest.TestCase):
@@ -528,6 +534,77 @@ class DetailFetchTests(unittest.TestCase):
             )
         self.assertEqual(check.status, STATUS_NO)
         self.assertIn("検索ヒットあり", check.detail)
+
+    def test_gamers_skips_popular_keyword_and_opens_matching_title(self) -> None:
+        comic = Comic(title="異世界エステ 1", isbn="9784434385728")
+        search_html = """
+        <div class="popular_keyword_box">
+          <ul class="popular_keyword">
+            <li><a href="/pd/10933357/">カリアのアトリエ</a></li>
+          </ul>
+        </div>
+        <ul class="search_item_list">
+          <li class="list_product">
+            <a href="/pd/10933244/">【コミック】異世界エステ 1</a>
+          </li>
+        </ul>
+        """
+        este_html = (
+            "<html><head><title>異世界エステ</title></head>"
+            "<body><h1>異世界エステ 1</h1><p>在庫あり</p></body></html>"
+        )
+        kalia_html = (
+            "<html><head><title>カリアのアトリエ</title></head>"
+            "<body><h1>カリアのアトリエ</h1>"
+            "<p>ゲーマーズ特典：描き下ろしB2タペストリー</p></body></html>"
+        )
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            if "/pd/10933357" in url:
+                resp.text = kalia_html
+            elif "/pd/10933244" in url:
+                resp.text = este_html
+            else:
+                resp.text = search_html
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_gamers(
+                comic,
+                "https://www.gamers.co.jp/products/list.php?mode=search&smt=x",
+                session,
+            )
+        fetched = [call.args[0] for call in session.get.call_args_list]
+        self.assertTrue(any("/pd/10933244" in url for url in fetched))
+        self.assertFalse(any("/pd/10933357" in url for url in fetched))
+        self.assertEqual(check.url, "https://www.gamers.co.jp/pd/10933244/")
+        self.assertEqual(check.status, STATUS_NO)
+
+    def test_gamers_extract_ignores_popular_keyword(self) -> None:
+        from manga_checker.stores import first_gamers_detail_url
+
+        html = """
+        <div class="popular_keyword_box">
+          <ul class="popular_keyword">
+            <li><a href="/pd/10933357/">カリアのアトリエ</a></li>
+          </ul>
+        </div>
+        <ul class="search_item_list">
+          <li class="list_product"><a href="/pd/10933244/">【コミック】異世界エステ</a></li>
+        </ul>
+        """
+        url = first_gamers_detail_url(
+            html,
+            "https://www.gamers.co.jp/products/list.php",
+            "異世界エステ",
+            isbn="9784434385728",
+            allow_first=True,
+        )
+        self.assertEqual(url, "https://www.gamers.co.jp/pd/10933244/")
 
 
 if __name__ == "__main__":
