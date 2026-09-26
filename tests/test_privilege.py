@@ -578,27 +578,42 @@ class ToranoanaDetailTests(unittest.TestCase):
 
 class GamersFairTests(unittest.TestCase):
     def test_tokutenbako_fair_is_not_privilege(self) -> None:
-        from manga_checker.privilege import evaluate_detail_privilege
+        from manga_checker.privilege import evaluate_gamers_detail
 
         html = """
-        <h1>異世界エステ 1</h1>
+        <h1>スミハルハンマー 1</h1>
         <div class="item_detail_class pc" id="fp_fair">
           <h3>特典箱フェアのご案内</h3>
           <p>特典箱フェア期間中、500円お買い上げ毎に1ポイント</p>
         </div>
         <div class="tokuten">特典箱フェア 景品交換</div>
         """
-        status, detail = evaluate_detail_privilege(html)
+        status, detail = evaluate_gamers_detail(html)
         self.assertEqual(status, STATUS_NO, detail)
 
+    def test_illustration_alone_is_not_privilege(self) -> None:
+        from manga_checker.privilege import evaluate_gamers_detail
+
+        html = "<h1>作品</h1><p>描き下ろしB2タペストリー</p>"
+        status, _ = evaluate_gamers_detail(html)
+        self.assertEqual(status, STATUS_NO)
+
+    def test_tokuten_info_heading_is_yes(self) -> None:
+        from manga_checker.privilege import evaluate_gamers_detail
+
+        html = "<h1>作品</h1><h2>特典情報</h2><p>イラストカード</p>"
+        status, detail = evaluate_gamers_detail(html)
+        self.assertEqual(status, STATUS_YES, detail)
+        self.assertIn("特典情報", detail)
+
     def test_store_privilege_still_yes_beside_fair(self) -> None:
-        from manga_checker.privilege import evaluate_detail_privilege
+        from manga_checker.privilege import evaluate_gamers_detail
 
         html = """
         <h1>カリアのアトリエ</h1>
         <div id="fp_fair"><h3>特典箱フェアのご案内</h3><p>特典</p></div>
         <div class="privilege_box"><p>ゲーマーズ特典：描き下ろしB2タペストリー</p></div>
         """
-        status, detail = evaluate_detail_privilege(html)
+        status, detail = evaluate_gamers_detail(html)
         self.assertEqual(status, STATUS_YES, detail)
-        self.assertIn("描き下ろし", detail)
+        self.assertIn("ゲーマーズ特典", detail)

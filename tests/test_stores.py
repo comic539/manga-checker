@@ -486,6 +486,44 @@ class DetailFetchTests(unittest.TestCase):
         self.assertEqual(check.status, STATUS_UNKNOWN)
         self.assertNotIn("ページを取得できませんでした", check.detail)
 
+    def test_toranoana_isbn_miss_falls_back_to_title_hit(self) -> None:
+        comic = Comic(title="スミハルハンマー 1", isbn="9784049722314")
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            if "9784049722314" in url:
+                resp.status_code = 404
+                resp.text = (
+                    "<h1>商品一覧</h1>"
+                    '<span class="errorMessage">条件に一致する商品は見つかりませんでした。</span>'
+                )
+            elif "/item/" in url:
+                resp.text = (
+                    "<section class='product-detail'><h1>スミハルハンマー 1</h1>"
+                    "<p>在庫あり</p></section>"
+                )
+            else:
+                resp.text = (
+                    '<ul class="product-list-container">'
+                    '<li class="product-list-item">'
+                    '<a href="/tora/ec/item/200012823981/">スミハルハンマー 1</a>'
+                    "</li></ul>"
+                )
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_toranoana(
+                comic,
+                "https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertIn("/item/200012823981", check.url)
+        self.assertNotEqual(check.status, STATUS_UNKNOWN)
+
     def test_isbn_timeout_falls_back_to_title_search(self) -> None:
         import requests as req_mod
 

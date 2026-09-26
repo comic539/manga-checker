@@ -24,6 +24,7 @@ from manga_checker.privilege import (
     STATUS_UNKNOWN,
     STATUS_YES,
     evaluate_detail_privilege,
+    evaluate_gamers_detail,
     evaluate_privilege,
     listing_has_products,
     pick_ranked_detail_url,
@@ -369,6 +370,7 @@ def _fetch_toranoana(comic: Comic, search_url: str, session: requests.Session) -
         evaluate=evaluate_toranoana_detail,
         missing="検索結果から商品詳細（/tora/ec/item/）を特定できませんでした。",
         match_title=toranoana_search_word(comic.title, comic.volume),
+        retries=1,
     )
 
 
@@ -381,7 +383,7 @@ def _fetch_gamers(comic: Comic, search_url: str, session: requests.Session) -> S
         fallback_url=search_url,
         attempts=[(search_url, bool(isbn_search_query(comic.isbn)))],
         extract=first_gamers_detail_url,
-        evaluate=evaluate_detail_privilege,
+        evaluate=evaluate_gamers_detail,
         missing="検索結果から商品詳細を特定できませんでした。",
     )
 
@@ -455,14 +457,15 @@ def _fetch_detail_attempts(
                 last_error = exc
                 continue
             html = search_resp.text or ""
-            if search_resp.status_code < 400 or search_is_no_hit(html):
+            no_hit = search_is_no_hit(html) and not listing_has_products(html)
+            if no_hit:
                 saw_search_page = True
+                continue
             if search_resp.status_code < 400:
                 last_http = 0
+                saw_search_page = True
             else:
                 last_http = search_resp.status_code
-            if search_is_no_hit(html) and not listing_has_products(html):
-                continue
             detail_url = extract(
                 html,
                 list_url,
@@ -506,20 +509,20 @@ def _fetch_detail_attempts(
                 "検索ヒットあり。詳細ページへ進めなかったため特典なしと扱います。",
                 fallback_url,
             )
-        if saw_search_page:
-            return StoreCheck(
-                store_id,
-                name,
-                STATUS_UNKNOWN,
-                "検索ヒットが見つかりませんでした。",
-                fallback_url,
-            )
         if last_http >= 400:
             return StoreCheck(
                 store_id,
                 name,
                 STATUS_UNKNOWN,
                 f"HTTP {last_http}。ページを取得できませんでした。",
+                fallback_url,
+            )
+        if saw_search_page:
+            return StoreCheck(
+                store_id,
+                name,
+                STATUS_UNKNOWN,
+                "検索ヒットが見つかりませんでした。",
                 fallback_url,
             )
         if last_error is not None:

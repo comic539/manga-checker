@@ -209,6 +209,26 @@ def evaluate_detail_privilege(html: str) -> tuple[str, str]:
     return STATUS_NO, "詳細ページに特典情報はありません。"
 
 
+_GAMERS_YES_WORDS = ("特典情報", "ゲーマーズ特典")
+
+
+def evaluate_gamers_detail(html: str) -> tuple[str, str]:
+    """ゲーマーズは商品ページの『特典情報』または『ゲーマーズ特典』だけを特典ありにする。"""
+    if not html:
+        return STATUS_UNKNOWN, "詳細ページを取得できませんでした。"
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup.find_all(("header", "footer", "nav", "aside")):
+        tag.decompose()
+    _strip_campaign_fair(soup)
+    haystack = _CAMPAIGN_FAIR.sub(" ", soup.get_text(" ", strip=True))
+    if _DETAIL_NONE.search(haystack):
+        return STATUS_NO, "詳細ページに特典情報はありません。"
+    for word in _GAMERS_YES_WORDS:
+        if word in haystack:
+            return STATUS_YES, f"詳細ページで検出: {_snippet(haystack, word)}"
+    return STATUS_NO, "詳細ページに特典情報はありません。"
+
+
 def _snippet(text: str, word: str, radius: int = 40) -> str:
     idx = text.find(word)
     if idx < 0:
@@ -259,6 +279,8 @@ def evaluate_privilege(
             from manga_checker.melon import evaluate_melon_detail
 
             return evaluate_melon_detail(html)
+        if store_id == "gamers" or "gamers.co.jp" in source:
+            return evaluate_gamers_detail(html)
         return evaluate_detail_privilege(html)
 
     if store_id == "kinokuniya" or "kinokuniya.co.jp" in source:
