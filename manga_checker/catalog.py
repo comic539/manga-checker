@@ -29,6 +29,7 @@ from manga_checker.publishers import canonical_publisher, publisher_sort_key
 from manga_checker.rakuten_books import (
     fetch_rakuten_volume_ones,
     rakuten_configured,
+    refresh_covers_from_rakuten,
     sales_year_month,
 )
 from manga_checker.retail_dates import fill_missing_pubdates
@@ -111,6 +112,7 @@ def fetch_month_volume_ones(
         comics.extend(load_csv(extra_csv))
     comics = _dedupe(comics)
     comics = fill_missing_pubdates(comics, session=session)
+    comics = refresh_covers_from_rakuten(comics, session=session)
     comics.sort(key=lambda c: publisher_sort_key(c.publisher, c.pubdate, c.display_title))
     by_pub = Counter(canonical_publisher(c.publisher) for c in comics)
     if by_pub:
@@ -192,6 +194,7 @@ def fetch_months_volume_ones(
         result[key] = _dedupe(result[key])
         all_comics.extend(result[key])
     fill_missing_pubdates(all_comics, session=session)
+    refresh_covers_from_rakuten(all_comics, session=session)
     result = redistribute_by_pubdate(result, months)
     for year, month in months:
         comics = _dedupe(result[(year, month)])
@@ -295,6 +298,9 @@ def load_catalog_json(
     for comics in result.values():
         for comic in comics:
             _keep_rakuten_cover_only(comic)
+    refresh_covers_from_rakuten(
+        [comic for comics in result.values() for comic in comics]
+    )
     return result
 
 

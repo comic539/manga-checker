@@ -124,6 +124,18 @@ def year_month_from_pubdate(raw: str) -> tuple[int, int] | None:
     return None
 
 
+def is_unreleased(pubdate: str, today: date | None = None) -> bool:
+    """発売日が今日以降（または年月だけ分かって当月以降）なら未発売。"""
+    today = today or date.today()
+    parsed = parse_release_date(pubdate)
+    if parsed:
+        return parsed >= today
+    ym = year_month_from_pubdate(pubdate)
+    if ym is None:
+        return True
+    return date(ym[0], ym[1], 1) >= date(today.year, today.month, 1)
+
+
 def date_in_month(raw: str, year: int, month: int) -> bool | None:
     """年月日まで分かる値はその月の初日〜末日に入るか。判定不能なら None。"""
     parsed = parse_release_date(raw)

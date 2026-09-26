@@ -573,6 +573,85 @@ def _items(payload: dict) -> list[dict]:
 def _cover_url(item: dict) -> str:
     for key in ("largeImageUrl", "mediumImageUrl", "smallImageUrl"):
         url = str(item.get(key) or "").strip()
-        if url:
+        if url and not is_placeholder_cover(url):
+            return url
+    return ""
+
+
+def is_placeholder_cover(url: str) -> bool:
+    """楽天の nowprinting / noimage / .gif プレースホルダは書影として使わない。"""
+    text = (url or "").strip().lower()
+    if not text:
+        return True
+    if any(token in text for token in ("noimage", "nowprinting", "now_printing", "now-printing")):
+        return True
+    path = text.split("?", 1)[0]
+    return path.endswith(".gif")
+
+
+def needs_cover_refresh(comic: Comic) -> bool:
+    url = comic.cover_url or ""
+    if not url:
+        return bool(comic.isbn)
+    return is_placeholder_cover(url)
+
+
+def refresh_covers_from_rakuten(
+    comics: list[Comic],
+    session: requests.Session | None = None,
+    delay_sec: float = 0.8,
+) -> list[Comic]:
+    """ISBNごとに楽天APIを引き直し、差し替わった書影URLを取り込む。"""
+    if not rakuten_configured():
+        return comics
+    targets = [c for c in comics if needs_cover_refresh(c)]
+    if not targets:
+        return comics
+    session = session or make_session()
+    print(f"楽天ブックス: 書影が未反映の {len(targets)} 件をISBNで再取得します。")
+    updated = 0
+    for index, comic in enumerate(targets, start=1):
+        isbn = re.sub(r"\D", "", comic.isbn or "")
+        if len(isbn) < 10:
+            continue
+        try:
+            payload = _request(session, {"isbn": isbn, "hits": "1"})
+        except Exception as exc:
+            print(f"  書影再取得失敗 {isbn}: {exc}")
+            continue
+        items = _items(payload)
+        cover = _cover_url(items[0]) if items else ""
+        if not cover:
+            cover = _cabinet_cover_url(session, isbn)
+        if cover:
+            comic.cover_url = cover
+            comic.cover_source = "rakuten"
+            updated += 1
+            print(f"  [{index}/{len(targets)}] {comic.display_title}: 書影を更新")
+        if index < len(targets) and delay_sec:
+            time.sleep(delay_sec)
+    print(f"楽天ブックス: 書影を {updated} 件更新しました。")
+    return comics
+
+
+def _cabinet_cover_url(session: requests.Session, isbn: str) -> str:
+    """APIがgifのままでも、楽天CDNの実書影(_1_9.jpg)があれば使う。"""
+    last4 = isbn[-4:]
+    for name in (f"{isbn}_1_9.jpg", f"{isbn}_1.jpg"):
+        url = (
+            "https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/"
+            f"{last4}/{name}?_ex=200x200"
+        )
+        try:
+            response = session.get(url, timeout=15)
+        except requests.RequestException:
+            continue
+        ctype = (response.headers.get("content-type") or "").lower()
+        if (
+            response.status_code == 200
+            and "image" in ctype
+            and "gif" not in ctype
+            and len(response.content) > 8000
+        ):
             return url
     return ""

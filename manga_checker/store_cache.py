@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from manga_checker.dates import is_unreleased
 from manga_checker.models import Comic, StoreCheck
 from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
 
@@ -60,6 +61,8 @@ def cached_check(cache: dict[str, dict[str, str]] | None, comic: Comic, store_id
     status = row.get("status") or ""
     if status not in _KEEP:
         return None
+    if status == STATUS_NO and is_unreleased(comic.pubdate):
+        return None
     return StoreCheck(
         store_id,
         row.get("store_name") or store_id,
@@ -73,6 +76,9 @@ def remember_check(cache: dict[str, dict[str, str]] | None, check: StoreCheck, c
     if cache is None:
         return
     if check.status == STATUS_UNKNOWN:
+        cache.pop(cache_key(comic, check.store_id), None)
+        return
+    if check.status == STATUS_NO and is_unreleased(comic.pubdate):
         cache.pop(cache_key(comic, check.store_id), None)
         return
     cache[cache_key(comic, check.store_id)] = {

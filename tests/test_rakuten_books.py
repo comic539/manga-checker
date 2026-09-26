@@ -46,7 +46,7 @@ class RakutenParseTests(unittest.TestCase):
         self.assertTrue(comic.cover_url.startswith("https://thumbnail.image.rakuten.co.jp"))
         self.assertTrue(is_volume_one(comic.title, comic.volume))
 
-    def test_keeps_noimage_url(self) -> None:
+    def test_skips_noimage_url(self) -> None:
         comic = parse_rakuten_item(
             {
                 "title": "テスト (1)",
@@ -56,10 +56,36 @@ class RakutenParseTests(unittest.TestCase):
             }
         )
         assert comic is not None
-        self.assertIn("noimage", comic.cover_url)
-        self.assertEqual(comic.cover_source, "rakuten")
+        self.assertEqual(comic.cover_url, "")
         self.assertTrue(sales_in_month("2026年09月頃", 2026, 9))
         self.assertEqual(normalize_sales_date("2026年09月頃"), "2026-09")
+
+    def test_prefers_jpg_over_gif_placeholder(self) -> None:
+        comic = parse_rakuten_item(
+            {
+                "title": "レイバイデイ (1)",
+                "isbn": "9784088852263",
+                "largeImageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/2263/9784088852263.gif?_ex=200x200",
+                "mediumImageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/2263/9784088852263_1_9.jpg?_ex=120x120",
+            }
+        )
+        assert comic is not None
+        self.assertIn("9784088852263_1_9.jpg", comic.cover_url)
+        self.assertNotIn(".gif", comic.cover_url)
+
+    def test_gif_and_noimage_are_placeholders(self) -> None:
+        from manga_checker.rakuten_books import is_placeholder_cover
+
+        self.assertTrue(
+            is_placeholder_cover(
+                "https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/2263/9784088852263.gif?_ex=200x200"
+            )
+        )
+        self.assertFalse(
+            is_placeholder_cover(
+                "https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/2263/9784088852263_1_9.jpg?_ex=200x200"
+            )
+        )
 
     def test_reservation_month_match(self) -> None:
         self.assertTrue(sales_in_month("2026年9月5日", 2026, 9))

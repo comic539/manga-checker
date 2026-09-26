@@ -33,7 +33,11 @@ class StoreCacheTests(unittest.TestCase):
         self.assertIsNone(cached_check(cache, comic, "animate"))
 
     def test_yes_and_no_are_reused(self) -> None:
-        comic = Comic(title="2年B組 勇者デストロイヤーず 1", isbn="9784088852280")
+        comic = Comic(
+            title="2年B組 勇者デストロイヤーず 1",
+            isbn="9784088852280",
+            pubdate="2020-01-04",
+        )
         cache: dict = {}
         remember_check(
             cache,
@@ -51,6 +55,20 @@ class StoreCacheTests(unittest.TestCase):
         assert no is not None
         self.assertEqual(yes.status, STATUS_YES)
         self.assertEqual(no.status, STATUS_NO)
+
+    def test_no_is_not_reused_before_release(self) -> None:
+        comic = Comic(
+            title="アニマルシグナル 1",
+            isbn="9784088852690",
+            pubdate="2099-12-31",
+        )
+        cache: dict = {}
+        remember_check(
+            cache,
+            StoreCheck("animate", "アニメイト", STATUS_NO, "なし", "https://a"),
+            comic,
+        )
+        self.assertIsNone(cached_check(cache, comic, "animate"))
 
     def test_load_drops_unknown_entries(self) -> None:
         import tempfile

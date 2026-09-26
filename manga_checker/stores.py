@@ -543,10 +543,7 @@ def _detail_page_matches(comic: Comic, html: str) -> bool:
         if text:
             parts.append(text)
     heading = " ".join(parts)
-    body = soup.get_text(" ", strip=True)[:8000]
-    return listing_matches_work(
-        comic.search_query, heading, comic.isbn, comic.author
-    ) or listing_matches_work(comic.search_query, body, comic.isbn, comic.author)
+    return listing_matches_work(comic.search_query, heading, comic.isbn, comic.author)
 
 
 _GAMERS_PD = re.compile(r"/pd/(\d+)/?", re.I)
@@ -598,6 +595,11 @@ def first_gamers_detail_url(
     allow_first: bool = False,
 ) -> str:
     soup = BeautifulSoup(html or "", "html.parser")
+    for node in soup.select(
+        ".popular_keyword, .popular_keyword_box, header, footer, nav, aside, "
+        ".swiper, [class*='bnr_'], #fp_fair"
+    ):
+        node.decompose()
     base = page_url or "https://www.gamers.co.jp/"
     ranked: list[tuple[int, str]] = []
     seen: set[str] = set()
@@ -621,8 +623,10 @@ def first_gamers_detail_url(
             score += 2
         if _is_gamers_listing_link(tag):
             score += 1
+        if score == 0 and not _is_gamers_listing_link(tag):
+            continue
         ranked.append((score, abs_url))
-    return pick_ranked_detail_url(ranked, allow_first=allow_first)
+    return pick_ranked_detail_url(ranked, allow_first=False)
 
 
 def _gamers_detail_url(href: str, base: str) -> str:

@@ -103,6 +103,7 @@ def main() -> None:
     if args.reuse_catalog and catalog_json.exists():
         print(f"保存済み書誌を読みます: {catalog_json.resolve()}（楽天/NDLの再取得はしません）")
         comics_by_month = load_catalog_json(catalog_json, windows)
+        write_catalog_json(catalog_json, comics_by_month)
     else:
         comics_by_month = fetch_months_volume_ones(windows, extra_csv=args.csv_in, session=session)
         args.out_dir.mkdir(parents=True, exist_ok=True)

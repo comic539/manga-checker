@@ -331,7 +331,11 @@ def _credit_html(comic: Comic) -> str:
 
 
 def _rakuten_cover_url(comic: Comic) -> str:
+    from manga_checker.rakuten_books import is_placeholder_cover
+
     url = comic.cover_url or ""
+    if is_placeholder_cover(url):
+        return ""
     if comic.cover_source == "rakuten" or "rakuten" in url:
         return url
     return ""

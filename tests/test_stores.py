@@ -606,6 +606,39 @@ class DetailFetchTests(unittest.TestCase):
         )
         self.assertEqual(url, "https://www.gamers.co.jp/pd/10933244/")
 
+    def test_gamers_extract_empty_when_only_popular_keyword(self) -> None:
+        from manga_checker.stores import first_gamers_detail_url
+
+        html = """
+        <div class="popular_keyword_box">
+          <ul class="popular_keyword">
+            <li><a href="/pd/10935357/">カリアのアトリエ</a></li>
+          </ul>
+        </div>
+        """
+        url = first_gamers_detail_url(
+            html,
+            "https://www.gamers.co.jp/products/list.php",
+            "異世界エステ",
+            isbn="9784434385728",
+            allow_first=True,
+        )
+        self.assertEqual(url, "")
+
+    def test_gamers_detail_ignores_related_work_in_body(self) -> None:
+        from manga_checker.stores import _detail_page_matches
+
+        comic = Comic(title="異世界エステ 1", isbn="9784434385728")
+        html = """
+        <html><head><title>カリアのアトリエ</title></head>
+        <body>
+          <h1>カリアのアトリエ</h1>
+          <p>ゲーマーズ特典：描き下ろし</p>
+          <div class="popular_keyword"><a href="/pd/10933244/">異世界エステ</a></div>
+        </body></html>
+        """
+        self.assertFalse(_detail_page_matches(comic, html))
+
 
 if __name__ == "__main__":
     unittest.main()
