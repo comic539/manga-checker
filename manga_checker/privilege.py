@@ -99,7 +99,7 @@ _KINO_CHROME = re.compile(
 )
 
 STATUS_YES = "特典あり"
-STATUS_NO = "通常/なし"
+STATUS_NO = "特典なし"
 STATUS_UNKNOWN = "未確認"
 
 _DETAIL_BLOCK_WORDS = (
@@ -129,7 +129,7 @@ _DETAIL_NONE = re.compile(
 )
 
 _PRODUCT_HREF = re.compile(
-    r"/pd/\d+|product_id=\d+|detail\.php|/tora/ec/item/\d+|/f/dsg-01-\d+",
+    r"/pd/\d+|/pn/[^\"'\\s]+/\d+|product_id=\d+|detail\.php|/tora/ec/item/\d+|/f/dsg-01-\d+",
     re.I,
 )
 
@@ -274,7 +274,7 @@ def evaluate_privilege(
         return STATUS_UNKNOWN, "ページを取得できませんでした。"
 
     source = source_url or ""
-    if "detail.php" in source or "/pd/" in source or "/tora/ec/item/" in source:
+    if "detail.php" in source or "/pd/" in source or "/pn/" in source or "/tora/ec/item/" in source:
         if store_id == "melonbooks" or "melonbooks.co.jp" in source:
             from manga_checker.melon import evaluate_melon_detail
 

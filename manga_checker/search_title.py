@@ -15,10 +15,15 @@ _DECORATION_PATTERNS = [
 
 _VOLUME_PATTERNS = [
     re.compile(r"第\s*\d+\s*巻"),
+    re.compile(r"第\s*一\s*巻"),
+    re.compile(r"全\s*\d+\s*巻"),
+    re.compile(r"全\s*一\s*巻"),
+    re.compile(r"(?<!\d)一\s*巻"),
     re.compile(r"volume\s*\d+", re.IGNORECASE),
     re.compile(r"vol\.?\s*\d+", re.IGNORECASE),
     re.compile(r"[\(（]\s*\d+\s*[\)）]"),
     re.compile(r"\[\s*\d+\s*\]"),
+    re.compile(r"[①]"),
     re.compile(r"(?<!\d)\d+\s*巻"),
 ]
 

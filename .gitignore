@@ -1,7 +1,10 @@
 .venv/
 __pycache__/
 *.pyc
-output/
+output/*
+!output/catalog_by_month.json
+!output/store_checks.json
+!output/preview_urls.json
 .DS_Store
 affiliate.json
 config.json

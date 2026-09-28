@@ -6,6 +6,7 @@
 3. 任意の CSV（手動追加）
 
 書影は楽天ブックスAPIのみ。openBDからは取得しない。
+保存済みの過去月は再走査しない（当月・未来月と、未保存の過去月だけ取り直す）。
 """
 
 from __future__ import annotations
@@ -123,21 +124,59 @@ def fetch_month_volume_ones(
     return comics
 
 
+def catalog_month_is_frozen(
+    year: int,
+    month: int,
+    saved_count: int,
+    *,
+    today: date | None = None,
+    refetch_past: bool = False,
+) -> bool:
+    """一度取れた過去月は楽天の棚を再走査しない。当月・未来月と空の過去月は対象。"""
+    if refetch_past or saved_count <= 0:
+        return False
+    today = today or date.today()
+    return (year, month) < (today.year, today.month)
+
+
 def fetch_months_volume_ones(
     months: list[tuple[int, int]],
     extra_csv: Path | None = None,
     session: requests.Session | None = None,
+    *,
+    saved: dict[tuple[int, int], list[Comic]] | None = None,
+    today: date | None = None,
+    refetch_past: bool = False,
 ) -> dict[tuple[int, int], list[Comic]]:
-    """対象の複数月を、楽天なら1ヶ月ずつ完全取得する。
+    """対象の複数月を取得する。保存済みの過去月は再利用し、当月・未来月だけ取り直す。
     各月は暦の初日〜末日を範囲とする。楽天が使えないときは NDL も同じ範囲で取得する。
     """
     if not months:
         return {}
+    today = today or date.today()
+    saved = saved or {}
     session = session or make_session()
     result: dict[tuple[int, int], list[Comic]] = {key: [] for key in months}
+    frozen: list[tuple[int, int]] = []
+    live: list[tuple[int, int]] = []
+    for year, month in months:
+        cached = list(saved.get((year, month)) or [])
+        if catalog_month_is_frozen(
+            year, month, len(cached), today=today, refetch_past=refetch_past
+        ):
+            result[(year, month)] = cached
+            frozen.append((year, month))
+            print(
+                f"書誌: {year}年{month}月は保存済み（{len(cached)}件）のため"
+                "楽天を再走査しません。"
+            )
+        else:
+            live.append((year, month))
     used_rakuten = False
-    if rakuten_configured():
-        for year, month in months:
+    if not live:
+        print("書誌: 再走査する月がありません（過去月は保存済み、当月・未来は対象外）。")
+    elif rakuten_configured():
+        for year, month in live:
             try:
                 got = fetch_rakuten_volume_ones(year, month, session=session)
                 result[(year, month)].extend(got)
@@ -151,14 +190,17 @@ def fetch_months_volume_ones(
                     f"楽天ブックスAPIを利用できません（{year}年{month}月: {exc}）。"
                     "取得済みの月は残します。"
                 )
-        total = sum(len(comics) for comics in result.values())
+                if not result[(year, month)] and saved.get((year, month)):
+                    result[(year, month)] = list(saved[(year, month)])
+                    print(f"  {year}年{month}月は保存済み書誌に戻します。")
+        total = sum(len(result[key]) for key in live)
         if used_rakuten:
-            print(f"楽天ブックスAPIから第1巻を合計 {total} 件取得しました。")
+            print(f"楽天ブックスAPIから第1巻を合計 {total} 件取得しました（再走査月）。")
     else:
         print("楽天アプリIDまたはaccessKeyが未設定のため、NDL/openBDにフォールバックします。")
 
     if used_rakuten:
-        for year, month in months:
+        for year, month in live:
             if result[(year, month)]:
                 continue
             print(f"楽天ブックス: {year}年{month}月が空のため、単月で再走査します。")
@@ -168,8 +210,8 @@ def fetch_months_volume_ones(
                 )
             except Exception as exc:
                 print(f"楽天ブックス: {year}年{month}月の単月走査に失敗しました（{exc}）。")
-    else:
-        for year, month in months:
+    elif live:
+        for year, month in live:
             try:
                 ndl = fetch_ndl_comics(year, month, session=session)
             except Exception as exc:
@@ -263,6 +305,8 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
 def load_catalog_json(
     path: Path,
     months: list[tuple[int, int]] | None = None,
+    *,
+    refresh_covers: bool = True,
 ) -> dict[tuple[int, int], list[Comic]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     month_set = set(months) if months else None
@@ -298,9 +342,10 @@ def load_catalog_json(
     for comics in result.values():
         for comic in comics:
             _keep_rakuten_cover_only(comic)
-    refresh_covers_from_rakuten(
-        [comic for comics in result.values() for comic in comics]
-    )
+    if refresh_covers:
+        refresh_covers_from_rakuten(
+            [comic for comics in result.values() for comic in comics]
+        )
     return result
 
 

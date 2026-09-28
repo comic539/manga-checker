@@ -10,6 +10,8 @@ class BareSearchTitleTests(unittest.TestCase):
         self.assertEqual(bare_search_title("夜は猫といっしょ(1)"), "夜は猫といっしょ")
         self.assertEqual(bare_search_title("夜は猫といっしょ（１）"), "夜は猫といっしょ")
         self.assertEqual(bare_search_title("リベンジアクト 1巻"), "リベンジアクト")
+        self.assertEqual(bare_search_title("冒険 一巻"), "冒険")
+        self.assertEqual(bare_search_title("冒険 全1巻"), "冒険")
         self.assertEqual(bare_search_title("Example Volume 1"), "Example")
         self.assertEqual(bare_search_title("Example Vol.1"), "Example")
         self.assertEqual(bare_search_title("タイトル 1"), "タイトル")

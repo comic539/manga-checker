@@ -24,3 +24,11 @@ class ReadingIndexTests(unittest.TestCase):
         self.assertIn("れん", blob)
         self.assertIn("つき", blob)
         self.assertIn("げつ", blob)
+
+    def test_single_kana_is_in_title_not_only_publisher(self) -> None:
+        blob = search_index_text("6年生なのに", publisher="スクウェア・エニックス")
+        self.assertIn("スクウェア", blob)
+
+    def test_mae_reading_is_indexed_for_long_query(self) -> None:
+        blob = search_index_text("お前がやったんだろ").replace(" ", "")
+        self.assertIn("まえ", blob)

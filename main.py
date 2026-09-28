@@ -51,6 +51,11 @@ def parse_args() -> argparse.Namespace:
         help="output/catalog_by_month.json があれば書誌取得を省略し、特典判定だけやり直す",
     )
     parser.add_argument(
+        "--refetch-past",
+        action="store_true",
+        help="保存済みの過去月も楽天から取り直す（通常は当月・未来月と未保存月だけ）",
+    )
+    parser.add_argument(
         "--csv-in",
         type=Path,
         default=None,
@@ -66,6 +71,17 @@ def parse_args() -> argparse.Namespace:
         "--insecure",
         action="store_true",
         help="SSL証明書の検証をスキップする（CERTIFICATE_VERIFY_FAILED 向け）",
+    )
+    parser.add_argument(
+        "--fetch-preview",
+        action="store_true",
+        help="個別ページ用に公式試し読みURLを検索してキャッシュする",
+    )
+    parser.add_argument(
+        "--preview-limit",
+        type=int,
+        default=0,
+        help="公式試し読み検索の最大件数（0で全件。確認時は小さく指定）",
     )
     return parser.parse_args()
 
@@ -100,12 +116,28 @@ def main() -> None:
     catalog.load(session)
 
     catalog_json = args.out_dir / "catalog_by_month.json"
-    if args.reuse_catalog and catalog_json.exists():
+    saved_catalog = (
+        load_catalog_json(catalog_json, windows, refresh_covers=False)
+        if catalog_json.exists()
+        else {}
+    )
+    if args.reuse_catalog and saved_catalog:
         print(f"保存済み書誌を読みます: {catalog_json.resolve()}（楽天/NDLの再取得はしません）")
-        comics_by_month = load_catalog_json(catalog_json, windows)
+        comics_by_month = saved_catalog
         write_catalog_json(catalog_json, comics_by_month)
     else:
-        comics_by_month = fetch_months_volume_ones(windows, extra_csv=args.csv_in, session=session)
+        if args.refetch_past:
+            print("過去月も含めて書誌を取り直します（--refetch-past）。")
+        else:
+            print("書誌: 過去月は保存済みがあれば再利用し、当月・未来月だけ楽天を走査します。")
+        comics_by_month = fetch_months_volume_ones(
+            windows,
+            extra_csv=args.csv_in,
+            session=session,
+            saved=saved_catalog,
+            today=date.today(),
+            refetch_past=args.refetch_past,
+        )
         args.out_dir.mkdir(parents=True, exist_ok=True)
         write_catalog_json(catalog_json, comics_by_month)
 
@@ -167,6 +199,11 @@ def main() -> None:
         heading,
         month_panels=month_panels,
         active_period=active_period,
+        book_dir=Path("books"),
+        sitemap_path=Path("sitemap.xml"),
+        preview_cache_path=args.out_dir / "preview_urls.json",
+        fetch_preview=args.fetch_preview,
+        preview_limit=args.preview_limit,
     )
     if not args.no_index and html_path.resolve() != index_path.resolve():
         index_path.write_bytes(html_path.read_bytes())
@@ -175,6 +212,8 @@ def main() -> None:
     print(f"  CSV : {csv_path.resolve()}")
     print(f"  HTML: {html_path.resolve()}")
     print(f"  Pages: {index_path.resolve()}")
+    print(f"  Books: {Path('books').resolve()}")
+    print(f"  Sitemap: {Path('sitemap.xml').resolve()}")
     print("HTMLをブラウザで開くと、月タブと各書店の検索リンクから特典を確認できます。")
 
 

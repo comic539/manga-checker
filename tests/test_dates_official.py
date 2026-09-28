@@ -30,6 +30,8 @@ class DateFormatTests(unittest.TestCase):
         self.assertTrue(is_unreleased("2099-12-31", today=date(2026, 9, 26)))
         self.assertFalse(is_unreleased("2026-06-04", today=date(2026, 9, 26)))
         self.assertTrue(is_unreleased("2026-10", today=date(2026, 9, 26)))
+        self.assertFalse(is_unreleased("2026-09-28", today=date(2026, 9, 28)))
+        self.assertTrue(is_unreleased("2026-09-29", today=date(2026, 9, 28)))
 
     def test_iter_months_four_from_september(self) -> None:
         self.assertEqual(

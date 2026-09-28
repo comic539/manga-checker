@@ -11,6 +11,7 @@ from manga_checker.privilege import evaluate_detail_privilege, pick_ranked_detai
 from manga_checker.title_match import listing_matches_work
 
 _PD_PATH = re.compile(r"/pd/(\d+)/?", re.I)
+_PN_PATH = re.compile(r"/pn/[^/]+/(\d+)/?", re.I)
 _PRODUCT_ID = re.compile(r"(?:[?&]product_id=)(\d+)", re.I)
 _DETAIL_PATH = re.compile(r"/products/detail\.php", re.I)
 
@@ -23,7 +24,7 @@ def first_animate_detail_url(
     author: str = "",
     allow_first: bool = False,
 ) -> str:
-    """検索結果から商品詳細 URL（/pd/ または product_id）を返す。"""
+    """検索結果から商品詳細 URL（/pd/・/pn/ または product_id）を返す。"""
     soup = BeautifulSoup(html or "", "html.parser")
     base = page_url or "https://www.animate-onlineshop.jp/"
     ranked: list[tuple[int, str]] = []
@@ -50,6 +51,11 @@ def first_animate_detail_url(
         if abs_url not in seen:
             seen.add(abs_url)
             ranked.append((0, abs_url))
+    for match in _PN_PATH.finditer(html or ""):
+        abs_url = f"https://www.animate-onlineshop.jp/pd/{match.group(1)}/"
+        if abs_url not in seen:
+            seen.add(abs_url)
+            ranked.append((0, abs_url))
     for tag in soup.find_all(attrs={"data-product_id": True}):
         pid = str(tag.get("data-product_id") or "")
         if pid.isdigit():
@@ -71,6 +77,9 @@ def _animate_detail_url(href: str, base: str) -> str:
     pd = _PD_PATH.search(abs_url)
     if pd:
         return f"https://www.animate-onlineshop.jp/pd/{pd.group(1)}/"
+    pn = _PN_PATH.search(abs_url)
+    if pn:
+        return f"https://www.animate-onlineshop.jp/pd/{pn.group(1)}/"
     parsed = urlparse(abs_url)
     query = parse_qs(parsed.query)
     product_id = (query.get("product_id") or [""])[0]

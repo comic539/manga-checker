@@ -468,6 +468,24 @@ class MelonDetailTests(unittest.TestCase):
         )
         self.assertEqual(url, "https://www.animate-onlineshop.jp/pd/111/")
 
+    def test_pn_url_is_accepted(self) -> None:
+        from manga_checker.animate import first_animate_detail_url
+
+        html = """
+        <ul class="item_list">
+          <li class="item">
+            <a href="/pn/【コミック】ややこしさんはややこしい(1)/3560567/">ややこしさんはややこしい(1)</a>
+          </li>
+        </ul>
+        """
+        url = first_animate_detail_url(
+            html,
+            "https://www.animate-onlineshop.jp/products/list.php",
+            "ややこしさんはややこしい",
+            isbn="9784091543301",
+        )
+        self.assertEqual(url, "https://www.animate-onlineshop.jp/pd/3560567/")
+
     def test_product_id_query_is_accepted(self) -> None:
         from manga_checker.animate import first_animate_detail_url
 

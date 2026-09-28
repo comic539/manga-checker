@@ -7,7 +7,12 @@ import html
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from manga_checker.dates import format_release_date, format_year_month, year_month_from_pubdate
+from manga_checker.dates import (
+    format_release_date,
+    format_year_month,
+    parse_release_date,
+    year_month_from_pubdate,
+)
 from manga_checker.links import amazon_url, mercari_url, rakuten_url
 from manga_checker.models import Comic, ComicReport, StoreCheck
 from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
@@ -20,8 +25,22 @@ from manga_checker.publishers import (
 from manga_checker.readings import search_index_text
 from manga_checker.stores import STORES
 
-SITE_TITLE = "新刊コミック第１巻　書店特典チェック"
-ASSET_VER = "mercari4"
+SITE_NAME = "イチコミ特典＋"
+SITE_TAGLINE = "新刊コミック第1巻 書店特典チェック"
+SITE_TITLE = SITE_NAME
+PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
+LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
+SITE_BASE = "https://comic539.github.io/manga-checker"
+ASSET_VER = "brand16"
+INTRO_HEADING = "【イチコミ特典＋の説明】"
+INTRO_NOTES = [
+    "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
+    "『未確認』の表示は「取り扱いなし」「情報収集エラー」によって表示されます",
+    "特典があるのに『未確認』『特典なし』となる場合がございます。",
+    "特典の配布状況の最終確認は各書店の公式商品ページにてご確認ください。",
+    "現在月から前後３カ月の情報を掲載しております",
+    "当サイトはアフィリエイト広告(PR)を利用しています。",
+]
 
 _STATUS_CLASS = {
     STATUS_YES: "yes",
@@ -94,6 +113,12 @@ def write_html(
     *,
     month_panels: list[tuple[int, int, list[ComicReport]]] | None = None,
     active_period: tuple[int, int] | None = None,
+    book_dir: Path | None = None,
+    sitemap_path: Path | None = None,
+    site_base: str | None = None,
+    preview_cache_path: Path | None = None,
+    fetch_preview: bool = False,
+    preview_limit: int = 0,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not month_panels:
@@ -176,17 +201,7 @@ def write_html(
         for store in STORES
         if store.privilege_index_url
     )
-    summary = (
-        "新タイトルの【第1巻】の発売日のみにスポットを当て、"
-        "各書店の限定特典情報をまとめたチェッカーサイトです。"
-        "各月は出版社優先順 → 発売日順です。"
-    )
-    disclaimer = (
-        "各書店の表記ゆれや仕様変更により、自動検知に不安定な部分"
-        "（特典があるのに『未確認』となる等）が生じる場合がございます。"
-        "ご不便をおかけしますが、特典の有無や配布状況の最終確認は"
-        "各書店の公式商品ページにてご確認ください。"
-    )
+    summary = INTRO_NOTES[0]
     path.write_text(
         _html_document(
             heading,
@@ -197,10 +212,23 @@ def write_html(
             rakuten_credit=_uses_rakuten(all_reports),
             tabs_html=tabs_html,
             summary=summary,
-            disclaimer=disclaimer,
         ),
         encoding="utf-8",
     )
+    if book_dir is not None or sitemap_path is not None:
+        from manga_checker.book_pages import write_book_pages, write_sitemap
+
+        base = site_base or SITE_BASE
+        if book_dir is not None:
+            write_book_pages(
+                all_reports,
+                book_dir,
+                preview_cache_path=preview_cache_path,
+                fetch_preview=fetch_preview,
+                preview_limit=preview_limit,
+            )
+        if sitemap_path is not None:
+            write_sitemap(all_reports, sitemap_path, site_base=base)
 
 
 def _sorted_reports(reports: list[ComicReport]) -> list[ComicReport]:
@@ -267,12 +295,10 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         '<div class="ext-links">'
         f'<a class="ext amazon" href="{html.escape(amazon)}" target="_blank" '
         'rel="noopener noreferrer"><span class="mark" aria-hidden="true">a</span>Amazon</a>'
-        '<div class="ext-stack">'
         f'<a class="ext rakuten" href="{html.escape(rakuten)}" target="_blank" '
         'rel="noopener noreferrer"><span class="mark" aria-hidden="true">R</span>楽天ブックス</a>'
         f'<a class="ext mercari" href="{html.escape(mercari)}" target="_blank" '
         'rel="noopener noreferrer"><span class="mark" aria-hidden="true">m</span>mercari</a>'
-        "</div>"
         "</div>"
     )
     search_blob = html.escape(
@@ -285,30 +311,53 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         ),
         quote=True,
     )
+    from manga_checker.book_pages import book_href, isbn_slug
+
+    href = book_href(comic.isbn)
+    isbn_digits = isbn_slug(comic.isbn)
+    fav_btn = _fav_button_html(isbn_digits)
+    title_html = html.escape(comic.display_title)
+    if href:
+        title_html = (
+            f'<a class="title-link" href="{html.escape(href, quote=True)}">{title_html}</a>'
+        )
+        cover = (
+            f'<a class="cover-link" href="{html.escape(href, quote=True)}">{cover}</a>'
+        )
+    parsed = parse_release_date(comic.pubdate)
+    pub_iso = parsed.isoformat() if parsed else ""
     cover_attr = html.escape(_rakuten_cover_url(comic), quote=True)
     return (
         f'<article class="card" id="comic-card-{card_id}" data-card-id="{card_id}" '
+        f'data-isbn="{html.escape(isbn_digits, quote=True)}" '
         f'data-search="{search_blob}" '
         f'data-cover="{cover_attr}" '
         f'data-title="{html.escape(comic.display_title, quote=True)}" '
+        f'data-author="{html.escape(comic.author or "", quote=True)}" '
+        f'data-kana="{html.escape(" ".join(p for p in (comic.title_kana, comic.author_kana) if p), quote=True)}" '
         f'data-publisher="{html.escape(comic.publisher or "出版社未登録", quote=True)}" '
-        f'data-date="{release}" data-release-month="{release_month_attr}">'
+        f'data-date="{release}" data-release-month="{release_month_attr}" '
+        f'data-pubdate="{html.escape(pub_iso, quote=True)}">'
         '<div class="cover-col">'
         f"{cover}"
         f"{credit}"
         "</div>"
         '<div class="card-body">'
+        '<div class="date-row">'
         f'<p class="date-chip">{release}</p>'
-        '<div class="title-row">'
-        f"<h3>{html.escape(comic.display_title)}</h3>"
         f'<button type="button" class="copy-title" data-title="{html.escape(comic.display_title, quote=True)}">📋 コピー</button>'
+        "</div>"
+        '<div class="title-row">'
+        f"<h3>{title_html}</h3>"
         "</div>"
         f"{ext}"
         f'<p class="meta">{author}</p>'
         f'<p class="meta">{publisher}</p>'
         f'<p class="isbn">{isbn}</p>'
         f'<div class="badges">{badges}</div>'
-        "</div></article>"
+        "</div>"
+        f"{fav_btn}"
+        "</article>"
     )
 
 
@@ -356,6 +405,25 @@ def _cover_html(comic: Comic) -> str:
     )
 
 
+_HEART_SVG = (
+    '<svg class="fav-heart" viewBox="0 0 32 32" aria-hidden="true">'
+    '<path d="M16 27.2S4.8 19.6 4.8 12.7C4.8 8.6 8 5.8 11.8 5.8c2.2 0 3.8 1.1 4.2 2.6'
+    "C16.4 6.9 18 5.8 20.2 5.8 24 5.8 27.2 8.6 27.2 12.7 27.2 19.6 16 27.2 16 27.2z\"/>"
+    "</svg>"
+)
+
+
+def _fav_button_html(isbn_digits: str) -> str:
+    slug = "".join(ch for ch in (isbn_digits or "") if ch.isdigit())
+    if not slug:
+        return ""
+    return (
+        f'<button type="button" class="fav-btn" data-isbn="{html.escape(slug, quote=True)}" '
+        'aria-pressed="false" aria-label="お気に入りに追加">'
+        f"{_HEART_SVG}</button>"
+    )
+
+
 def _badge_html(check: StoreCheck) -> str:
     css = _STATUS_CLASS.get(check.status, "todo")
     title = html.escape(check.detail)
@@ -377,7 +445,6 @@ def _html_document(
     rakuten_credit: bool = False,
     tabs_html: str = "",
     summary: str = "",
-    disclaimer: str = "",
 ) -> str:
     page_size = 50
     if total <= 0:
@@ -387,31 +454,31 @@ def _html_document(
     else:
         initial_hit = f"{total}件中 1〜{page_size}件表示"
     if not summary:
-        summary = (
-            "新タイトルの【第1巻】の発売日のみにスポットを当て、"
-            "各書店の限定特典情報をまとめたチェッカーサイトです。"
-            "各月は出版社優先順 → 発売日順です。"
-        )
-    if not disclaimer:
-        disclaimer = (
-            "各書店の表記ゆれや仕様変更により、自動検知に不安定な部分"
-            "（特典があるのに『未確認』となる等）が生じる場合がございます。"
-            "ご不便をおかけしますが、特典の有無や配布状況の最終確認は"
-            "各書店の公式商品ページにてご確認ください。"
-        )
+        summary = INTRO_NOTES[0]
+    intro_notes = "".join(f"<li>{html.escape(note)}</li>" for note in INTRO_NOTES)
     return f"""<!DOCTYPE html>
 <html lang="ja" data-build="{ASSET_VER}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-store">
-  <title>{html.escape(heading)}</title>
+  <title>{html.escape(PAGE_TITLE)}</title>
+  <meta name="description" content="{html.escape(SITE_NAME + '｜' + SITE_TAGLINE)}">
+  <meta property="og:site_name" content="{html.escape(SITE_NAME)}">
+  <meta property="og:title" content="{html.escape(PAGE_TITLE)}">
+  <meta property="og:description" content="{html.escape(summary or SITE_TAGLINE)}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{html.escape(SITE_BASE)}/">
+  <meta property="og:image" content="{html.escape(SITE_BASE)}/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{html.escape(PAGE_TITLE)}">
+  <meta name="twitter:image" content="{html.escape(SITE_BASE)}/logo.png">
   <link rel="icon" type="image/png" href="icon-3.png?v={ASSET_VER}">
   <link rel="shortcut icon" href="favicon.ico?v={ASSET_VER}">
   <style>
     :root {{
-      --bg: #efe7dc;
-      --paper: #fffaf3;
+      --bg: #ffffff;
+      --paper: #f2f2f2;
       --ink: #2a211c;
       --muted: #7a6f66;
       --accent: #c45c26;
@@ -426,31 +493,72 @@ def _html_document(
     html, body {{
       width: 100%;
       max-width: 100%;
-      overflow-x: hidden;
+      overflow-x: clip;
       box-sizing: border-box;
     }}
     body {{
       margin: 0;
       font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
-      background:
-        radial-gradient(circle at top left, #f7efe3, transparent 28%),
-        var(--bg);
+      background: #fff;
       color: var(--ink);
     }}
     header {{
-      padding: 32px 24px 12px;
+      padding: 0;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      overflow: visible;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 40;
+    }}
+    .site-top {{
+      position: sticky;
+      top: 0;
+      z-index: 300;
+      background: #fff;
+      border-bottom: 1px solid #ececec;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }}
+    .site-top-inner {{
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      overflow-x: hidden;
+      padding: 8px 24px;
       box-sizing: border-box;
-      position: relative;
-      z-index: 5;
+    }}
+    .header-actions {{
+      align-self: flex-start;
+      margin-top: 8px;
+    }}
+    .site-intro {{
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 12px 24px 12px;
+      box-sizing: border-box;
     }}
     h1 {{
       margin: 0 0 8px;
       font-size: 1.6rem;
       letter-spacing: 0.04em;
+    }}
+    .logo-link {{
+      display: block;
+      flex: 0 0 220px;
+      width: 220px;
+      max-width: 100%;
+      margin: 0;
+    }}
+    .site-logo {{
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
     }}
     .kicker {{
       color: var(--accent);
@@ -458,6 +566,24 @@ def _html_document(
       font-size: 0.8rem;
       letter-spacing: 0.18em;
       margin: 0 0 6px;
+    }}
+    .intro-heading {{
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      font-weight: 800;
+    }}
+    .intro-notes {{
+      margin: 0 0 12px;
+      padding: 0 0 0 1.25em;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      max-width: 46rem;
+    }}
+    .intro-notes li {{
+      margin: 0 0 4px;
     }}
     .summary, .legend, .indexes, .search-hit {{
       color: var(--muted);
@@ -469,7 +595,14 @@ def _html_document(
       font-size: 0.82rem;
       line-height: 1.6;
       max-width: 46rem;
-      margin: 8px 0 10px;
+      margin: 8px 0 6px;
+    }}
+    .affiliate-notice {{
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      max-width: 46rem;
+      margin: 0 0 10px;
     }}
     .month-tabs {{
       display: flex;
@@ -563,17 +696,22 @@ def _html_document(
     }}
     .search-bar {{
       display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
+      flex: 1 1 auto;
+      flex-wrap: nowrap;
+      align-items: flex-end;
       gap: 10px 16px;
-      margin: 14px 0 8px;
+      margin: 0;
+      min-width: 0;
     }}
     .search-cluster {{
       display: flex;
-      align-items: flex-start;
+      align-items: flex-end;
       gap: 8px;
-      flex: 1 1 320px;
-      max-width: 560px;
+      flex: 1 1 auto;
+      max-width: 720px;
+      min-width: 0;
+      position: relative;
+      z-index: 50;
     }}
     .search-wrap {{
       position: relative;
@@ -583,9 +721,9 @@ def _html_document(
     .search-wrap input {{
       width: 100%;
       padding: 10px 36px 10px 12px;
-      border: 1px solid #e2d5c4;
+      border: 1px solid #ddd;
       border-radius: 10px;
-      background: #fffaf3;
+      background: #fff;
       color: var(--ink);
       font-size: 0.95rem;
       font-family: inherit;
@@ -597,7 +735,8 @@ def _html_document(
     .search-clear {{
       position: absolute;
       right: 6px;
-      top: 10px;
+      top: 50%;
+      transform: translateY(-50%);
       width: 28px;
       height: 28px;
       border: 0;
@@ -616,22 +755,23 @@ def _html_document(
       flex: 0 0 auto;
       width: 44px;
       height: 44px;
+      padding: 0;
       border: 0;
-      border-radius: 10px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 1.15rem;
+      border-radius: 0;
+      background: transparent;
       cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }}
+    .search-go img {{
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }}
     .search-go:hover {{
-      filter: brightness(1.05);
+      transform: scale(1.06);
     }}
     .search-suggest {{
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(100% + 4px);
+      position: fixed;
       margin: 0;
       padding: 6px 0;
       list-style: none;
@@ -639,8 +779,8 @@ def _html_document(
       border: 1px solid #e2d5c4;
       border-radius: 12px;
       box-shadow: 0 12px 28px rgba(80, 50, 20, 0.16);
-      z-index: 20;
-      max-height: 420px;
+      z-index: 4000;
+      max-height: min(360px, 50vh);
       overflow: auto;
     }}
     .search-suggest[hidden] {{
@@ -689,7 +829,240 @@ def _html_document(
     }}
     .search-hit {{
       font-weight: 700;
+      margin: 0;
+      white-space: nowrap;
+    }}
+    .fav-list-btn {{
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: #fff0f6;
+      color: #c2185b;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }}
+    .fav-list-btn:hover {{
+      background: #ffd6ea;
+    }}
+    .fav-list-btn.is-on {{
+      background: #ff2eb8;
+      color: #fff;
+    }}
+    .header-actions {{
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }}
+    .cal-btn {{
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: #eef6ff;
+      color: #1565c0;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }}
+    .cal-btn:hover {{
+      background: #d6ebff;
+    }}
+    .cal-modal {{
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 72px 16px 24px;
+      background: rgba(42, 33, 28, 0.35);
+    }}
+    .cal-modal[hidden] {{ display: none !important; }}
+    .cal-dialog {{
+      width: min(560px, 100%);
+      max-height: calc(100vh - 96px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 16px 40px rgba(80, 50, 20, 0.22);
+      padding: 16px 16px 20px;
+    }}
+    .cal-head {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+    }}
+    .cal-head h2 {{
+      flex: 1 1 auto;
+      margin: 0;
+      text-align: center;
+      font-size: 1.05rem;
+    }}
+    .cal-nav,
+    .cal-close {{
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 8px;
+      background: #f3e6d6;
+      color: var(--ink);
+      font-size: 1.1rem;
+      cursor: pointer;
+    }}
+    .cal-week,
+    .cal-grid {{
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }}
+    .cal-week span {{
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--muted);
+      padding: 4px 0;
+    }}
+    .cal-cell {{
+      min-height: 54px;
+      border: 0;
+      border-radius: 10px;
+      background: #f7f4f0;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+      padding: 4px 2px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }}
+    .cal-cell[disabled] {{
+      background: transparent;
+      cursor: default;
+    }}
+    .cal-cell.is-empty {{ visibility: hidden; }}
+    .cal-cell.is-on {{
+      outline: 2px solid var(--accent);
+      background: #fff4ea;
+    }}
+    .cal-num {{ font-size: 0.82rem; font-weight: 700; }}
+    .cal-count {{
+      min-width: 1.6em;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #c45c26;
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }}
+    .cal-cell.is-zero .cal-count {{
+      display: none;
+    }}
+    .cal-day-list {{
+      margin: 14px 0 0;
+      padding: 12px 0 0;
+      border-top: 1px solid #ececec;
+    }}
+    .cal-day-list h3 {{
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+    }}
+    .cal-day-list ul {{
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }}
+    .cal-day-item {{
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 10px;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+    }}
+    .cal-day-item img,
+    .cal-day-item .ph {{
+      width: 40px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #d9cfc3;
+    }}
+    .cal-day-item .ph {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      color: #8a7f75;
+    }}
+    .cal-day-item strong {{
+      display: block;
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }}
+    .cal-day-item span {{
+      color: var(--muted);
+      font-size: 0.72rem;
+    }}
+    .day-filter-bar {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin: 8px 0 0;
+      font-size: 0.86rem;
+    }}
+    .day-filter-bar[hidden] {{ display: none !important; }}
+    .day-filter-bar button {{
+      border: 0;
+      border-radius: 999px;
+      background: #f3e6d6;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      cursor: pointer;
+    }}
+    .fav-btn {{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }}
+    .fav-heart {{
+      width: 30px;
+      height: 30px;
+      fill: #fff;
+      stroke: none;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.12)) drop-shadow(0 3px 8px rgba(0,0,0,0.18));
+    }}
+    .fav-btn.is-on .fav-heart {{
+      fill: #ff2eb8;
+      filter: drop-shadow(0 1px 2px rgba(255,46,184,0.25));
     }}
     .card.focus-flash {{
       outline: 3px solid var(--accent);
@@ -736,6 +1109,7 @@ def _html_document(
       grid-template-columns: 110px 1fr;
       gap: 12px;
       min-width: 340px;
+      position: relative;
       background: var(--paper);
       border-radius: 16px;
       padding: 12px;
@@ -779,6 +1153,20 @@ def _html_document(
       align-items: flex-start;
       gap: 8px;
       margin: 0 0 6px;
+      padding-right: 36px;
+    }}
+    .title-link {{
+      color: inherit;
+      text-decoration: none;
+    }}
+    .title-link:hover {{
+      color: var(--accent);
+      text-decoration: underline;
+    }}
+    .cover-link {{
+      display: block;
+      color: inherit;
+      text-decoration: none;
     }}
     .copy-title {{
       flex: 0 0 auto;
@@ -801,9 +1189,16 @@ def _html_document(
     .copy-title.done {{
       color: var(--yes);
     }}
+    .date-row {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 6px;
+      padding-right: 36px;
+    }}
     .date-chip {{
       display: inline-block;
-      margin: 0 0 6px;
+      margin: 0;
       padding: 2px 8px;
       border-radius: 999px;
       background: #f3e6d6;
@@ -842,29 +1237,20 @@ def _html_document(
     }}
     .ext-links {{
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 6px;
       margin: 0 0 8px;
-      align-items: start;
-    }}
-    .ext-stack {{
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 0;
-    }}
-    .ext-stack .ext {{
-      width: 100%;
-      box-sizing: border-box;
+      align-items: stretch;
     }}
     .ext {{
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      font-size: 0.72rem;
+      gap: 6px;
+      min-height: 44px;
+      padding: 12px 6px;
+      border-radius: 10px;
+      font-size: 0.78rem;
       font-weight: 800;
       letter-spacing: 0.01em;
       text-decoration: none;
@@ -877,46 +1263,28 @@ def _html_document(
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 1.15em;
-      height: 1.15em;
+      width: 1.2em;
+      height: 1.2em;
       border-radius: 50%;
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       font-weight: 900;
       flex: 0 0 auto;
     }}
     .ext.amazon {{
-      background: #232f3e;
+      background: #1877f2;
       color: #ff9900;
     }}
-    .ext.amazon .mark {{
-      background: #ff9900;
-      color: #232f3e;
-    }}
+    .ext.amazon .mark {{ background: #ff9900; color: #1877f2; }}
     .ext.rakuten {{
-      background: #bf0000;
+      background: #c41e3a;
       color: #fff;
     }}
-    .ext.rakuten .mark {{
-      background: #fff;
-      color: #bf0000;
-      border-radius: 3px;
-    }}
+    .ext.rakuten .mark {{ background: #fff; color: #c41e3a; }}
     .ext.mercari {{
       background: #4ba7ee;
-      color: #ffffff;
-      font-weight: 800;
-      justify-content: center;
-      align-items: center;
-      border-radius: 10px;
-      letter-spacing: 0.02em;
+      color: #ff0211;
     }}
-    .ext.mercari .mark {{
-      background: #ff0211;
-      color: #ffffff;
-      border-radius: 4px;
-      font-family: "Nunito", "Varela Round", "Segoe UI", "Trebuchet MS", sans-serif;
-      font-weight: 800;
-    }}
+    .ext.mercari .mark {{ background: #ff0211; color: #fff; }}
     .badges {{
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -985,7 +1353,9 @@ def _html_document(
       font-weight: 700;
     }}
     .ad-slot {{
+      position: relative;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
       width: 100%;
@@ -998,15 +1368,61 @@ def _html_document(
       letter-spacing: 0.14em;
       border: 1px dashed #cfc4b6;
       overflow: hidden;
+      box-sizing: border-box;
     }}
-    .ad-container img,
+    .ad-slot:has(a) {{
+      background: transparent;
+      border: none;
+      color: inherit;
+    }}
+    .ad-slot > a {{
+      display: block;
+      max-width: 100%;
+      margin: 0 auto;
+    }}
     .ad-container iframe,
-    .ad-container ins {{
+    .ad-container ins,
+    .ad-slot > a img {{
+      display: block;
       max-width: 100%;
       height: auto;
+      margin: 0 auto;
+    }}
+    .ad-slot > img {{
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      max-width: 1px;
+      border: 0;
+    }}
+    .ad-header .ad-row {{
+      max-width: 640px;
+      align-items: center;
+    }}
+    .ad-header .ad-slot {{
+      width: auto;
+      max-width: 100%;
+      min-height: 50px;
     }}
     .ad-footer {{
       margin-bottom: 8px;
+    }}
+    .ad-row {{
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 728px;
+      margin: 0 auto;
+    }}
+    .ad-row .ad-slot {{
+      width: auto;
+      max-width: 100%;
+      min-height: 60px;
+      flex: 0 1 auto;
     }}
     .pager {{
       display: flex;
@@ -1110,9 +1526,19 @@ def _html_document(
       display: none !important;
     }}
     @media (max-width: 768px) {{
-      header {{ padding: 20px 12px 8px; }}
+      header {{ padding: 0; }}
+      .site-top-inner {{
+        padding: 8px 12px;
+        gap: 10px;
+      }}
+      .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
       h1 {{ font-size: 1.28rem; }}
+      .search-hit {{ display: none; }}
+      .search-wrap input {{ padding: 8px 32px 8px 10px; font-size: 0.88rem; }}
+      .search-go {{ width: 40px; height: 40px; }}
+      .fav-list-btn,
+      .cal-btn {{ font-size: 0.7rem; padding: 6px 8px; }}
       .card-grid {{
         grid-template-columns: 1fr;
         gap: 10px;
@@ -1138,45 +1564,69 @@ def _html_document(
         flex: 1 1 calc(50% - 4px);
         min-width: 0;
       }}
-      .ext {{ font-size: 0.66rem; padding: 6px 4px; }}
+      .ext {{ padding: 10px 8px; font-size: 0.82rem; }}
       .ad-slot {{ min-height: 60px; }}
+      .ad-row {{ flex-direction: column; }}
+      .logo-link,
+      .site-logo {{
+        flex: 0 0 140px;
+        width: 140px;
+        max-width: 140px;
+      }}
     }}
   </style>
 </head>
 <body>
-  <header>
-    <p class="kicker">COMIC RELEASE CALENDAR</p>
-    <h1>{html.escape(heading)}</h1>
-    <p class="summary">{html.escape(summary)}</p>
-    <p class="disclaimer">{html.escape(disclaimer)}</p>
-    <p class="legend" id="status-legend">
-      凡例:
-      <b class="yes" id="legend-yes">特典あり {counts.get(STATUS_YES, 0)}</b>
-      <b class="no" id="legend-no">通常/なし {counts.get(STATUS_NO, 0)}</b>
-      <b class="todo" id="legend-todo">未確認 {counts.get(STATUS_UNKNOWN, 0)}</b>
-    </p>
-    <nav class="index-tabs" aria-label="特典一覧">
-      <span class="index-label">特典一覧</span>
-      {index_links or "—"}
-    </nav>
-    {tabs_html}
-    <div class="search-bar">
-      <div class="search-cluster">
-        <div class="search-wrap">
-          <input id="comic-search" type="search" placeholder="タイトル・著者・出版社で検索"
-                 autocomplete="off" spellcheck="false" aria-label="作品を検索"
-                 aria-autocomplete="list" aria-controls="search-suggest">
-          <button type="button" class="search-clear" id="search-clear" aria-label="検索をクリア">×</button>
-          <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
+  <div class="site-top">
+    <div class="site-top-inner">
+      <a class="logo-link" href="./index.html">
+        <img class="site-logo" src="logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
+      </a>
+      <div class="search-bar">
+        <div class="search-cluster">
+          <div class="search-wrap">
+            <input id="comic-search" type="search" placeholder="タイトル・著者・出版社で検索"
+                   autocomplete="off" spellcheck="false" aria-label="作品を検索"
+                   aria-autocomplete="list" aria-controls="search-suggest">
+            <button type="button" class="search-clear" id="search-clear" aria-label="検索をクリア">×</button>
+            <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
+          </div>
+          <button type="button" class="search-go" id="search-go" aria-label="検索する">
+            <img src="search-icon.png?v={ASSET_VER}" alt="" width="44" height="44">
+          </button>
         </div>
-        <button type="button" class="search-go" id="search-go" aria-label="検索する">🔍</button>
+        <p class="search-hit" id="search-hit">{initial_hit}</p>
       </div>
-      <p class="search-hit" id="search-hit">{initial_hit}</p>
+      <div class="header-actions">
+        <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">📅 カレンダー</button>
+        <button type="button" class="fav-list-btn" id="fav-list-btn">お気に入り一覧</button>
+      </div>
+    </div>
+  </div>
+  <header>
+    <div class="site-intro">
+    <p class="intro-heading">{html.escape(INTRO_HEADING)}</p>
+    <ul class="intro-notes">{intro_notes}</ul>
+    {tabs_html}
+    <p class="day-filter-bar" id="day-filter-bar" hidden>
+      <span id="day-filter-label"></span>
+      <button type="button" id="day-filter-clear">この日の絞り込みを解除</button>
+    </p>
     </div>
   </header>
   <div class="ad-container ad-header">
     <p class="ad-pr">PR</p>
-    <div class="ad-slot"><!-- 上部広告スペース（728x90等） -->広告スペース</div>
+    <div class="ad-row">
+      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+5DHWDU+4RNG+5ZU29" rel="nofollow">
+<img border="0" width="120" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620325&wid=001&eno=01&mid=s00000022246001007000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4BCDBO+5DHWDU+4RNG+5ZU29" alt=""></div>
+      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+1U34XE+4Y6G+5ZEMP" rel="nofollow">
+<img border="0" width="320" height="50" alt="" src="https://www22.a8.net/svt/bgt?aid=260927714111&wid=001&eno=01&mid=s00000023092001005000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www17.a8.net/0.gif?a8mat=4BCL42+1U34XE+4Y6G+5ZEMP" alt=""></div>
+      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+5CB16A+41ZK+601S1" rel="nofollow">
+<img border="0" width="120" height="60" alt="" src="https://www29.a8.net/svt/bgt?aid=260927714323&wid=001&eno=01&mid=s00000018920001008000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4BCL42+5CB16A+41ZK+601S1" alt=""></div>
+    </div>
   </div>
   <nav class="pager pager-top" id="pager-top" aria-label="ページ送り（上部）" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
@@ -1189,7 +1639,17 @@ def _html_document(
   </main>
   <div class="ad-container ad-footer">
     <p class="ad-pr">PR</p>
-    <div class="ad-slot"><!-- 下部広告スペース -->広告スペース</div>
+    <div class="ad-row">
+      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+UD4MQ+37DC+5ZMCH" rel="nofollow">
+<img border="0" width="120" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620051&wid=001&eno=01&mid=s00000014952001006000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4BCDBO+UD4MQ+37DC+5ZMCH" alt=""></div>
+      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+3KMEQ+1892+6QEUP" rel="nofollow">
+<img border="0" width="120" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620006&wid=001&eno=01&mid=s00000005735001131000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www17.a8.net/0.gif?a8mat=4BCDBO+3KMEQ+1892+6QEUP" alt=""></div>
+      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBN+FG2VSI+4AHY+5ZU29" rel="nofollow">
+<img border="0" width="120" height="60" alt="" src="https://www21.a8.net/svt/bgt?aid=260917619934&wid=001&eno=01&mid=s00000020023001007000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www16.a8.net/0.gif?a8mat=4BCDBN+FG2VSI+4AHY+5ZU29" alt=""></div>
+    </div>
   </div>
   <nav class="pager pager-bottom" id="pager" aria-label="ページ送り" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
@@ -1197,11 +1657,23 @@ def _html_document(
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
   {"<footer class='api-credit'>Supported by Rakuten Developers</footer>" if rakuten_credit else ""}
-  <footer class="affiliate-note">このサイトはアフィリエイト広告（Amazonアソシエイト、楽天アフィリエイト、メルカリアンバサダー含む）を掲載しています。</footer>
   <button type="button" class="back-to-top" id="back-to-top" aria-label="TOPに戻る">
     <span class="back-to-top-icon" aria-hidden="true">↑</span>
     <span class="back-to-top-label">TOPに戻る</span>
   </button>
+  <div class="cal-modal" id="cal-modal" hidden>
+    <div class="cal-dialog" role="dialog" aria-modal="true" aria-labelledby="cal-title">
+      <div class="cal-head">
+        <button type="button" class="cal-nav" id="cal-prev" aria-label="前の月">‹</button>
+        <h2 id="cal-title">カレンダー</h2>
+        <button type="button" class="cal-nav" id="cal-next" aria-label="次の月">›</button>
+        <button type="button" class="cal-close" id="cal-close" aria-label="閉じる">×</button>
+      </div>
+      <div class="cal-week" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-day-list" id="cal-day-list" hidden></div>
+    </div>
+  </div>
   <script>
     document.querySelectorAll(".copy-title").forEach(function (btn) {{
       var label = "📋 コピー";
@@ -1246,8 +1718,61 @@ def _html_document(
       var cluster = input ? input.closest(".search-cluster") : null;
       var PAGE_SIZE = 50;
       var currentPage = 1;
+      var dayFilter = "";
       var monthState = {{}};
       var MAX_SUGGEST = 8;
+      var FAV_KEY = "ichikomi-favorites-v1";
+      var favMode = false;
+      var favs = {{}};
+      function loadFavs() {{
+        try {{
+          var raw = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
+          var map = {{}};
+          (Array.isArray(raw) ? raw : []).forEach(function (id) {{
+            if (id) map[String(id)] = true;
+          }});
+          return map;
+        }} catch (e) {{
+          return {{}};
+        }}
+      }}
+      function saveFavs() {{
+        try {{
+          localStorage.setItem(FAV_KEY, JSON.stringify(Object.keys(favs)));
+        }} catch (e) {{}}
+      }}
+      function isFav(isbn) {{
+        return !!(isbn && favs[isbn]);
+      }}
+      function paintFavs() {{
+        document.querySelectorAll(".fav-btn").forEach(function (btn) {{
+          var on = isFav(btn.getAttribute("data-isbn") || "");
+          btn.classList.toggle("is-on", on);
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+          btn.setAttribute("aria-label", on ? "お気に入りから外す" : "お気に入りに追加");
+        }});
+      }}
+      function setFavMode(on) {{
+        favMode = !!on;
+        document.body.classList.toggle("fav-mode", favMode);
+        var favListBtn = document.getElementById("fav-list-btn");
+        if (favListBtn) {{
+          favListBtn.classList.toggle("is-on", favMode);
+          favListBtn.textContent = favMode ? "一覧に戻る" : "お気に入り一覧";
+        }}
+        if (empty) empty.textContent = favMode ? "お気に入りはまだありません。" : "一致する作品がありません。";
+        if (!favMode) {{
+          var id = monthKey();
+          document.querySelectorAll(".month-panel").forEach(function (panel) {{
+            var onp = panel.getAttribute("data-month") === id;
+            panel.classList.toggle("is-active", onp);
+            panel.hidden = !onp;
+          }});
+        }}
+        currentPage = 1;
+        renderList();
+      }}
+      favs = loadFavs();
       function fold(s) {{
         s = String(s || "").normalize("NFKC").toLowerCase();
         var out = "";
@@ -1265,6 +1790,7 @@ def _html_document(
         return panel ? parseInt(panel.getAttribute("data-total") || "0", 10) : 0;
       }}
       function cards() {{
+        if (favMode) return allCards();
         var panel = activePanel();
         if (!panel) return [];
         var want = panel.getAttribute("data-month") || "";
@@ -1283,6 +1809,68 @@ def _html_document(
           query: input ? input.value : ""
         }};
       }}
+      var LIST_POS_KEY = "ichikomi-list-pos-v1";
+      function saveListPos(extra) {{
+        extra = extra || {{}};
+        try {{
+          sessionStorage.setItem(LIST_POS_KEY, JSON.stringify({{
+            month: monthKey(),
+            page: currentPage,
+            query: input ? input.value : "",
+            fav: favMode,
+            day: dayFilter,
+            card: extra.card || "",
+            scroll: (typeof extra.scroll === "number") ? extra.scroll : window.scrollY
+          }}));
+        }} catch (e) {{}}
+      }}
+      function loadListPos() {{
+        try {{
+          var raw = sessionStorage.getItem(LIST_POS_KEY);
+          return raw ? JSON.parse(raw) : null;
+        }} catch (e) {{
+          return null;
+        }}
+      }}
+      function applyListPos(st) {{
+        if (!st) return false;
+        if (st.fav) {{
+          favMode = true;
+          document.body.classList.toggle("fav-mode", true);
+          var favListBtn = document.getElementById("fav-list-btn");
+          if (favListBtn) {{
+            favListBtn.classList.toggle("is-on", true);
+            favListBtn.textContent = "一覧に戻る";
+          }}
+          if (empty) empty.textContent = "お気に入りはまだありません。";
+        }} else if (st.month) {{
+          document.querySelectorAll(".month-panel").forEach(function (panel) {{
+            var on = panel.getAttribute("data-month") === st.month;
+            panel.classList.toggle("is-active", on);
+            panel.hidden = !on;
+          }});
+          document.querySelectorAll(".month-tab").forEach(function (tab) {{
+            var on = tab.getAttribute("data-month") === st.month;
+            tab.classList.toggle("is-active", on);
+            tab.setAttribute("aria-selected", on ? "true" : "false");
+          }});
+        }}
+        if (input && typeof st.query === "string") input.value = st.query;
+        if (typeof st.day === "string") dayFilter = st.day;
+        currentPage = st.page || 1;
+        updateLegend();
+        updateDayBar();
+        renderList();
+        window.setTimeout(function () {{
+          var card = st.card ? document.getElementById(st.card) : null;
+          if (card && !card.hidden && card.scrollIntoView) {{
+            card.scrollIntoView({{ behavior: "auto", block: "center" }});
+          }} else if (typeof st.scroll === "number") {{
+            window.scrollTo(0, st.scroll);
+          }}
+        }}, 0);
+        return true;
+      }}
       function updateLegend() {{
         var panel = activePanel();
         if (!panel) return;
@@ -1290,11 +1878,39 @@ def _html_document(
         var no = document.getElementById("legend-no");
         var todo = document.getElementById("legend-todo");
         if (yes) yes.textContent = "特典あり " + (panel.getAttribute("data-yes") || "0");
-        if (no) no.textContent = "通常/なし " + (panel.getAttribute("data-no") || "0");
+        if (no) no.textContent = "特典なし " + (panel.getAttribute("data-no") || "0");
         if (todo) todo.textContent = "未確認 " + (panel.getAttribute("data-todo") || "0");
       }}
-      function switchMonth(id) {{
+      function allCards() {{
+        return Array.prototype.slice.call(document.querySelectorAll(".month-panel .card"));
+      }}
+      function cardMatches(card, q) {{
+        if (favMode && !isFav(card.getAttribute("data-isbn") || "")) return false;
+        if (!q) return true;
+        var title = fold(card.getAttribute("data-title") || "");
+        if (title.indexOf(q) !== -1) return true;
+        if (q.length < 3) return false;
+        var author = fold(card.getAttribute("data-author") || "");
+        var kana = fold(card.getAttribute("data-kana") || "");
+        if (author.indexOf(q) !== -1 || kana.indexOf(q) !== -1) return true;
+        return fold(card.getAttribute("data-search") || "").indexOf(q) !== -1;
+      }}
+      function matchingAllCards() {{
+        var q = fold(input && input.value);
+        if (!q && !favMode) return [];
+        return allCards().filter(function (card) {{
+          return cardMatches(card, q);
+        }});
+      }}
+      function cardMonth(card) {{
+        if (!card) return "";
+        var panel = card.closest(".month-panel");
+        return (panel && panel.getAttribute("data-month")) || card.getAttribute("data-release-month") || "";
+      }}
+      function switchMonth(id, keepQuery, keepDay) {{
+        var q = input ? input.value : "";
         saveMonthState();
+        if (!keepDay) dayFilter = "";
         document.querySelectorAll(".month-panel").forEach(function (panel) {{
           var on = panel.getAttribute("data-month") === id;
           panel.classList.toggle("is-active", on);
@@ -1306,28 +1922,57 @@ def _html_document(
           tab.setAttribute("aria-selected", on ? "true" : "false");
         }});
         var st = monthState[id] || {{ page: 1, query: "" }};
-        currentPage = st.page || 1;
-        if (input) input.value = st.query || "";
+        currentPage = keepQuery ? 1 : (st.page || 1);
+        if (input) input.value = keepQuery ? q : (st.query || "");
         updateLegend();
+        updateDayBar();
         renderList();
-        closeSuggest();
+        if (!keepQuery) closeSuggest();
       }}
       function closeSuggest() {{
         if (!suggest) return;
         suggest.hidden = true;
         suggest.innerHTML = "";
       }}
+      function placeSuggest() {{
+        if (!suggest || suggest.hidden || !input) return;
+        var r = input.getBoundingClientRect();
+        var width = Math.max(r.width, 280);
+        var left = Math.min(Math.max(8, r.left), window.innerWidth - width - 8);
+        var top = r.bottom + 4;
+        var maxH = Math.min(360, Math.max(120, window.innerHeight - top - 12));
+        suggest.style.left = left + "px";
+        suggest.style.width = width + "px";
+        suggest.style.top = top + "px";
+        suggest.style.maxHeight = maxH + "px";
+      }}
       function matchingCards() {{
         var q = fold(input && input.value);
+        var seen = {{}};
         return cards().filter(function (card) {{
-          return !q || fold(card.getAttribute("data-search") || "").indexOf(q) !== -1;
+          if (dayFilter && (card.getAttribute("data-pubdate") || "") !== dayFilter) return false;
+          if (!cardMatches(card, q)) return false;
+          if (favMode) {{
+            var isbn = card.getAttribute("data-isbn") || "";
+            if (isbn && seen[isbn]) return false;
+            if (isbn) seen[isbn] = true;
+          }}
+          return true;
         }});
       }}
       function applyFilter() {{
+        dayFilter = "";
+        updateDayBar();
+        var globalMatches = matchingAllCards();
+        if (!favMode && globalMatches.length) {{
+          var month = cardMonth(globalMatches[0]);
+          if (month && month !== monthKey()) switchMonth(month, true);
+        }}
         currentPage = 1;
         renderList();
         saveMonthState();
         closeSuggest();
+        if (globalMatches.length === 1) focusCard(globalMatches[0].id);
       }}
       function renderList() {{
         var matched = matchingCards();
@@ -1341,8 +1986,13 @@ def _html_document(
         visible.forEach(function (card) {{ visibleSet[card.id] = true; }});
         var matchSet = {{}};
         matched.forEach(function (card) {{ matchSet[card.id] = true; }});
-        var panel = activePanel();
-        if (panel) {{
+        var panelList = favMode
+          ? Array.prototype.slice.call(document.querySelectorAll(".month-panel"))
+          : [activePanel()].filter(Boolean);
+        if (favMode) {{
+          panelList.forEach(function (panel) {{ panel.hidden = false; }});
+        }}
+        panelList.forEach(function (panel) {{
           panel.querySelectorAll(".day-block").forEach(function (sec) {{
           var nMatch = 0;
           var nVis = 0;
@@ -1356,12 +2006,16 @@ def _html_document(
           var countEl = sec.querySelector(".count");
           if (countEl) countEl.textContent = nMatch + "作品";
           }});
-        }}
-        var total = panelTotal();
+        }});
+        var total = favMode ? matched.length : panelTotal();
         var shownFrom = matched.length ? start + 1 : 0;
         var shownTo = start + visible.length;
         if (hit) {{
-          if (!matched.length) hit.textContent = total + "件中 0件表示";
+          if (favMode) {{
+            if (!matched.length) hit.textContent = "お気に入り 0件";
+            else if (matched.length <= PAGE_SIZE) hit.textContent = "お気に入り " + matched.length + "件";
+            else hit.textContent = "お気に入り " + shownFrom + "〜" + shownTo + " / " + matched.length + "件";
+          }} else if (!matched.length) hit.textContent = total + "件中 0件表示";
           else if (matched.length <= PAGE_SIZE) hit.textContent = total + "件中 " + matched.length + "件表示";
           else hit.textContent = matched.length + "件中 " + shownFrom + "〜" + shownTo + "件表示";
         }}
@@ -1398,6 +2052,7 @@ def _html_document(
         currentPage = page;
         renderList();
         saveMonthState();
+        saveListPos();
         var topPager = document.getElementById("pager-top") || document.querySelector("main");
         if (topPager && topPager.scrollIntoView) topPager.scrollIntoView({{ behavior: "smooth", block: "start" }});
       }}
@@ -1408,10 +2063,14 @@ def _html_document(
           closeSuggest();
           return;
         }}
-        var matches = matchingCards().slice(0, MAX_SUGGEST);
+        var matches = matchingAllCards().slice(0, MAX_SUGGEST);
         if (!matches.length) {{
           closeSuggest();
           return;
+        }}
+        if (!favMode) {{
+          var firstMonth = cardMonth(matches[0]);
+          if (firstMonth && firstMonth !== monthKey()) switchMonth(firstMonth, true);
         }}
         suggest.innerHTML = matches.map(function (card) {{
           var id = card.id || "";
@@ -1426,13 +2085,16 @@ def _html_document(
           var card = matches[i];
           btn.querySelector(".suggest-title").textContent = card.getAttribute("data-title") || "";
           btn.querySelector(".suggest-meta").textContent =
-            (card.getAttribute("data-publisher") || "") + " · " + (card.getAttribute("data-date") || "");
+            (card.getAttribute("data-date") || "") + " · " + (card.getAttribute("data-publisher") || "");
         }});
         suggest.hidden = false;
+        placeSuggest();
       }}
       function focusCard(id) {{
         var card = document.getElementById(id);
         if (!card) return;
+        var month = cardMonth(card);
+        if (month && month !== monthKey()) switchMonth(month, true);
         var matched = matchingCards();
         var idx = matched.indexOf(card);
         if (idx < 0) idx = 0;
@@ -1440,8 +2102,8 @@ def _html_document(
         renderList();
         closeSuggest();
         card.classList.remove("focus-flash");
-        card.scrollIntoView({{ behavior: "smooth", block: "center" }});
         window.setTimeout(function () {{
+          card.scrollIntoView({{ behavior: "smooth", block: "center" }});
           card.classList.add("focus-flash");
         }}, 80);
         window.setTimeout(function () {{
@@ -1468,7 +2130,9 @@ def _html_document(
       document.querySelectorAll(".month-tab").forEach(function (tab) {{
         tab.addEventListener("click", function () {{
           var id = tab.getAttribute("data-month") || "";
-          if (!id || id === monthKey()) return;
+          if (!id) return;
+          if (favMode) setFavMode(false);
+          if (id === monthKey()) return;
           switchMonth(id);
         }});
       }});
@@ -1485,10 +2149,13 @@ def _html_document(
         }});
       }}
       if (!input) {{
+        paintFavs();
         renderList();
         return;
       }}
       input.addEventListener("input", updateSuggest);
+      window.addEventListener("resize", placeSuggest);
+      window.addEventListener("scroll", placeSuggest, true);
       input.addEventListener("keydown", function (ev) {{
         if (ev.key === "Enter") {{
           ev.preventDefault();
@@ -1513,11 +2180,239 @@ def _html_document(
           applyFilter();
         }});
       }}
+      function updateDayBar() {{
+        var bar = document.getElementById("day-filter-bar");
+        var lab = document.getElementById("day-filter-label");
+        if (!bar) return;
+        if (!dayFilter) {{
+          bar.hidden = true;
+          return;
+        }}
+        var parts = dayFilter.split("-");
+        var n = allCards().filter(function (c) {{
+          return (c.getAttribute("data-pubdate") || "") === dayFilter;
+        }}).length;
+        if (lab) {{
+          lab.textContent = Number(parts[1]) + "月" + Number(parts[2]) + "日 発売 " + n + "冊";
+        }}
+        bar.hidden = false;
+      }}
+      function bookHref(card) {{
+        var a = card.querySelector("a.title-link, a.cover-link");
+        return a ? a.getAttribute("href") || "" : "";
+      }}
+      function cardsByDate() {{
+        var map = {{}};
+        allCards().forEach(function (card) {{
+          var d = card.getAttribute("data-pubdate") || "";
+          if (!d) return;
+          if (!map[d]) map[d] = [];
+          map[d].push(card);
+        }});
+        return map;
+      }}
+      function availableMonths() {{
+        return Array.prototype.slice.call(document.querySelectorAll(".month-tab[data-month]")).map(function (tab) {{
+          return tab.getAttribute("data-month") || "";
+        }}).filter(Boolean);
+      }}
+      var calYear = 0;
+      var calMonth = 0;
+      function openCalendar() {{
+        var modal = document.getElementById("cal-modal");
+        if (!modal) return;
+        var key = (dayFilter && dayFilter.slice(0, 7)) || monthKey();
+        var parts = (key || "").split("-");
+        calYear = parseInt(parts[0], 10) || new Date().getFullYear();
+        calMonth = parseInt(parts[1], 10) || (new Date().getMonth() + 1);
+        renderCalendar();
+        if (dayFilter) renderCalDayList(dayFilter);
+        else {{
+          var list = document.getElementById("cal-day-list");
+          if (list) {{ list.hidden = true; list.innerHTML = ""; }}
+        }}
+        modal.hidden = false;
+      }}
+      function closeCalendar() {{
+        var modal = document.getElementById("cal-modal");
+        if (modal) modal.hidden = true;
+      }}
+      function pad2(n) {{
+        return (n < 10 ? "0" : "") + n;
+      }}
+      function shiftCalMonth(delta) {{
+        calMonth += delta;
+        if (calMonth < 1) {{ calMonth = 12; calYear -= 1; }}
+        if (calMonth > 12) {{ calMonth = 1; calYear += 1; }}
+        var months = availableMonths();
+        var key = calYear + "-" + pad2(calMonth);
+        if (months.length) {{
+          if (delta > 0 && key > months[months.length - 1]) {{
+            calYear = parseInt(months[months.length - 1].slice(0, 4), 10);
+            calMonth = parseInt(months[months.length - 1].slice(5), 10);
+          }}
+          if (delta < 0 && key < months[0]) {{
+            calYear = parseInt(months[0].slice(0, 4), 10);
+            calMonth = parseInt(months[0].slice(5), 10);
+          }}
+        }}
+        var list = document.getElementById("cal-day-list");
+        if (list) {{ list.hidden = true; list.innerHTML = ""; }}
+        renderCalendar();
+      }}
+      function renderCalendar() {{
+        var title = document.getElementById("cal-title");
+        var grid = document.getElementById("cal-grid");
+        if (title) title.textContent = calYear + "年" + calMonth + "月";
+        if (!grid) return;
+        var map = cardsByDate();
+        var first = new Date(calYear, calMonth - 1, 1);
+        var start = (first.getDay() + 6) % 7;
+        var days = new Date(calYear, calMonth, 0).getDate();
+        var html = "";
+        var i;
+        for (i = 0; i < start; i++) html += '<button type="button" class="cal-cell is-empty" disabled></button>';
+        for (var d = 1; d <= days; d++) {{
+          var iso = calYear + "-" + pad2(calMonth) + "-" + pad2(d);
+          var n = (map[iso] || []).length;
+          var on = dayFilter === iso ? " is-on" : "";
+          var zero = n ? "" : " is-zero";
+          html += '<button type="button" class="cal-cell' + on + zero + '" data-date="' + iso + '"' +
+            (n ? "" : " disabled") + '><span class="cal-num">' + d +
+            '</span><span class="cal-count">' + n + "</span></button>";
+        }}
+        grid.innerHTML = html;
+      }}
+      function renderCalDayList(iso) {{
+        var box = document.getElementById("cal-day-list");
+        if (!box) return;
+        var items = cardsByDate()[iso] || [];
+        var parts = iso.split("-");
+        var seen = {{}};
+        var rows = [];
+        items.forEach(function (card) {{
+          var isbn = card.getAttribute("data-isbn") || card.id;
+          if (seen[isbn]) return;
+          seen[isbn] = true;
+          rows.push({{
+            href: bookHref(card),
+            cover: card.getAttribute("data-cover") || "",
+            title: card.getAttribute("data-title") || "",
+            pub: card.getAttribute("data-publisher") || "",
+            id: card.id
+          }});
+        }});
+        box.hidden = false;
+        box.innerHTML = "<h3>" + Number(parts[1]) + "月" + Number(parts[2]) + "日　" + rows.length + "冊</h3><ul></ul>";
+        var ul = box.querySelector("ul");
+        rows.forEach(function (row) {{
+          var li = document.createElement("li");
+          var node = document.createElement(row.href ? "a" : "div");
+          node.className = "cal-day-item";
+          if (row.href) node.href = row.href;
+          var thumb = row.cover
+            ? '<img src="' + row.cover.replace(/"/g, "") + '" alt="">'
+            : '<div class="ph">書影</div>';
+          node.innerHTML = thumb + "<div><strong></strong><span></span></div>";
+          node.querySelector("strong").textContent = row.title;
+          node.querySelector("span").textContent = row.pub;
+          if (row.href) {{
+            node.addEventListener("click", function () {{
+              saveListPos({{ card: row.id }});
+            }});
+          }}
+          li.appendChild(node);
+          ul.appendChild(li);
+        }});
+      }}
+      function selectCalDate(iso) {{
+        if (!iso) return;
+        dayFilter = iso;
+        var ym = iso.slice(0, 7);
+        if (ym && ym !== monthKey()) switchMonth(ym, true, true);
+        else {{
+          currentPage = 1;
+          renderList();
+        }}
+        updateDayBar();
+        renderCalendar();
+        renderCalDayList(iso);
+        saveListPos();
+      }}
+      var calBtn = document.getElementById("cal-btn");
+      if (calBtn) calBtn.addEventListener("click", openCalendar);
+      var calClose = document.getElementById("cal-close");
+      if (calClose) calClose.addEventListener("click", closeCalendar);
+      var calPrev = document.getElementById("cal-prev");
+      if (calPrev) calPrev.addEventListener("click", function () {{ shiftCalMonth(-1); }});
+      var calNext = document.getElementById("cal-next");
+      if (calNext) calNext.addEventListener("click", function () {{ shiftCalMonth(1); }});
+      var calGrid = document.getElementById("cal-grid");
+      if (calGrid) calGrid.addEventListener("click", function (ev) {{
+        var cell = ev.target.closest(".cal-cell[data-date]");
+        if (!cell || cell.disabled) return;
+        selectCalDate(cell.getAttribute("data-date") || "");
+      }});
+      var calModal = document.getElementById("cal-modal");
+      if (calModal) calModal.addEventListener("click", function (ev) {{
+        if (ev.target === calModal) closeCalendar();
+      }});
+      var dayClear = document.getElementById("day-filter-clear");
+      if (dayClear) dayClear.addEventListener("click", function () {{
+        dayFilter = "";
+        updateDayBar();
+        currentPage = 1;
+        renderList();
+        saveListPos();
+      }});
+      document.addEventListener("keydown", function (ev) {{
+        if (ev.key === "Escape") closeCalendar();
+      }});
+      var favListBtn = document.getElementById("fav-list-btn");
+      if (favListBtn) {{
+        favListBtn.addEventListener("click", function () {{
+          setFavMode(!favMode);
+        }});
+      }}
       document.addEventListener("click", function (ev) {{
+        var bookLink = ev.target.closest("a.title-link, a.cover-link");
+        if (bookLink) {{
+          var card = ev.target.closest(".card");
+          saveListPos({{ card: card ? card.id : "" }});
+        }}
+        var favBtn = ev.target.closest(".fav-btn");
+        if (favBtn) {{
+          ev.preventDefault();
+          ev.stopPropagation();
+          var isbn = favBtn.getAttribute("data-isbn") || "";
+          if (!isbn) return;
+          if (favs[isbn]) delete favs[isbn];
+          else favs[isbn] = true;
+          saveFavs();
+          paintFavs();
+          if (favMode) renderList();
+          return;
+        }}
         if (cluster && cluster.contains(ev.target)) return;
         closeSuggest();
       }});
-      renderList();
+      paintFavs();
+      try {{
+        var params = new URLSearchParams(location.search);
+        if (params.get("fav") === "1") {{
+          setFavMode(true);
+        }} else if (!applyListPos(loadListPos())) {{
+          renderList();
+        }}
+        var q = params.get("q");
+        if (q && input) {{
+          input.value = q;
+          applyFilter();
+        }}
+        if (params.get("cal") === "1") openCalendar();
+      }} catch (e) {{
+        renderList();
+      }}
     }})();
   </script>
 </body>

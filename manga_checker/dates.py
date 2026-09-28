@@ -129,11 +129,11 @@ def is_unreleased(pubdate: str, today: date | None = None) -> bool:
     today = today or date.today()
     parsed = parse_release_date(pubdate)
     if parsed:
-        return parsed >= today
+        return parsed > today
     ym = year_month_from_pubdate(pubdate)
     if ym is None:
         return True
-    return date(ym[0], ym[1], 1) >= date(today.year, today.month, 1)
+    return date(ym[0], ym[1], 1) > date(today.year, today.month, 1)
 
 
 def date_in_month(raw: str, year: int, month: int) -> bool | None:

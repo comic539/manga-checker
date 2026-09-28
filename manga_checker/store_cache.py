@@ -10,6 +10,9 @@ from manga_checker.models import Comic, StoreCheck
 from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
 
 _KEEP = frozenset({STATUS_YES, STATUS_NO})
+_STATUS_ALIASES = {
+    "通常/なし": STATUS_NO,
+}
 
 
 def cache_key(comic: Comic, store_id: str) -> str:
@@ -30,7 +33,7 @@ def load_checks_cache(path: Path) -> dict[str, dict[str, str]]:
     for key, row in payload.items():
         if not isinstance(row, dict):
             continue
-        status = str(row.get("status") or "")
+        status = _STATUS_ALIASES.get(str(row.get("status") or ""), str(row.get("status") or ""))
         if status == STATUS_UNKNOWN:
             continue
         result[str(key)] = {
@@ -52,16 +55,22 @@ def save_checks_cache(path: Path, cache: dict[str, dict[str, str]]) -> None:
     path.write_text(json.dumps(cleaned, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def cached_check(cache: dict[str, dict[str, str]] | None, comic: Comic, store_id: str) -> StoreCheck | None:
+def cached_check(
+    cache: dict[str, dict[str, str]] | None,
+    comic: Comic,
+    store_id: str,
+    *,
+    refresh_unreleased_no: bool = False,
+) -> StoreCheck | None:
     if not cache:
         return None
     row = cache.get(cache_key(comic, store_id))
     if not row:
         return None
-    status = row.get("status") or ""
+    status = _STATUS_ALIASES.get(row.get("status") or "", row.get("status") or "")
     if status not in _KEEP:
         return None
-    if status == STATUS_NO and is_unreleased(comic.pubdate):
+    if status == STATUS_NO and is_unreleased(comic.pubdate) and refresh_unreleased_no:
         return None
     return StoreCheck(
         store_id,
@@ -76,9 +85,6 @@ def remember_check(cache: dict[str, dict[str, str]] | None, check: StoreCheck, c
     if cache is None:
         return
     if check.status == STATUS_UNKNOWN:
-        cache.pop(cache_key(comic, check.store_id), None)
-        return
-    if check.status == STATUS_NO and is_unreleased(comic.pubdate):
         cache.pop(cache_key(comic, check.store_id), None)
         return
     cache[cache_key(comic, check.store_id)] = {

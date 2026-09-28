@@ -309,6 +309,20 @@ class DetailFetchTests(unittest.TestCase):
         self.assertEqual(by_id["melonbooks"].status, STATUS_YES)
         self.assertEqual(by_id["animate"].status, STATUS_UNKNOWN)
 
+    def test_empty_official_catalog_does_not_mark_kikuya_as_no(self) -> None:
+        from manga_checker.official import OfficialIndex
+        from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN
+        from manga_checker.stores import check_stores
+
+        comic = Comic(title="2年B組 勇者デストロイヤーズ 1")
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        checks = check_stores(comic, fetch=False, delay_sec=0, catalog=catalog)
+        by_id = {c.store_id: c for c in checks}
+        self.assertEqual(by_id["kikuya"].status, STATUS_UNKNOWN)
+        self.assertNotEqual(by_id["kikuya"].status, STATUS_NO)
+        self.assertEqual(by_id["kumazawa"].status, STATUS_UNKNOWN)
+
     def test_toranoana_uses_item_url_and_privilege(self) -> None:
         comic = Comic(title="ヒトナー 1", isbn="9784088852317")
         search_html = """

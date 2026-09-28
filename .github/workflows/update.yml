@@ -29,7 +29,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Generate full index.html
+      - name: Restore fetch caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            output/catalog_by_month.json
+            output/store_checks.json
+            output/preview_urls.json
+          key: checker-data-${{ github.run_id }}
+          restore-keys: |
+            checker-data-
+            store-checks-
+
+      - name: Generate full site
         env:
           PYTHONUNBUFFERED: "1"
           RAKUTEN_APPLICATION_ID: ${{ secrets.RAKUTEN_APPLICATION_ID }}
@@ -37,16 +49,18 @@ jobs:
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APPLICATION_ID }}
         timeout-minutes: 360
-        run: python main.py --limit 0 --fetch
+        run: python main.py --limit 0 --fetch --fetch-preview
 
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- index.html
+          mkdir -p output
+          git add -- index.html sitemap.xml books logo.png search-icon.png \
+            output/catalog_by_month.json output/store_checks.json output/preview_urls.json
           if git diff --staged --quiet; then
             echo "No catalog changes."
           else
-            git commit -m "Update index.html (scheduled catalog refresh)"
+            git commit -m "Update site (catalog, privileges, previews)"
             git push
           fi

@@ -1,10 +1,12 @@
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+from datetime import date
 from pathlib import Path
 
 from manga_checker.catalog import (
     _parse_ndl_item,
+    catalog_month_is_frozen,
     load_catalog_json,
     month_range,
     redistribute_by_pubdate,
@@ -76,6 +78,16 @@ class CatalogParseTests(unittest.TestCase):
         self.assertEqual(loaded[(2026, 8)][0].cover_url, "https://thumbnail.image.rakuten.co.jp/cover.jpg")
         self.assertEqual(loaded[(2026, 8)][0].cover_source, "rakuten")
         self.assertEqual(loaded[(2026, 9)], [])
+
+    def test_past_month_with_saved_rows_is_frozen(self) -> None:
+        today = date(2026, 9, 28)
+        self.assertTrue(catalog_month_is_frozen(2026, 8, 12, today=today))
+        self.assertFalse(catalog_month_is_frozen(2026, 9, 12, today=today))
+        self.assertFalse(catalog_month_is_frozen(2026, 10, 3, today=today))
+        self.assertFalse(catalog_month_is_frozen(2026, 8, 0, today=today))
+        self.assertFalse(
+            catalog_month_is_frozen(2026, 8, 12, today=today, refetch_past=True)
+        )
 
     def test_load_catalog_json_drops_amazon_covers(self) -> None:
         comic = Comic(

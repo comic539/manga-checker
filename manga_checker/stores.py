@@ -34,10 +34,10 @@ from manga_checker.store_cache import cached_check, remember_check
 from manga_checker.title_match import listing_matches_work
 from manga_checker.toranoana import evaluate_toranoana_detail, first_toranoana_detail_url
 
-# 公式一覧を正とし、未掲載なら「通常/なし」にする店
+# 公式一覧を正とし、未掲載なら「特典なし」にする店
 STRICT_OFFICIAL_STORES = frozenset({"kumazawa", "kikuya"})
 DETAIL_PAGE_STORES = frozenset({"animate", "melonbooks", "toranoana"})
-# 検索結果ページを常に取得し、ヒット済みなら特典語なしを「通常/なし」にする店
+# 検索結果ページを常に取得し、ヒット済みなら特典語なしを「特典なし」にする店
 LISTING_FETCH_STORES = frozenset({"gamers", "kinokuniya"})
 
 
@@ -202,16 +202,37 @@ def check_stores(
         if official_yes == STATUS_YES and (
             store.store_id not in DETAIL_PAGE_STORES or not fetch
         ):
-            results.append(
-                StoreCheck(store.store_id, store.name, official_yes, detail, official_url)
+            check = StoreCheck(
+                store.store_id, store.name, official_yes, detail, official_url
             )
+            remember_check(cache, check, comic)
+            results.append(check)
             continue
         if store.store_id in STRICT_OFFICIAL_STORES:
-            results.append(
-                StoreCheck(store.store_id, store.name, official_yes, detail, url)
-            )
+            if not catalog.entries.get(store.store_id):
+                remembered = cached_check(
+                    cache, comic, store.store_id, refresh_unreleased_no=fetch
+                )
+                if remembered is not None:
+                    results.append(remembered)
+                    continue
+                results.append(
+                    StoreCheck(
+                        store.store_id,
+                        store.name,
+                        STATUS_UNKNOWN,
+                        "公式特典一覧を取得できていないため未確認。",
+                        url,
+                    )
+                )
+                continue
+            check = StoreCheck(store.store_id, store.name, official_yes, detail, url)
+            remember_check(cache, check, comic)
+            results.append(check)
             continue
-        remembered = cached_check(cache, comic, store.store_id)
+        remembered = cached_check(
+            cache, comic, store.store_id, refresh_unreleased_no=fetch
+        )
         if remembered is not None:
             results.append(remembered)
             continue

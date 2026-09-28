@@ -56,7 +56,7 @@ class StoreCacheTests(unittest.TestCase):
         self.assertEqual(yes.status, STATUS_YES)
         self.assertEqual(no.status, STATUS_NO)
 
-    def test_no_is_not_reused_before_release(self) -> None:
+    def test_no_is_reused_before_release_unless_refreshing(self) -> None:
         comic = Comic(
             title="アニマルシグナル 1",
             isbn="9784088852690",
@@ -68,7 +68,12 @@ class StoreCacheTests(unittest.TestCase):
             StoreCheck("animate", "アニメイト", STATUS_NO, "なし", "https://a"),
             comic,
         )
-        self.assertIsNone(cached_check(cache, comic, "animate"))
+        kept = cached_check(cache, comic, "animate")
+        assert kept is not None
+        self.assertEqual(kept.status, STATUS_NO)
+        self.assertIsNone(
+            cached_check(cache, comic, "animate", refresh_unreleased_no=True)
+        )
 
     def test_load_drops_unknown_entries(self) -> None:
         import tempfile
@@ -96,3 +101,21 @@ class StoreCacheTests(unittest.TestCase):
             loaded = load_checks_cache(path)
         self.assertNotIn("9784|animate", loaded)
         self.assertEqual(loaded["9784|gamers"]["status"], STATUS_NO)
+
+    def test_legacy_no_label_is_treated_as_privilege_none(self) -> None:
+        comic = Comic(
+            title="発売済み 1",
+            isbn="9784000000001",
+            pubdate="2020-01-04",
+        )
+        cache = {
+            "9784000000001|animate": {
+                "status": "通常/なし",
+                "detail": "なし",
+                "url": "https://a",
+                "store_name": "アニメイト",
+            }
+        }
+        check = cached_check(cache, comic, "animate")
+        assert check is not None
+        self.assertEqual(check.status, STATUS_NO)
