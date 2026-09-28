@@ -171,7 +171,7 @@ class PrivilegeEvalTests(unittest.TestCase):
             title_for_match="存在しない作品",
             source_url="https://www.animate-onlineshop.jp/products/list.php",
         )
-        self.assertEqual(status, STATUS_UNKNOWN)
+        self.assertEqual(status, STATUS_NO)
 
     def test_sidebar_zero_ebooks_is_not_unknown_when_products_exist(self) -> None:
         html = """

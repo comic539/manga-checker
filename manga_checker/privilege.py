@@ -69,6 +69,12 @@ _NO_HIT_PHRASES = (
     "お探しの商品は見つかりません",
     "条件に一致する商品は見つかりませんでした",
     "一致する商品は見つかりませんでした",
+    "商品が見つかりませんでした",
+    "お取り扱いはございません",
+    "商品のお取り扱いはございません",
+)
+_NO_HIT_COUNT = re.compile(
+    r"(商品|検索結果|該当)[^。\n]{0,24}[（(]?0\s*件|[（(]0件[）)]"
 )
 
 _MELON_CONCRETE = (
@@ -256,7 +262,9 @@ def listing_has_products(html: str) -> bool:
 def search_is_no_hit(html: str) -> bool:
     """検索結果ページが『0件』と明示しているか。"""
     text = html or ""
-    return any(phrase in text for phrase in _NO_HIT_PHRASES)
+    if any(phrase in text for phrase in _NO_HIT_PHRASES):
+        return True
+    return bool(_NO_HIT_COUNT.search(text))
 
 
 def evaluate_privilege(
@@ -291,7 +299,7 @@ def evaluate_privilege(
         ):
             return STATUS_NO, "検索ヒットあり。一覧では特典判定しません。"
         if _looks_like_no_hit(html, title_for_match, isbn):
-            return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
+            return STATUS_NO, "検索結果が0件のため、取り扱いなし（特典なし）と扱います。"
         return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
 
     if store_id == "melonbooks" or "melonbooks.co.jp" in source:
@@ -299,6 +307,8 @@ def evaluate_privilege(
             html, title_for_match, isbn, author=author
         ):
             return STATUS_NO, "検索ヒットあり。一覧では特典判定しません。"
+        if search_is_no_hit(html or ""):
+            return STATUS_NO, "検索結果が0件のため、取り扱いなし（特典なし）と扱います。"
         return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
 
     markup = html or ""
@@ -307,7 +317,7 @@ def evaluate_privilege(
     ):
         return STATUS_NO, "検索ヒットあり。一覧では特典判定しません。"
     if _looks_like_no_hit(markup, title_for_match, isbn):
-        return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
+        return STATUS_NO, "検索結果が0件のため、取り扱いなし（特典なし）と扱います。"
     return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
 
 
@@ -357,7 +367,7 @@ def _evaluate_kinokuniya(
 ) -> tuple[str, str]:
     markup = html or ""
     if _looks_like_no_hit(markup, title_for_match, isbn):
-        return STATUS_UNKNOWN, "検索ヒットが見つかりませんでした。"
+        return STATUS_NO, "検索結果が0件のため、取り扱いなし（特典なし）と扱います。"
 
     titles = _kinokuniya_product_titles(markup, title_for_match, isbn, author=author)
     if not titles:

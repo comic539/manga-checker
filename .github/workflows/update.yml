@@ -2,8 +2,8 @@ name: Update catalog
 
 on:
   schedule:
-    # 毎日 6:00 JST = 前日 21:00 UTC
-    - cron: "0 21 * * *"
+    # 毎日 1:00 JST = 前日 16:00 UTC
+    - cron: "0 16 * * *"
   workflow_dispatch:
 
 permissions:

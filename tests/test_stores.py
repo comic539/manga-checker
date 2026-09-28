@@ -8,8 +8,10 @@ from manga_checker.stores import (
     STORES,
     _fetch_animate,
     _fetch_gamers,
+    _fetch_kinokuniya,
     _fetch_melonbooks,
     _fetch_toranoana,
+    _kinokuniya_url,
 )
 
 
@@ -438,7 +440,7 @@ class DetailFetchTests(unittest.TestCase):
             )
         self.assertEqual(check.status, STATUS_NO)
 
-    def test_empty_search_is_unknown(self) -> None:
+    def test_empty_search_is_no(self) -> None:
         comic = Comic(title="存在しない作品 1", isbn="9999999999999")
 
         def fake_get(url, timeout=25, **kwargs):
@@ -455,7 +457,8 @@ class DetailFetchTests(unittest.TestCase):
                 "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
                 session,
             )
-        self.assertEqual(check.status, STATUS_UNKNOWN)
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertIn("0件", check.detail)
 
     def test_search_http_error_is_unknown(self) -> None:
         comic = Comic(title="初凪ヒメリウム 1", isbn="9784000000000")
@@ -497,7 +500,7 @@ class DetailFetchTests(unittest.TestCase):
                 "https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=x",
                 session,
             )
-        self.assertEqual(check.status, STATUS_UNKNOWN)
+        self.assertEqual(check.status, STATUS_NO)
         self.assertNotIn("ページを取得できませんでした", check.detail)
 
     def test_toranoana_isbn_miss_falls_back_to_title_hit(self) -> None:
@@ -691,8 +694,134 @@ class DetailFetchTests(unittest.TestCase):
         """
         self.assertFalse(_detail_page_matches(comic, html))
 
+    def test_kinokuniya_badge_uses_search_not_hanging_permalink(self) -> None:
+        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
+        url = _kinokuniya_url(comic)
+        self.assertIn("CSfDispListPage_001.jsp", url)
+        self.assertIn("9784098640782", url)
+        self.assertNotIn("/f/dsg-01-", url)
+
+    def test_kinokuniya_isbn_zero_is_no(self) -> None:
+        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.text = "<p>該当する商品はございません</p>"
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_kinokuniya(
+                comic,
+                "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp?q=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+        fetched = [call.args[0] for call in session.get.call_args_list]
+        self.assertTrue(all("/f/dsg-01-" not in url for url in fetched))
+
+    def test_kinokuniya_follows_list_to_product_page(self) -> None:
+        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
+        list_html = (
+            '<ul><li><a href="/f/dsg-01-9784098640782">佐武と市捕物控</a></li></ul>'
+        )
+        detail_html = "<h1>佐武と市捕物控</h1><p>在庫あり</p>"
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.text = detail_html if "/f/dsg-01-" in url else list_html
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_kinokuniya(
+                comic,
+                "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp?q=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertEqual(check.url, "https://www.kinokuniya.co.jp/f/dsg-01-9784098640782")
+
+    def test_isbn_zero_does_not_fall_back_to_title_for_animate(self) -> None:
+        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
+        seen: list[str] = []
+
+        def fake_get(url, timeout=25, **kwargs):
+            seen.append(url)
+            resp = MagicMock()
+            resp.status_code = 200
+            if "9784098640782" in url:
+                resp.text = "<p>該当する商品はございません</p>"
+            else:
+                resp.text = '<ul><li><a href="/pd/999/">別作品</a></li></ul>'
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_animate(
+                comic,
+                "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertFalse(any("/pd/999" in url for url in seen))
+
+    def test_gamers_zero_count_is_no(self) -> None:
+        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.text = (
+                "<h1>9784098640782 の検索結果</h1>"
+                "<p>商品 (0件)</p>"
+                "<p>商品が見つかりませんでした。</p>"
+            )
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_gamers(
+                comic,
+                "https://www.gamers.co.jp/products/list.php?mode=search&smt=9784098640782",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+
+    def test_blocked_detail_keeps_product_url(self) -> None:
+        comic = Comic(title="初凪ヒメリウム 1", isbn="9784000000000")
+        search_html = '<ul><li><a href="/pd/222/">初凪ヒメリウム 1</a></li></ul>'
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            if "/pd/" in url:
+                resp.status_code = 403
+                resp.text = "forbidden"
+            else:
+                resp.status_code = 200
+                resp.text = search_html
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_animate(
+                comic,
+                "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_NO)
+        self.assertEqual(check.url, "https://www.animate-onlineshop.jp/pd/222/")
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 

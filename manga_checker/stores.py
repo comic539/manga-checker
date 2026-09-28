@@ -39,6 +39,8 @@ STRICT_OFFICIAL_STORES = frozenset({"kumazawa", "kikuya"})
 DETAIL_PAGE_STORES = frozenset({"animate", "melonbooks", "toranoana"})
 # 検索結果ページを常に取得し、ヒット済みなら特典語なしを「特典なし」にする店
 LISTING_FETCH_STORES = frozenset({"gamers", "kinokuniya"})
+# ISBN検索が0件なら取り扱いなし（タイトル検索に落とさない）
+ISBN_NO_HIT_IS_ABSENT = frozenset({"animate", "melonbooks", "gamers", "kinokuniya"})
 
 
 @dataclass
@@ -57,14 +59,16 @@ def _search_term(comic: Comic) -> str:
     return isbn_search_query(comic.isbn) or _q(comic)
 
 
-def _kinokuniya_url(comic: Comic) -> str:
-    isbn = isbn_search_query(comic.isbn)
-    if isbn:
-        return f"https://www.kinokuniya.co.jp/f/dsg-01-{isbn}"
+def _kinokuniya_list_url(query: str) -> str:
     return (
         "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp"
-        f"?qsd=true&ptk=01&q={quote(_q(comic))}"
+        f"?qsd=true&ptk=01&q={quote(query)}"
     )
+
+
+def _kinokuniya_url(comic: Comic) -> str:
+    isbn = isbn_search_query(comic.isbn)
+    return _kinokuniya_list_url(isbn or _q(comic))
 
 
 def _gamers_url(comic: Comic) -> str:
@@ -409,18 +413,10 @@ def _fetch_gamers(comic: Comic, search_url: str, session: requests.Session) -> S
     )
 
 
-def _kinokuniya_list_url(query: str) -> str:
-    return (
-        "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp"
-        f"?qsd=true&ptk=01&q={quote(query)}"
-    )
-
-
 def _fetch_kinokuniya(comic: Comic, search_url: str, session: requests.Session) -> StoreCheck:
     attempts: list[tuple[str, bool]] = []
     isbn = isbn_search_query(comic.isbn)
     if isbn:
-        attempts.append((f"https://www.kinokuniya.co.jp/f/dsg-01-{isbn}", True))
         attempts.append((_kinokuniya_list_url(isbn), True))
     attempts.append((_kinokuniya_list_url(_q(comic)), False))
     if search_url and all(search_url != url for url, _ in attempts):
@@ -460,7 +456,10 @@ def _fetch_detail_attempts(
     last_http = 0
     had_product_hit = False
     saw_search_page = False
+    saw_no_hit = False
     last_error: Exception | None = None
+    no_hit_url = fallback_url
+    last_detail_url = ""
     try:
         for index, (list_url, from_isbn) in enumerate(attempts):
             last_search = list_url
@@ -481,6 +480,16 @@ def _fetch_detail_attempts(
             no_hit = search_is_no_hit(html) and not listing_has_products(html)
             if no_hit:
                 saw_search_page = True
+                saw_no_hit = True
+                no_hit_url = list_url
+                if from_isbn and store_id in ISBN_NO_HIT_IS_ABSENT:
+                    return StoreCheck(
+                        store_id,
+                        name,
+                        STATUS_NO,
+                        "ISBN検索が0件のため、取り扱いなし（特典なし）と扱います。",
+                        list_url,
+                    )
                 continue
             if search_resp.status_code < 400:
                 last_http = 0
@@ -499,6 +508,7 @@ def _fetch_detail_attempts(
                 if listing_has_products(html):
                     had_product_hit = True
                 continue
+            last_detail_url = detail_url
             had_product_hit = True
             time.sleep(0.8)
             try:
@@ -528,7 +538,15 @@ def _fetch_detail_attempts(
                 name,
                 STATUS_NO,
                 "検索ヒットあり。詳細ページへ進めなかったため特典なしと扱います。",
-                fallback_url,
+                last_detail_url or fallback_url,
+            )
+        if saw_no_hit:
+            return StoreCheck(
+                store_id,
+                name,
+                STATUS_NO,
+                "検索結果が0件のため、取り扱いなし（特典なし）と扱います。",
+                no_hit_url,
             )
         if last_http >= 400:
             return StoreCheck(
