@@ -3,7 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from manga_checker.models import Comic, ComicReport
+from manga_checker.models import Comic, ComicReport, StoreCheck
+from manga_checker.privilege import STATUS_UNKNOWN
 from manga_checker.publishers import canonical_publisher, publisher_sort_key
 from manga_checker.report import ASSET_VER, _group_by_publisher, write_html
 
@@ -131,6 +132,8 @@ class HtmlSearchTests(unittest.TestCase):
             html.find("当サイトはアフィリエイト広告(PR)を利用しています。"),
         )
         self.assertIn("情報収集エラー", html)
+        self.assertIn("検知できなかった店舗は『特典なし』", html)
+        self.assertNotIn("『未確認』の表示", html)
         self.assertIn("アフィリエイト広告(PR)", html)
         self.assertNotIn("イチコミ特典＋はアフィリエイト広告（Amazonアソシエイト", html)
         self.assertNotIn('class="affiliate-note"', html)
@@ -187,6 +190,33 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertLess(html.find('id="pager-top"'), html.find("<main"))
         self.assertGreater(html.find('id="pager"'), html.find('class="ad-container ad-footer"'))
         self.assertGreater(html.find('class="ad-container ad-footer"'), html.find("</main>"))
+
+    def test_unknown_store_status_shows_as_no(self) -> None:
+        reports = [
+            ComicReport(
+                Comic(title="未確認作品 1", isbn="9784000000001"),
+                checks=[
+                    StoreCheck(
+                        "animate",
+                        "アニメイト",
+                        STATUS_UNKNOWN,
+                        "未取得",
+                        "https://example.com/a",
+                    )
+                ],
+            )
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            html = (Path(tmp) / "out.html")
+            write_html(reports, html, "test")
+            text = html.read_text(encoding="utf-8")
+        self.assertIn("class=\"badge no\"", text)
+        self.assertIn("<span class='status'>特典なし</span>", text)
+        self.assertNotIn("<span class='status'>未確認</span>", text)
+        self.assertIn("📋 コピー", text)
+        self.assertIn("</a><button type=\"button\" class=\"copy-title\"", text)
+        self.assertIn("grid-template-columns: 92px minmax(0, 1fr) auto", text)
+        self.assertIn("grid-template-columns: 1fr;", text)
 
     def test_rakuten_credit_and_lazy_cover(self) -> None:
         reports = [

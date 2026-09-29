@@ -31,12 +31,12 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand16"
+ASSET_VER = "brand17"
 INTRO_HEADING = "【イチコミ特典＋の説明】"
 INTRO_NOTES = [
     "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
-    "『未確認』の表示は「取り扱いなし」「情報収集エラー」によって表示されます",
-    "特典があるのに『未確認』『特典なし』となる場合がございます。",
+    "検知できなかった店舗は『特典なし』と表示します（取り扱いなし・情報収集エラーを含みます）。",
+    "特典があるのに『特典なし』となる場合がございます。",
     "特典の配布状況の最終確認は各書店の公式商品ページにてご確認ください。",
     "現在月から前後３カ月の情報を掲載しております",
     "当サイトはアフィリエイト広告(PR)を利用しています。",
@@ -345,10 +345,11 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         '<div class="card-body">'
         '<div class="date-row">'
         f'<p class="date-chip">{release}</p>'
-        f'<button type="button" class="copy-title" data-title="{html.escape(comic.display_title, quote=True)}">📋 コピー</button>'
         "</div>"
         '<div class="title-row">'
-        f"<h3>{title_html}</h3>"
+        f"<h3>{title_html}"
+        f'<button type="button" class="copy-title" data-title="{html.escape(comic.display_title, quote=True)}">📋 コピー</button>'
+        "</h3>"
         "</div>"
         f"{ext}"
         f'<p class="meta">{author}</p>'
@@ -425,15 +426,21 @@ def _fav_button_html(isbn_digits: str) -> str:
 
 
 def _badge_html(check: StoreCheck) -> str:
-    css = _STATUS_CLASS.get(check.status, "todo")
+    css, label = _badge_view(check.status)
     title = html.escape(check.detail)
     return (
         f'<a class="badge {css}" href="{html.escape(check.url)}" '
         f'target="_blank" rel="noopener noreferrer" title="{title}">'
         f"<span class='store'>{html.escape(check.store_name)}</span>"
-        f"<span class='status'>{html.escape(check.status)}</span>"
+        f"<span class='status'>{html.escape(label)}</span>"
         "</a>"
     )
+
+
+def _badge_view(status: str) -> tuple[str, str]:
+    if status == STATUS_UNKNOWN:
+        return "no", STATUS_NO
+    return _STATUS_CLASS.get(status, "no"), status
 
 
 def _html_document(
@@ -1149,11 +1156,13 @@ def _html_document(
       line-height: 1.35;
     }}
     .title-row {{
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
       margin: 0 0 6px;
       padding-right: 36px;
+    }}
+    .title-row h3 .copy-title {{
+      display: inline;
+      vertical-align: middle;
+      margin-left: 4px;
     }}
     .title-link {{
       color: inherit;
@@ -1528,17 +1537,52 @@ def _html_document(
     @media (max-width: 768px) {{
       header {{ padding: 0; }}
       .site-top-inner {{
-        padding: 8px 12px;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr) auto;
+        align-items: center;
+        padding: 6px 8px;
+        gap: 6px 8px;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
       h1 {{ font-size: 1.28rem; }}
       .search-hit {{ display: none; }}
-      .search-wrap input {{ padding: 8px 32px 8px 10px; font-size: 0.88rem; }}
-      .search-go {{ width: 40px; height: 40px; }}
+      .search-bar {{
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        gap: 0;
+      }}
+      .search-cluster {{
+        max-width: none;
+        gap: 4px;
+        align-items: center;
+      }}
+      .search-wrap input {{
+        padding: 5px 26px 5px 8px;
+        font-size: 0.72rem;
+        border-radius: 8px;
+      }}
+      .search-clear {{
+        width: 22px;
+        height: 22px;
+        font-size: 0.9rem;
+        right: 4px;
+      }}
+      .search-go {{ width: 26px; height: 26px; }}
+      .header-actions {{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin: 0;
+        align-self: center;
+      }}
       .fav-list-btn,
-      .cal-btn {{ font-size: 0.7rem; padding: 6px 8px; }}
+      .cal-btn {{
+        font-size: 0.58rem;
+        padding: 4px 6px;
+        line-height: 1.2;
+      }}
       .card-grid {{
         grid-template-columns: 1fr;
         gap: 10px;
@@ -1564,14 +1608,25 @@ def _html_document(
         flex: 1 1 calc(50% - 4px);
         min-width: 0;
       }}
-      .ext {{ padding: 10px 8px; font-size: 0.82rem; }}
+      .ext-links {{
+        grid-template-columns: 1fr;
+        gap: 5px;
+        margin: 0 0 8px;
+      }}
+      .ext {{
+        width: 100%;
+        min-height: 32px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        box-sizing: border-box;
+      }}
       .ad-slot {{ min-height: 60px; }}
       .ad-row {{ flex-direction: column; }}
       .logo-link,
       .site-logo {{
-        flex: 0 0 140px;
-        width: 140px;
-        max-width: 140px;
+        flex: none;
+        width: 92px;
+        max-width: 92px;
       }}
     }}
   </style>
@@ -1585,7 +1640,7 @@ def _html_document(
       <div class="search-bar">
         <div class="search-cluster">
           <div class="search-wrap">
-            <input id="comic-search" type="search" placeholder="タイトル・著者・出版社で検索"
+            <input id="comic-search" type="search" placeholder="タイトル・著者で検索"
                    autocomplete="off" spellcheck="false" aria-label="作品を検索"
                    aria-autocomplete="list" aria-controls="search-suggest">
             <button type="button" class="search-clear" id="search-clear" aria-label="検索をクリア">×</button>

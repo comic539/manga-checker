@@ -18,7 +18,7 @@ from manga_checker.preview import (
     resolve_preview_cache,
     save_preview_cache,
 )
-from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
+from manga_checker.privilege import STATUS_YES
 from manga_checker.report import (
     ASSET_VER,
     LOGO_ALT,
@@ -167,8 +167,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     rakuten = rakuten_url(comic.isbn, comic.search_query)
     mercari = mercari_url(comic.search_query)
     yes = sum(1 for c in report.checks if c.status == STATUS_YES)
-    no = sum(1 for c in report.checks if c.status == STATUS_NO)
-    todo = sum(1 for c in report.checks if c.status == STATUS_UNKNOWN)
+    no = sum(1 for c in report.checks if c.status != STATUS_YES)
     store_confirm = "".join(_store_confirm_row(check) for check in report.checks)
     trial_html = _trial_buttons_html(preview)
     ndl = ""
@@ -567,17 +566,30 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     @media (max-width: 768px) {{
       .site-top-inner {{
-        padding: 8px 12px;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: minmax(0, 108px) auto;
+        align-items: center;
+        padding: 6px 10px;
+        gap: 6px 8px;
       }}
       .logo-link,
       .site-logo {{
-        flex: 0 0 140px;
-        width: 140px;
-        max-width: 140px;
+        flex: none;
+        width: 108px;
+        max-width: 108px;
+      }}
+      .header-actions {{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin: 0 0 0 auto;
       }}
       .fav-list-btn,
-      .cal-btn {{ font-size: 0.7rem; padding: 6px 8px; }}
+      .cal-btn {{
+        font-size: 0.58rem;
+        padding: 4px 8px;
+        line-height: 1.2;
+      }}
     }}
     @media (max-width: 640px) {{
       .hero-ad {{
@@ -596,6 +608,27 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       .store-confirm-row {{
         grid-template-columns: 1fr;
         align-items: start;
+      }}
+      .hero-actions {{
+        flex-direction: column;
+        gap: 12px;
+      }}
+      .hero-actions .action-block {{
+        flex: 1 1 auto;
+        min-width: 0;
+        width: 100%;
+      }}
+      .hero-actions .buy {{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+      }}
+      .hero-actions .ext {{
+        width: 100%;
+        min-height: 32px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        box-sizing: border-box;
       }}
     }}
   </style>
@@ -631,7 +664,6 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         <div class="summary-chips">
           <span class="chip yes">特典あり {yes}</span>
           <span class="chip no">特典なし {no}</span>
-          <span class="chip todo">未確認 {todo}</span>
         </div>
       </div>
       <div class="hero-actions">

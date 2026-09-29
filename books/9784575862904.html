@@ -11,7 +11,7 @@
   <meta property="og:image" content="https://comic539.github.io/manga-checker/logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="『ちょっと! いいもの食べよう終末レシピ(1)』店舗別購入特典・発売日情報まとめ｜イチコミ特典＋">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand16">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand17">
   <style>
     :root {
       --bg: #ffffff;
@@ -384,17 +384,30 @@
     }
     @media (max-width: 768px) {
       .site-top-inner {
-        padding: 8px 12px;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: minmax(0, 108px) auto;
+        align-items: center;
+        padding: 6px 10px;
+        gap: 6px 8px;
       }
       .logo-link,
       .site-logo {
-        flex: 0 0 140px;
-        width: 140px;
-        max-width: 140px;
+        flex: none;
+        width: 108px;
+        max-width: 108px;
+      }
+      .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin: 0 0 0 auto;
       }
       .fav-list-btn,
-      .cal-btn { font-size: 0.7rem; padding: 6px 8px; }
+      .cal-btn {
+        font-size: 0.58rem;
+        padding: 4px 8px;
+        line-height: 1.2;
+      }
     }
     @media (max-width: 640px) {
       .hero-ad {
@@ -414,6 +427,27 @@
         grid-template-columns: 1fr;
         align-items: start;
       }
+      .hero-actions {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .hero-actions .action-block {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: 100%;
+      }
+      .hero-actions .buy {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+      }
+      .hero-actions .ext {
+        width: 100%;
+        min-height: 32px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        box-sizing: border-box;
+      }
     }
   </style>
 </head>
@@ -421,7 +455,7 @@
   <div class="site-top">
     <div class="site-top-inner">
       <a class="logo-link" href="../index.html">
-        <img class="site-logo" src="../logo.png?v=brand16" alt="イチコミ特典＋ 新刊コミック第1巻 書店特典チェック">
+        <img class="site-logo" src="../logo.png?v=brand17" alt="イチコミ特典＋ 新刊コミック第1巻 書店特典チェック">
       </a>
       <div class="header-actions">
         <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
@@ -447,8 +481,7 @@
         
         <div class="summary-chips">
           <span class="chip yes">特典あり 0</span>
-          <span class="chip no">特典なし 2</span>
-          <span class="chip todo">未確認 5</span>
+          <span class="chip no">特典なし 7</span>
         </div>
       </div>
       <div class="hero-actions">
@@ -481,7 +514,7 @@
       </aside>
     </section>
     <h2>各書店の特典</h2>
-    <div class="store-confirm"><div class="store-confirm-row"><a class="badge todo" href="https://www.animate-onlineshop.jp/products/list.php?mode=search&amp;smt=9784575862904" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>アニメイト</span><span class='status'>未確認</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge todo" href="https://www.melonbooks.co.jp/search/search.php?name=9784575862904&amp;text_type=all" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>メロンブックス</span><span class='status'>未確認</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge todo" href="https://www.gamers.co.jp/products/list.php?mode=search&amp;smt=9784575862904&amp;spc=4" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>ゲーマーズ</span><span class='status'>未確認</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge todo" href="https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=%E3%81%A1%E3%82%87%E3%81%A3%E3%81%A8%21%20%E3%81%84%E3%81%84%E3%82%82%E3%81%AE%E9%A3%9F%E3%81%B9%E3%82%88%E3%81%86%E7%B5%82%E6%9C%AB%E3%83%AC%E3%82%B7%E3%83%94&amp;searchCategoryCode=bok" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>とらのあな</span><span class='status'>未確認</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://kikuyashoten.myshopify.com/search?q=%E3%81%A1%E3%82%87%E3%81%A3%E3%81%A8%21%20%E3%81%84%E3%81%84%E3%82%82%E3%81%AE%E9%A3%9F%E3%81%B9%E3%82%88%E3%81%86%E7%B5%82%E6%9C%AB%E3%83%AC%E3%82%B7%E3%83%94" target="_blank" rel="noopener noreferrer" title="公式特典ページに該当タイトルはありません。"><span class='store'>喜久屋書店</span><span class='status'>特典なし</span></a><p class="store-detail">公式特典ページに該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge todo" href="https://www.kinokuniya.co.jp/f/dsg-01-9784575862904" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>紀伊國屋書店</span><span class='status'>未確認</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://www.search.kumabook.com/kumazawa/html/products/list?mode=books&amp;name=9784575862904" target="_blank" rel="noopener noreferrer" title="公式特典ページに該当タイトルはありません。"><span class='store'>くまざわ書店</span><span class='status'>特典なし</span></a><p class="store-detail">公式特典ページに該当タイトルはありません。</p></div></div>
+    <div class="store-confirm"><div class="store-confirm-row"><a class="badge no" href="https://www.animate-onlineshop.jp/products/list.php?mode=search&amp;smt=9784575862904" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>アニメイト</span><span class='status'>特典なし</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://www.melonbooks.co.jp/search/search.php?name=9784575862904&amp;text_type=all" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>メロンブックス</span><span class='status'>特典なし</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://www.gamers.co.jp/products/list.php?mode=search&amp;smt=9784575862904&amp;spc=4" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>ゲーマーズ</span><span class='status'>特典なし</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=%E3%81%A1%E3%82%87%E3%81%A3%E3%81%A8%21%20%E3%81%84%E3%81%84%E3%82%82%E3%81%AE%E9%A3%9F%E3%81%B9%E3%82%88%E3%81%86%E7%B5%82%E6%9C%AB%E3%83%AC%E3%82%B7%E3%83%94&amp;searchCategoryCode=bok" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>とらのあな</span><span class='status'>特典なし</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://kikuyashoten.myshopify.com/search?q=%E3%81%A1%E3%82%87%E3%81%A3%E3%81%A8%21%20%E3%81%84%E3%81%84%E3%82%82%E3%81%AE%E9%A3%9F%E3%81%B9%E3%82%88%E3%81%86%E7%B5%82%E6%9C%AB%E3%83%AC%E3%82%B7%E3%83%94" target="_blank" rel="noopener noreferrer" title="公式特典ページに該当タイトルはありません。"><span class='store'>喜久屋書店</span><span class='status'>特典なし</span></a><p class="store-detail">公式特典ページに該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no" href="https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp?qsd=true&amp;ptk=01&amp;q=9784575862904" target="_blank" rel="noopener noreferrer" title="未取得。リンク先の商品カードで確認してください。"><span class='store'>紀伊國屋書店</span><span class='status'>特典なし</span></a><p class="store-detail">未取得。リンク先の商品カードで確認してください。</p></div><div class="store-confirm-row"><a class="badge no" href="https://www.search.kumabook.com/kumazawa/html/products/list?mode=books&amp;name=9784575862904" target="_blank" rel="noopener noreferrer" title="公式特典ページに該当タイトルはありません。"><span class='store'>くまざわ書店</span><span class='status'>特典なし</span></a><p class="store-detail">公式特典ページに該当タイトルはありません。</p></div></div>
     <p class="affiliate-notice">※イチコミ特典＋はアフィリエイト広告を利用しています</p>
   </div>
   <script>
