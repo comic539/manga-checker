@@ -902,15 +902,19 @@ def _pick_official_from_query(fn: SearchFn, query: str) -> str:
 
 
 def search_official_preview(comic: Comic, *, search_fn: SearchFn | None = None) -> str:
-    """ブラウザの「試し読みを検索」と同じ全文クエリを先に当て、公式ホストだけ採用する。"""
+    """先に『タイトル 1話』を当て、外したら公式サイト内検索へ。"""
     fn = search_fn or default_web_search
     web_queries = search_queries(comic, include_sites=False)
-    for query in web_queries:
-        url = _pick_official_from_query(fn, query)
+    if web_queries:
+        url = _pick_official_from_query(fn, web_queries[0])
         if url:
             return url
     if search_fn is None:
         url = search_giga_preview(comic)
+        if url:
+            return url
+    for query in web_queries[1:]:
+        url = _pick_official_from_query(fn, query)
         if url:
             return url
     for query in search_queries(comic, include_sites=True):

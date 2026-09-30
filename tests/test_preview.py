@@ -426,6 +426,34 @@ class PreviewSearchOrderTests(unittest.TestCase):
         self.assertIn("comic-days.com", url)
         giga.assert_not_called()
 
+    def test_giga_runs_if_first_web_query_misses(self) -> None:
+        from unittest.mock import patch
+
+        comic = Comic(
+            title="群雄を綴る(1)",
+            publisher="講談社",
+            isbn="9784065453575",
+            pubdate="2026-10-16",
+        )
+        magapoke = "https://pocket.shonenmagazine.com/title/03246/episode/441544"
+        with patch(
+            "manga_checker.preview.search_giga_preview",
+            return_value=magapoke,
+        ) as giga, patch(
+            "manga_checker.preview.default_web_search",
+            return_value=["https://www.tohnichi.co.jp/"],
+        ):
+            url = search_official_preview(comic)
+        self.assertEqual(url, magapoke)
+        giga.assert_called()
+
+    def test_magapoke_title_episode_is_official(self) -> None:
+        self.assertTrue(
+            is_official_preview_url(
+                "https://pocket.shonenmagazine.com/title/03246/episode/441544"
+            )
+        )
+
     def test_preview_fetch_order_puts_future_before_past(self) -> None:
         comics = [
             Comic(title="六月", isbn="9784060000001", pubdate="2026-06-01"),
