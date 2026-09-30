@@ -117,6 +117,29 @@ OFFICIAL_HOSTS = (
     "www.youngjump.jp",
     "tonarinoyj.jp",
     "www.tonarinoyj.jp",
+    "manga-park.com",
+    "www.manga-park.com",
+    "takecomic.jp",
+    "www.takecomic.jp",
+    "mangadx-plus.com",
+    "www.mangadx-plus.com",
+    "zerosumonline.com",
+    "www.zerosumonline.com",
+    "comic-ryu.jp",
+    "www.comic-ryu.jp",
+    "comic-fire.com",
+    "www.comic-fire.com",
+    "comic-fire.jp",
+    "comic-ride.jp",
+    "www.comic-ride.jp",
+    "comicride.jp",
+    "licomi.jp",
+    "www.licomi.jp",
+    "lovecoffre.com",
+    "www.lovecoffre.com",
+    "mangacross.jp",
+    "www.mangacross.jp",
+    "heros-web.com",
 )
 
 _SKIP_PATH_PARTS = (
@@ -288,6 +311,12 @@ _CROSS_PREVIEW_SITES = (
     "alphapolis.co.jp",
     "kuragebunch.com",
     "comic-action.com",
+    "manga-park.com",
+    "takecomic.jp",
+    "comic-gardo.com",
+    "comic-zenon.com",
+    "comic-growl.com",
+    "comic-boost.com",
 )
 
 
@@ -317,7 +346,11 @@ _PUBLISHER_SITES = {
         "shonenjumpplus.com",
         "tonarinoyj.jp",
         "youngjump.jp",
+        "plus.shonenjump.com",
         "s-manga.net",
+        "jumpsq.shueisha.co.jp",
+        "grandjump.shueisha.co.jp",
+        "ultrasj.jp",
     ),
     "小学館": (
         "manga-one.com",
@@ -326,10 +359,13 @@ _PUBLISHER_SITES = {
         "ciao.shogakukan.co.jp",
         "cheese.jp",
         "corocoro.jp",
+        "sho-comi.com",
+        "pocg.net",
     ),
     "講談社": (
         "comic-days.com",
         "pocket.shonenmagazine.com",
+        "magazine-pocket.com",
         "yanmaga.jp",
         "palcy.jp",
     ),
@@ -337,13 +373,38 @@ _PUBLISHER_SITES = {
         "comic-walker.com",
         "comic-walker.jp",
         "shonen-sirius.com",
+        "web-ace.jp",
     ),
     "スクウェア・エニックス": ("manga.square-enix.com", "ganganonline.com"),
+    # マンガクロスは2024-04-23にチャンピオンクロスへ統合。現行の公式ウェブはここだけ。
     "秋田書店": ("championcross.jp",),
     "芳文社": ("comic-fuz.com",),
+    "白泉社": (
+        "manga-park.com",
+        "younganimal.com",
+        "younganimal-idas.com",
+        "feelweb.jp",
+    ),
+    "竹書房": ("takecomic.jp",),
+    "双葉社": ("comic-action.com",),
+    "少年画報社": ("mangadx-plus.com",),
+    "徳間書店": ("comic-ryu.jp",),
+    "一迅社": ("zerosumonline.com",),
     "マッグガーデン": ("magcomi.com",),
+    "コアミックス": ("comic-zenon.com", "comic-zenon.jp"),
+    "TOブックス": ("comic-gardo.com",),
+    "アルファポリス": ("alphapolis.co.jp",),
+    "オーバーラップ": ("comic-gardo.com",),
+    "フロンティアワークス": ("comic-growl.com",),
+    "ホビージャパン": ("comic-fire.com", "comic-fire.jp"),
+    "ブシロードワークス": ("comic-boost.com",),
+    "マイクロマガジン社": ("comic-ride.jp", "licomi.jp"),
+    "イマジカインフォス": ("lovecoffre.com",),
     "ヒーローズ": ("viewer.heros-web.com", "heros-web.com"),
     "Cygames": ("cycomi.com",),
+    "新潮社": ("kuragebunch.com", "comicbunch.com"),
+    "アース・スター": ("comic-earthstar.com",),
+    "フレックスコミックス": ("comic-meteor.jp",),
 }
 
 
@@ -872,6 +933,13 @@ def _host_search_urls(host: str, term: str) -> list[str]:
             f"https://comic-walker.com/search/?keyword={q}",
             f"https://comic-walker.com/search?keyword={q}",
         ]
+    if "comic-days" in host:
+        return [f"https://comic-days.com/search?q={q}"]
+    if "pocket.shonenmagazine" in host or "magazine-pocket" in host:
+        return [
+            f"https://pocket.shonenmagazine.com/search?q={q}",
+            f"https://pocket.shonenmagazine.com/episode/search?q={q}",
+        ]
     if "sirius" in host:
         return [
             f"https://shonen-sirius.com/search?q={q}",
@@ -887,6 +955,8 @@ def _host_search_urls(host: str, term: str) -> list[str]:
         return [f"https://www.corocoro.jp/search?q={q}"]
     if host == "championcross.jp":
         return [f"https://championcross.jp/search?q={q}"]
+    if "alphapolis" in host:
+        return [f"https://www.alphapolis.co.jp/search?query={q}"]
     return [f"https://{host}/search?q={q}"]
 
 
@@ -902,18 +972,14 @@ def _pick_official_from_query(fn: SearchFn, query: str) -> str:
 
 
 def search_official_preview(comic: Comic, *, search_fn: SearchFn | None = None) -> str:
-    """先に『タイトル 1話』を当て、外したら公式サイト内検索へ。"""
-    fn = search_fn or default_web_search
-    web_queries = search_queries(comic, include_sites=False)
-    if web_queries:
-        url = _pick_official_from_query(fn, web_queries[0])
-        if url:
-            return url
+    """出版社の公式配信サイトを先に探し、無ければウェブの『タイトル 1話』へ。"""
     if search_fn is None:
         url = search_giga_preview(comic)
         if url:
             return url
-    for query in web_queries[1:]:
+    fn = search_fn or default_web_search
+    web_queries = search_queries(comic, include_sites=False)
+    for query in web_queries:
         url = _pick_official_from_query(fn, query)
         if url:
             return url

@@ -261,6 +261,10 @@ class PreviewUrlTests(unittest.TestCase):
         self.assertFalse(any("site:shogakukan-comic.jp" in q for q in shoga))
         houbun = search_queries(Comic(title="件の件について 1", publisher="芳文社"))
         self.assertTrue(any("1話 site:comic-fuz.com" in q for q in houbun))
+        hakusen = search_queries(Comic(title="花とゆめ作品 1", publisher="白泉社"))
+        self.assertTrue(any("1話 site:manga-park.com" in q for q in hakusen))
+        take = search_queries(Comic(title="竹書房作品 1", publisher="竹書房"))
+        self.assertTrue(any("1話 site:takecomic.jp" in q for q in take))
 
     def test_isbn_maps_imprint_to_kodansha_sites(self) -> None:
         from manga_checker.preview import preview_hosts_for, isbn_publisher_guess
@@ -406,7 +410,7 @@ class PreviewSearchOrderTests(unittest.TestCase):
             target,
         )
 
-    def test_web_query_hits_before_giga(self) -> None:
+    def test_publisher_sites_before_web_search(self) -> None:
         from unittest.mock import patch
 
         comic = Comic(
@@ -415,16 +419,18 @@ class PreviewSearchOrderTests(unittest.TestCase):
             isbn="9784060000001",
             pubdate="2026-11-12",
         )
+        magapoke = "https://pocket.shonenmagazine.com/title/1/episode/1"
         with patch(
             "manga_checker.preview.search_giga_preview",
-            return_value="https://shonenjumpplus.com/episode/giga-only",
+            return_value=magapoke,
         ) as giga, patch(
             "manga_checker.preview.default_web_search",
             return_value=["https://comic-days.com/episode/12207421984186879152"],
-        ):
+        ) as web:
             url = search_official_preview(comic)
-        self.assertIn("comic-days.com", url)
-        giga.assert_not_called()
+        self.assertEqual(url, magapoke)
+        giga.assert_called()
+        web.assert_not_called()
 
     def test_giga_runs_if_first_web_query_misses(self) -> None:
         from unittest.mock import patch
@@ -438,14 +444,55 @@ class PreviewSearchOrderTests(unittest.TestCase):
         magapoke = "https://pocket.shonenmagazine.com/title/03246/episode/441544"
         with patch(
             "manga_checker.preview.search_giga_preview",
-            return_value=magapoke,
-        ) as giga, patch(
+            return_value="",
+        ), patch(
             "manga_checker.preview.default_web_search",
-            return_value=["https://www.tohnichi.co.jp/"],
+            return_value=["https://www.tohnichi.co.jp/", magapoke],
         ):
             url = search_official_preview(comic)
         self.assertEqual(url, magapoke)
-        giga.assert_called()
+
+    def test_kodansha_hosts_include_magapoke(self) -> None:
+        from manga_checker.preview import preview_hosts_for
+
+        hosts = preview_hosts_for(
+            Comic(title="群雄を綴る(1)", publisher="講談社", isbn="9784065453575")
+        )
+        self.assertIn("pocket.shonenmagazine.com", hosts)
+        self.assertIn("comic-days.com", hosts)
+
+    def test_priority_publishers_have_official_preview_hosts(self) -> None:
+        from manga_checker.preview import preview_hosts_for, publisher_preview_hosts
+        from manga_checker.publishers import PUBLISHER_ORDER
+
+        expected = {
+            "秋田書店": ("championcross.jp",),
+            "白泉社": "manga-park.com",
+            "竹書房": "takecomic.jp",
+            "双葉社": "comic-action.com",
+            "少年画報社": "mangadx-plus.com",
+            "徳間書店": "comic-ryu.jp",
+            "一迅社": "zerosumonline.com",
+            "コアミックス": "comic-zenon.com",
+            "TOブックス": "comic-gardo.com",
+            "オーバーラップ": "comic-gardo.com",
+            "フロンティアワークス": "comic-growl.com",
+            "ホビージャパン": "comic-fire.com",
+            "ブシロードワークス": "comic-boost.com",
+            "マイクロマガジン社": "comic-ride.jp",
+            "イマジカインフォス": "lovecoffre.com",
+            "アルファポリス": "alphapolis.co.jp",
+        }
+        for name in PUBLISHER_ORDER:
+            self.assertTrue(publisher_preview_hosts(name), name)
+        self.assertEqual(publisher_preview_hosts("秋田書店"), expected["秋田書店"])
+        for name, host in expected.items():
+            if name == "秋田書店":
+                continue
+            self.assertIn(host, preview_hosts_for(Comic(title="x 1", publisher=name)))
+        self.assertTrue(is_official_preview_url("https://manga-park.com/title/123/episode/1"))
+        self.assertTrue(is_official_preview_url("https://takecomic.jp/episode/abc"))
+        self.assertTrue(is_official_preview_url("https://comic-gardo.com/episode/1"))
 
     def test_magapoke_title_episode_is_official(self) -> None:
         self.assertTrue(
