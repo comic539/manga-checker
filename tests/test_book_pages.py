@@ -63,6 +63,8 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("978-4-8322-0000-1", body)
             self.assertIn("アニメイト", body)
             self.assertIn("試し読み", body)
+            self.assertIn('class="copy-title"', body)
+            self.assertIn("clipboard.writeText", body)
             self.assertIn('class="fav-btn"', body)
             self.assertIn("ichikomi-favorites-v1", body)
             self.assertIn("購入", body)

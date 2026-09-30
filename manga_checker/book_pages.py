@@ -308,6 +308,27 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       font-size: 1.35rem;
       line-height: 1.4;
     }}
+    h1 .copy-title {{
+      display: inline;
+      vertical-align: middle;
+      margin-left: 6px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }}
+    h1 .copy-title:hover {{
+      background: #f3e6d6;
+      color: var(--ink);
+    }}
+    h1 .copy-title.done {{
+      color: #1f7a3a;
+    }}
     .hero {{
       display: grid;
       grid-template-columns: 1fr;
@@ -647,7 +668,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
   </div>
   <div class="wrap">
     <a class="back" href="../index.html">← 一覧へ戻る</a>
-    <h1>{html.escape(page_title)}</h1>
+    <h1>{html.escape(page_title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button></h1>
     <section class="hero">
       <div class="hero-info">
       <div class="hero-cover">
@@ -735,6 +756,38 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
           btn.setAttribute("aria-pressed", now ? "true" : "false");
         }});
       }});
+      document.querySelectorAll(".copy-title").forEach(function (btn) {{
+        var label = "📋 コピー";
+        btn.addEventListener("click", function () {{
+          var text = btn.getAttribute("data-title") || "";
+          var done = function () {{
+            btn.textContent = "コピー完了！";
+            btn.classList.add("done");
+            setTimeout(function () {{
+              btn.textContent = label;
+              btn.classList.remove("done");
+            }}, 1200);
+          }};
+          if (navigator.clipboard && navigator.clipboard.writeText) {{
+            navigator.clipboard.writeText(text).then(done).catch(function () {{
+              fallbackCopy(text); done();
+            }});
+          }} else {{
+            fallbackCopy(text); done();
+          }}
+        }});
+      }});
+      function fallbackCopy(text) {{
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {{ document.execCommand("copy"); }} catch (e) {{}}
+        document.body.removeChild(ta);
+      }}
     }})();
   </script>
 </body>

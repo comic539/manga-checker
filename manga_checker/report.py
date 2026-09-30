@@ -31,14 +31,14 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand17"
+ASSET_VER = "brand19"
 INTRO_HEADING = "【イチコミ特典＋の説明】"
 INTRO_NOTES = [
     "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
     "検知できなかった店舗は『特典なし』と表示します（取り扱いなし・情報収集エラーを含みます）。",
     "特典があるのに『特典なし』となる場合がございます。",
     "特典の配布状況の最終確認は各書店の公式商品ページにてご確認ください。",
-    "現在月から前後３カ月の情報を掲載しております",
+    "過去に掲載した月は残し、現在月から前後３カ月も合わせて掲載しております",
     "当サイトはアフィリエイト広告(PR)を利用しています。",
 ]
 
@@ -1447,9 +1447,19 @@ def _html_document(
       padding-bottom: 4px;
     }}
     .pager-bottom {{
-      margin-bottom: 40px;
-      padding-bottom: 24px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
     }}
+    .month-count {{
+      max-width: 1360px;
+      margin: 0 auto 8px;
+      padding: 0 16px 4px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-align: center;
+    }}
+    .month-count[hidden] {{ display: none !important; }}
     .pager-pages {{
       display: flex;
       align-items: center;
@@ -1688,6 +1698,7 @@ def _html_document(
     <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
+  <p class="month-count" id="month-count"></p>
   <main>
     {body}
     <p class="empty" id="search-empty" hidden>一致する作品がありません。</p>
@@ -1768,6 +1779,7 @@ def _html_document(
       var goBtn = document.getElementById("search-go");
       var suggest = document.getElementById("search-suggest");
       var hit = document.getElementById("search-hit");
+      var monthCount = document.getElementById("month-count");
       var empty = document.getElementById("search-empty");
       var pagers = document.querySelectorAll(".pager");
       var cluster = input ? input.closest(".search-cluster") : null;
@@ -2073,6 +2085,13 @@ def _html_document(
           }} else if (!matched.length) hit.textContent = total + "件中 0件表示";
           else if (matched.length <= PAGE_SIZE) hit.textContent = total + "件中 " + matched.length + "件表示";
           else hit.textContent = matched.length + "件中 " + shownFrom + "〜" + shownTo + "件表示";
+        }}
+        if (monthCount) {{
+          if (favMode) {{
+            monthCount.textContent = "お気に入り " + matched.length + "作品";
+          }} else {{
+            monthCount.textContent = "この月 " + total + "作品";
+          }}
         }}
         if (empty) empty.hidden = matched.length !== 0;
         renderPager(pages, matched.length);

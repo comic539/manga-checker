@@ -9,7 +9,13 @@ from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
 
-from manga_checker.catalog import fetch_months_volume_ones, load_catalog_json, write_catalog_json
+from manga_checker.catalog import (
+    catalog_display_months,
+    fetch_months_volume_ones,
+    load_catalog_json,
+    merge_catalog_months,
+    write_catalog_json,
+)
 from manga_checker.dates import format_year_month, iter_month_offsets, iter_months
 from manga_checker.http import configure_ssl, make_session
 from manga_checker.models import ComicReport
@@ -23,7 +29,7 @@ from manga_checker.stores import check_stores
 def parse_args() -> argparse.Namespace:
     today = date.today()
     parser = argparse.ArgumentParser(
-        description="今日を基準に前後3ヶ月（計7ヶ月）のコミック第1巻を集め、書店特典の確認用一覧を作ります。"
+        description="今日を基準に前後3ヶ月を走査し、保存済みの過去月も残して書店特典の確認用一覧を作ります。"
     )
     parser.add_argument("--year", type=int, default=today.year, help="基準年（省略時は今年＝当月タブ）")
     parser.add_argument("--month", type=int, default=today.month, help="基準月 1-12（省略時は今月＝初期選択）")
@@ -31,7 +37,7 @@ def parse_args() -> argparse.Namespace:
         "--months",
         type=int,
         default=None,
-        help="指定時のみ、基準月から連続Nヶ月（省略時は基準月の前後3ヶ月・計7タブ）",
+        help="指定時のみ、基準月から連続Nヶ月（省略時は前後3ヶ月走査＋保存済み過去月）",
     )
     parser.add_argument(
         "--fetch",
@@ -104,8 +110,9 @@ def main() -> None:
     else:
         windows = iter_month_offsets(args.year, args.month, before=3, after=3)
         active_period = (args.year, args.month)
-    labels = "、".join(format_year_month(year, month) for year, month in windows)
-    print(f"書誌を取得しています… {labels}（各月は初日〜末日。楽天は次ページがなくなるまで取得し、不足月は分割走査します。--limit は月ごとの出力件数です）")
+    live_windows = list(windows)
+    labels = "、".join(format_year_month(year, month) for year, month in live_windows)
+    print(f"書誌を走査します… {labels}（各月は初日〜末日。保存済みの過去月は走査窓から外れても残します）")
     if args.fetch:
         print("各書店の特典ページを取得して判定します（時間がかかります。スキップは --no-fetch）。")
     else:
@@ -116,30 +123,45 @@ def main() -> None:
     catalog.load(session)
 
     catalog_json = args.out_dir / "catalog_by_month.json"
+    keep_saved_months = args.months is None
+    load_months = None if keep_saved_months else live_windows
     saved_catalog = (
-        load_catalog_json(catalog_json, windows, refresh_covers=False)
+        load_catalog_json(catalog_json, load_months, refresh_covers=False)
         if catalog_json.exists()
         else {}
     )
     if args.reuse_catalog and saved_catalog:
         print(f"保存済み書誌を読みます: {catalog_json.resolve()}（楽天/NDLの再取得はしません）")
         comics_by_month = saved_catalog
+        if keep_saved_months:
+            windows = catalog_display_months(live_windows, comics_by_month)
         write_catalog_json(catalog_json, comics_by_month)
     else:
         if args.refetch_past:
             print("過去月も含めて書誌を取り直します（--refetch-past）。")
         else:
             print("書誌: 過去月は保存済みがあれば再利用し、当月・未来月だけ楽天を走査します。")
-        comics_by_month = fetch_months_volume_ones(
-            windows,
+        fetched = fetch_months_volume_ones(
+            live_windows,
             extra_csv=args.csv_in,
             session=session,
             saved=saved_catalog,
             today=date.today(),
             refetch_past=args.refetch_past,
         )
+        comics_by_month = (
+            merge_catalog_months(saved_catalog, fetched)
+            if keep_saved_months
+            else fetched
+        )
+        if keep_saved_months:
+            windows = catalog_display_months(live_windows, comics_by_month)
         args.out_dir.mkdir(parents=True, exist_ok=True)
         write_catalog_json(catalog_json, comics_by_month)
+    print(
+        "掲載月: "
+        + "、".join(format_year_month(year, month) for year, month in windows)
+    )
 
     checks_cache_path = args.out_dir / "store_checks.json"
     checks_cache = load_checks_cache(checks_cache_path)

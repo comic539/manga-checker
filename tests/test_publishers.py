@@ -126,9 +126,9 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn('class="intro-heading"', html)
         self.assertIn("第1巻の各書店の特典情報", html)
         self.assertNotIn("【第1巻】", html)
-        self.assertIn("現在月から前後３カ月の情報を掲載しております", html)
+        self.assertIn("過去に掲載した月は残し、現在月から前後３カ月も合わせて掲載しております", html)
         self.assertLess(
-            html.find("現在月から前後３カ月の情報を掲載しております"),
+            html.find("過去に掲載した月は残し、現在月から前後３カ月も合わせて掲載しております"),
             html.find("当サイトはアフィリエイト広告(PR)を利用しています。"),
         )
         self.assertIn("情報収集エラー", html)
@@ -169,6 +169,8 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertLess(html.find('class="ad-container ad-footer"'), html.find("</body>"))
         self.assertIn('id="pager"', html)
         self.assertIn('id="pager-top"', html)
+        self.assertIn('id="month-count"', html)
+        self.assertIn("この月", html)
         self.assertIn("pager-prev", html)
         self.assertIn("pager-next", html)
         self.assertIn("PAGE_SIZE = 50", html)
@@ -187,7 +189,8 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn("data-pubdate=", html)
         self.assertIn("ichikomi-list-pos-v1", html)
         self.assertLess(html.find("ad-header"), html.find('id="pager-top"'))
-        self.assertLess(html.find('id="pager-top"'), html.find("<main"))
+        self.assertLess(html.find('id="pager-top"'), html.find('id="month-count"'))
+        self.assertLess(html.find('id="month-count"'), html.find("<main"))
         self.assertGreater(html.find('id="pager"'), html.find('class="ad-container ad-footer"'))
         self.assertGreater(html.find('class="ad-container ad-footer"'), html.find("</main>"))
 

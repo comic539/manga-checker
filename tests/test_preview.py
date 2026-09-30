@@ -12,10 +12,13 @@ from manga_checker.preview import (
     pick_giga_first_episode,
     pick_matching_preview_link,
     pick_official_url,
+    preview_fetch_order,
     preview_links_for,
+    search_official_preview,
     search_queries,
     search_query,
     _preview_name,
+    _search_result_url,
     _short_search_name,
     _unwrap_search_url,
 )
@@ -38,6 +41,16 @@ class PreviewUrlTests(unittest.TestCase):
         self.assertFalse(is_official_preview_url("https://www.amazon.co.jp/dp/x"))
         self.assertFalse(is_official_preview_url("https://comic-days.com/search?q=a"))
         self.assertTrue(is_official_preview_url("https://www.comic-days.com/episode/1"))
+        self.assertTrue(
+            is_official_preview_url(
+                "https://shonen-sirius.com/comics/2026/9_02/0000429532.html"
+            )
+        )
+        self.assertTrue(
+            is_official_preview_url(
+                "https://comic-walker.com/detail/KC_00500001290011_E"
+            )
+        )
         self.assertTrue(
             is_official_preview_url(
                 "https://ciao.shogakukan.co.jp/comics/title/00827/episode/32377"
@@ -223,6 +236,15 @@ class PreviewUrlTests(unittest.TestCase):
         self.assertNotRegex(queries[0], r"\(\s*1\s*\)")
         self.assertTrue(any("1話 site:shonenjumpplus.com" in q for q in queries))
 
+    def test_long_title_keeps_full_query_and_kadokawa_sirius(self) -> None:
+        long_title = "非の打ち所のない令息から婚約の打診が来たので、断ってみました(1)"
+        comic = Comic(title=long_title, publisher="KADOKAWA", isbn="9784040000000")
+        queries = search_queries(comic)
+        self.assertTrue(queries[0].startswith("非の打ち所のない令息から婚約の打診が来たので、断ってみました 1話"))
+        self.assertGreater(len(queries[0]), 30)
+        self.assertTrue(any("site:shonen-sirius.com" in q for q in queries))
+        self.assertTrue(any("site:comic-walker.com" in q for q in queries))
+
     def test_short_site_query_and_publisher_hosts(self) -> None:
         self.assertEqual(
             _short_search_name("バキのわ! バキを語る女子高校生たち"),
@@ -372,6 +394,46 @@ class BookPageTrialButtonTests(unittest.TestCase):
         self.assertNotIn("版元ドットコム", body)
         self.assertNotIn("hanmoto.com", body)
         self.assertNotIn("シーモアで試し読み", body)
+
+
+class PreviewSearchOrderTests(unittest.TestCase):
+    def test_unwraps_google_relative_url_redirect(self) -> None:
+        target = "https://comic-walker.com/detail/KC_00500001290011_E"
+        wrapped = "/url?q=" + target + "&sa=U&ved=0ah"
+        self.assertEqual(_search_result_url(wrapped), target)
+        self.assertEqual(
+            pick_official_url([wrapped, "https://www.amazon.co.jp/dp/x"]),
+            target,
+        )
+
+    def test_web_query_hits_before_giga(self) -> None:
+        from unittest.mock import patch
+
+        comic = Comic(
+            title="来月の本",
+            publisher="講談社",
+            isbn="9784060000001",
+            pubdate="2026-11-12",
+        )
+        with patch(
+            "manga_checker.preview.search_giga_preview",
+            return_value="https://shonenjumpplus.com/episode/giga-only",
+        ) as giga, patch(
+            "manga_checker.preview.default_web_search",
+            return_value=["https://comic-days.com/episode/12207421984186879152"],
+        ):
+            url = search_official_preview(comic)
+        self.assertIn("comic-days.com", url)
+        giga.assert_not_called()
+
+    def test_preview_fetch_order_puts_future_before_past(self) -> None:
+        comics = [
+            Comic(title="六月", isbn="9784060000001", pubdate="2026-06-01"),
+            Comic(title="十一月", isbn="9784060000002", pubdate="2026-11-01"),
+            Comic(title="九月", isbn="9784060000003", pubdate="2026-09-15"),
+        ]
+        ordered = preview_fetch_order(comics, today=date(2026, 9, 30))
+        self.assertEqual([c.title for c in ordered], ["九月", "十一月", "六月"])
 
 
 if __name__ == "__main__":

@@ -30,6 +30,9 @@ OFFICIAL_HOSTS = (
     "www.sunday-webry.com",
     "comic-walker.com",
     "comic-walker.jp",
+    "www.comic-walker.com",
+    "shonen-sirius.com",
+    "www.shonen-sirius.com",
     "championcross.jp",
     "comic-action.com",
     "younganimal.com",
@@ -208,11 +211,17 @@ def preview_cache_key(comic: Comic) -> str:
     return digits or (comic.display_title or comic.title or "").strip()
 
 
-def _preview_name(comic: Comic) -> str:
-    """長いタイトルは20〜30文字程度に切り、区切り記号は空白にする。"""
+def _full_preview_name(comic: Comic) -> str:
+    """試し読み検索用の作品名。長いタイトルは切らない。"""
     name = bare_search_title(comic.title, comic.volume)
     name = re.sub(r"[〜～:：/／]", " ", name)
     name = re.sub(r"[\s　]+", " ", name).strip()
+    return name
+
+
+def _preview_name(comic: Comic) -> str:
+    """site:検索向け。長いタイトルは20〜30文字程度に切る。"""
+    name = _full_preview_name(comic)
     if len(name) > 30:
         cut = name[:30]
         space = cut.rfind(" ")
@@ -232,7 +241,23 @@ def _short_search_name(name: str) -> str:
 
 
 def search_query(comic: Comic) -> str:
-    return f"{_preview_name(comic)} 1話"
+    return f"{_full_preview_name(comic)} 1話"
+
+
+def search_queries(comic: Comic, *, include_sites: bool = True) -> list[str]:
+    full = _full_preview_name(comic)
+    short = _preview_name(comic)
+    base_full = f"{full} 1話"
+    queries: list[str] = [base_full, f'"{full}" 1話']
+    if short != full:
+        queries.append(f"{short} 1話")
+    queries.append(f"{base_full} 試し読み")
+    if include_sites:
+        for site in preview_hosts_for(comic)[:6]:
+            queries.append(f"{base_full} site:{site}")
+            if short != full:
+                queries.append(f"{short} 1話 site:{site}")
+    return queries
 
 
 _ISBN_PUBLISHER_PREFIX = {
@@ -250,8 +275,12 @@ _CROSS_PREVIEW_SITES = (
     "pocket.shonenmagazine.com",
     "shonenjumpplus.com",
     "comic-walker.com",
+    "shonen-sirius.com",
     "manga-one.com",
     "sunday-webry.com",
+    "sunday.webry.com",
+    "ciao.shogakukan.co.jp",
+    "corocoro.jp",
     "comic-fuz.com",
     "championcross.jp",
     "ganganonline.com",
@@ -259,7 +288,6 @@ _CROSS_PREVIEW_SITES = (
     "alphapolis.co.jp",
     "kuragebunch.com",
     "comic-action.com",
-    "corocoro.jp",
 )
 
 
@@ -284,16 +312,6 @@ def preview_hosts_for(comic: Comic) -> tuple[str, ...]:
     return tuple(seen)
 
 
-def search_queries(comic: Comic, *, include_sites: bool = True) -> list[str]:
-    name = _preview_name(comic)
-    base = f"{name} 1話"
-    queries: list[str] = [base, f'"{name}" 1話', f"{base} 試し読み"]
-    if include_sites:
-        for site in preview_hosts_for(comic)[:4]:
-            queries.append(f"{base} site:{site}")
-    return queries
-
-
 _PUBLISHER_SITES = {
     "集英社": (
         "shonenjumpplus.com",
@@ -304,6 +322,7 @@ _PUBLISHER_SITES = {
     "小学館": (
         "manga-one.com",
         "sunday-webry.com",
+        "sunday.webry.com",
         "ciao.shogakukan.co.jp",
         "cheese.jp",
         "corocoro.jp",
@@ -314,7 +333,11 @@ _PUBLISHER_SITES = {
         "yanmaga.jp",
         "palcy.jp",
     ),
-    "KADOKAWA": ("comic-walker.com", "comic-walker.jp"),
+    "KADOKAWA": (
+        "comic-walker.com",
+        "comic-walker.jp",
+        "shonen-sirius.com",
+    ),
     "スクウェア・エニックス": ("manga.square-enix.com", "ganganonline.com"),
     "秋田書店": ("championcross.jp",),
     "芳文社": ("comic-fuz.com",),
@@ -390,13 +413,25 @@ def _unwrap_bing(url: str) -> str:
 def _unwrap_google(url: str) -> str:
     parsed = urlparse(url)
     host = (parsed.netloc or "").lower()
+    path = parsed.path or ""
+    if path.startswith("/url") and not host:
+        parsed = urlparse("https://www.google.com" + url)
+        host = parsed.netloc.lower()
+        path = parsed.path
     if "google." not in host:
         return url
-    if parsed.path.startswith("/url"):
+    if path.startswith("/url"):
         target = (parse_qs(parsed.query).get("q") or [""])[0]
         if target.startswith("http"):
             return target
     return url
+
+
+def _search_result_url(href: str) -> str:
+    raw = (href or "").strip()
+    if raw.startswith("/url") or raw.startswith("/imgres"):
+        raw = "https://www.google.com" + raw
+    return _unwrap_search_url(raw)
 
 
 def _unwrap_search_url(url: str) -> str:
@@ -451,7 +486,7 @@ def pick_official_url(
     ranked: list[tuple[int, str]] = []
     seen: set[str] = set()
     for raw in urls:
-        url = _unwrap_search_url((raw or "").strip())
+        url = _search_result_url((raw or "").strip())
         if not is_official_preview_url(url, allowed_hosts=allowed_hosts):
             continue
         key = url.split("#")[0]
@@ -464,6 +499,8 @@ def pick_official_url(
             score += 6
         if "/viewer" in path:
             score += 5
+        if "/detail/" in path:
+            score += 4
         if "/trial" in path or "/reader" in path:
             score += 2
         if "/volume/" in path:
@@ -537,7 +574,14 @@ def _google_html_search(query: str, max_results: int = 10) -> list[str]:
     try:
         response = session.get(
             "https://www.google.com/search",
-            params={"q": query, "hl": "ja", "lr": "lang_ja", "num": str(max_results)},
+            params={
+                "q": query,
+                "hl": "ja",
+                "lr": "lang_ja",
+                "num": str(max_results),
+                "gbv": "1",
+                "pws": "0",
+            },
             headers={"Accept-Language": "ja,en;q=0.8"},
             timeout=20,
         )
@@ -549,7 +593,7 @@ def _google_html_search(query: str, max_results: int = 10) -> list[str]:
     urls: list[str] = []
     seen: set[str] = set()
     for a in soup.select("a[href]"):
-        href = _unwrap_search_url((a.get("href") or "").strip())
+        href = _search_result_url((a.get("href") or "").strip())
         if not href.startswith("http"):
             continue
         if "google." in _host_of(href):
@@ -767,44 +811,51 @@ def pick_matching_preview_link(
 def search_giga_preview(comic: Comic) -> str:
     from manga_checker.http import make_session
 
-    name = _preview_name(comic)
+    name = _full_preview_name(comic)
+    short = _preview_name(comic)
     hosts = list(preview_hosts_for(comic)) or list(_CROSS_PREVIEW_SITES)
     if not name:
         return ""
     session = make_session()
     terms = [name]
+    if short and short not in terms:
+        terms.append(short)
     first = name.split()[0]
     if first and first not in terms:
         terms.append(first)
     for host in hosts:
         for term in terms:
-            try:
-                response = session.get(
-                    f"https://{host}/search?q=" + quote(term),
-                    timeout=20,
-                )
-            except Exception:
-                response = None
-            url = ""
-            if response is not None and response.status_code < 400:
-                url = pick_matching_preview_link(
-                    response.text,
-                    name,
-                    host,
-                    require_full_title=(term != name),
-                )
-            if url:
-                return url
+            for search_url in _host_search_urls(host, term):
+                try:
+                    response = session.get(search_url, timeout=20)
+                except Exception:
+                    response = None
+                url = ""
+                if response is not None and response.status_code < 400:
+                    url = pick_matching_preview_link(
+                        response.text,
+                        name,
+                        host,
+                        require_full_title=(term != name),
+                    )
+                if url:
+                    return url
         try:
             hits = default_web_search(f"{name} 1話 site:{host}")
         except Exception:
             hits = []
         url = pick_official_url(hits, allowed_hosts=(host,))
+        if not url and short != name:
+            try:
+                hits = default_web_search(f"{short} 1話 site:{host}")
+            except Exception:
+                hits = []
+            url = pick_official_url(hits, allowed_hosts=(host,))
         if not url:
-            short = _short_search_name(name)
-            if short:
+            tiny = _short_search_name(name)
+            if tiny:
                 try:
-                    hits = default_web_search(f"{short} 1話 site:{host}")
+                    hits = default_web_search(f"{tiny} 1話 site:{host}")
                 except Exception:
                     hits = []
                 url = pick_official_url(hits, allowed_hosts=(host,))
@@ -814,20 +865,60 @@ def search_giga_preview(comic: Comic) -> str:
     return ""
 
 
+def _host_search_urls(host: str, term: str) -> list[str]:
+    q = quote(term)
+    if "comic-walker" in host:
+        return [
+            f"https://comic-walker.com/search/?keyword={q}",
+            f"https://comic-walker.com/search?keyword={q}",
+        ]
+    if "sirius" in host:
+        return [
+            f"https://shonen-sirius.com/search?q={q}",
+            f"https://www.shonen-sirius.com/?s={q}",
+        ]
+    if "sunday-webry" in host:
+        return [f"https://www.sunday-webry.com/search?q={q}"]
+    if "sunday.webry" in host:
+        return [f"https://www.sunday.webry.com/search?q={q}"]
+    if host == "ciao.shogakukan.co.jp":
+        return [f"https://ciao.shogakukan.co.jp/search?q={q}"]
+    if "corocoro" in host:
+        return [f"https://www.corocoro.jp/search?q={q}"]
+    if host == "championcross.jp":
+        return [f"https://championcross.jp/search?q={q}"]
+    return [f"https://{host}/search?q={q}"]
+
+
+def _pick_official_from_query(fn: SearchFn, query: str) -> str:
+    try:
+        results = fn(query) or []
+    except Exception:
+        results = []
+    url = pick_official_url(list(results))
+    if url:
+        return _normalize_preview_url(url)
+    return ""
+
+
 def search_official_preview(comic: Comic, *, search_fn: SearchFn | None = None) -> str:
+    """ブラウザの「試し読みを検索」と同じ全文クエリを先に当て、公式ホストだけ採用する。"""
+    fn = search_fn or default_web_search
+    web_queries = search_queries(comic, include_sites=False)
+    for query in web_queries:
+        url = _pick_official_from_query(fn, query)
+        if url:
+            return url
     if search_fn is None:
         url = search_giga_preview(comic)
         if url:
             return url
-    fn = search_fn or default_web_search
     for query in search_queries(comic, include_sites=True):
-        try:
-            results = fn(query) or []
-        except Exception:
-            results = []
-        url = pick_official_url(list(results))
+        if query in web_queries:
+            continue
+        url = _pick_official_from_query(fn, query)
         if url:
-            return _normalize_preview_url(url)
+            return url
     return ""
 
 
@@ -842,11 +933,15 @@ def load_preview_cache(path: Path) -> dict[str, dict[str, str]]:
         return {}
     result: dict[str, dict[str, str]] = {}
     for key, row in payload.items():
-        if isinstance(row, dict):
-            result[str(key)] = {
-                "official_url": str(row.get("official_url") or ""),
-                "title": str(row.get("title") or ""),
-            }
+        if not isinstance(row, dict):
+            continue
+        official = str(row.get("official_url") or "")
+        if official and not is_official_preview_url(official):
+            official = ""
+        result[str(key)] = {
+            "official_url": official,
+            "title": str(row.get("title") or ""),
+        }
     return result
 
 
@@ -874,6 +969,27 @@ def preview_links_for(
     }
 
 
+def preview_fetch_order(
+    comics: list[Comic],
+    today: date | None = None,
+) -> list[Comic]:
+    """当月→未来月→過去月の順。時間切れでも来月分が後回しにならないようにする。"""
+    today = today or date.today()
+    current = (today.year, today.month)
+
+    def key(comic: Comic) -> tuple[int, tuple[int, int], str]:
+        ym = year_month_from_pubdate(comic.pubdate) or current
+        if ym == current:
+            bucket = 0
+        elif ym > current:
+            bucket = 1
+        else:
+            bucket = 2
+        return (bucket, ym, comic.display_title)
+
+    return sorted(comics, key=key)
+
+
 def resolve_preview_cache(
     comics: list[Comic],
     cache: dict[str, dict[str, str]],
@@ -882,10 +998,11 @@ def resolve_preview_cache(
     limit: int = 0,
     delay_sec: float = 1.2,
     search_fn: SearchFn | None = None,
+    today: date | None = None,
 ) -> int:
     """キャッシュを更新する。戻り値は新規検索した件数。"""
     searched = 0
-    for comic in comics:
+    for comic in preview_fetch_order(comics, today=today):
         key = preview_cache_key(comic)
         if not key:
             continue

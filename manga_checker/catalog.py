@@ -302,6 +302,28 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
     print(f"月別JSONを書き出しました: {path.resolve()}")
 
 
+def merge_catalog_months(
+    saved: dict[tuple[int, int], list[Comic]],
+    updated: dict[tuple[int, int], list[Comic]],
+) -> dict[tuple[int, int], list[Comic]]:
+    """走査対象月で上書きし、JSONに残っている過去月は消さない。"""
+    merged = dict(saved)
+    merged.update(updated)
+    return merged
+
+
+def catalog_display_months(
+    live: list[tuple[int, int]],
+    by_month: dict[tuple[int, int], list[Comic]],
+) -> list[tuple[int, int]]:
+    """走査窓に加え、作品が残っている保存月もタブに出す。"""
+    keys = set(live)
+    for ym, comics in by_month.items():
+        if comics:
+            keys.add(ym)
+    return sorted(keys)
+
+
 def load_catalog_json(
     path: Path,
     months: list[tuple[int, int]] | None = None,

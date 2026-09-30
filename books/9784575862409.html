@@ -11,7 +11,7 @@
   <meta property="og:image" content="https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/2409/9784575862409_1_2.jpg?_ex=200x200">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="『侵略系Vtuber瑛りあん(1)』店舗別購入特典・発売日情報まとめ｜イチコミ特典＋">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand17">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand19">
   <style>
     :root {
       --bg: #ffffff;
@@ -125,6 +125,27 @@
       margin: 0 0 16px;
       font-size: 1.35rem;
       line-height: 1.4;
+    }
+    h1 .copy-title {
+      display: inline;
+      vertical-align: middle;
+      margin-left: 6px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    h1 .copy-title:hover {
+      background: #f3e6d6;
+      color: var(--ink);
+    }
+    h1 .copy-title.done {
+      color: #1f7a3a;
     }
     .hero {
       display: grid;
@@ -455,7 +476,7 @@
   <div class="site-top">
     <div class="site-top-inner">
       <a class="logo-link" href="../index.html">
-        <img class="site-logo" src="../logo.png?v=brand17" alt="イチコミ特典＋ 新刊コミック第1巻 書店特典チェック">
+        <img class="site-logo" src="../logo.png?v=brand19" alt="イチコミ特典＋ 新刊コミック第1巻 書店特典チェック">
       </a>
       <div class="header-actions">
         <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
@@ -465,7 +486,7 @@
   </div>
   <div class="wrap">
     <a class="back" href="../index.html">← 一覧へ戻る</a>
-    <h1>『侵略系Vtuber瑛りあん(1)』店舗別購入特典・発売日情報まとめ｜イチコミ特典＋</h1>
+    <h1>『侵略系Vtuber瑛りあん(1)』店舗別購入特典・発売日情報まとめ｜イチコミ特典＋<button type="button" class="copy-title" data-title="侵略系Vtuber瑛りあん(1)">📋 コピー</button></h1>
     <section class="hero">
       <div class="hero-info">
       <div class="hero-cover">
@@ -553,6 +574,38 @@
           btn.setAttribute("aria-pressed", now ? "true" : "false");
         });
       });
+      document.querySelectorAll(".copy-title").forEach(function (btn) {
+        var label = "📋 コピー";
+        btn.addEventListener("click", function () {
+          var text = btn.getAttribute("data-title") || "";
+          var done = function () {
+            btn.textContent = "コピー完了！";
+            btn.classList.add("done");
+            setTimeout(function () {
+              btn.textContent = label;
+              btn.classList.remove("done");
+            }, 1200);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(function () {
+              fallbackCopy(text); done();
+            });
+          } else {
+            fallbackCopy(text); done();
+          }
+        });
+      });
+      function fallbackCopy(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+      }
     })();
   </script>
 </body>

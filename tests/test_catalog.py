@@ -6,8 +6,10 @@ from pathlib import Path
 
 from manga_checker.catalog import (
     _parse_ndl_item,
+    catalog_display_months,
     catalog_month_is_frozen,
     load_catalog_json,
+    merge_catalog_months,
     month_range,
     redistribute_by_pubdate,
     write_catalog_json,
@@ -78,6 +80,28 @@ class CatalogParseTests(unittest.TestCase):
         self.assertEqual(loaded[(2026, 8)][0].cover_url, "https://thumbnail.image.rakuten.co.jp/cover.jpg")
         self.assertEqual(loaded[(2026, 8)][0].cover_source, "rakuten")
         self.assertEqual(loaded[(2026, 9)], [])
+
+    def test_display_months_keep_saved_past_when_live_window_moves(self) -> None:
+        june = Comic(title="六月の本 1", publisher="小学館", pubdate="2026-06-10")
+        oct_comic = Comic(title="十月の本 1", publisher="集英社", pubdate="2026-10-08")
+        saved = {
+            (2026, 6): [june],
+            (2026, 10): [oct_comic],
+        }
+        live = [
+            (2026, 7),
+            (2026, 8),
+            (2026, 9),
+            (2026, 10),
+            (2026, 11),
+            (2026, 12),
+            (2027, 1),
+        ]
+        merged = merge_catalog_months(saved, {(2026, 10): [oct_comic], (2026, 11): []})
+        months = catalog_display_months(live, merged)
+        self.assertIn((2026, 6), months)
+        self.assertIn((2026, 10), months)
+        self.assertIn((2027, 1), months)
 
     def test_past_month_with_saved_rows_is_frozen(self) -> None:
         today = date(2026, 9, 28)
