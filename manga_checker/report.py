@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import html
+import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -31,7 +32,19 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand19"
+ASSET_VER = "brand23"
+
+# A8タグは配布HTMLのまま使う（属性・改行・計測用1pxを改変しない）。
+INDEX_AD_TAGS = [
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBN+FFHG6Q+4ADS+609HT" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www21.a8.net/svt/bgt?aid=260917619933&wid=001&eno=01&mid=s00000020008001009000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4BCDBN+FFHG6Q+4ADS+609HT" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+1U34XE+4Y6G+5Z6WX" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260927714111&wid=001&eno=01&mid=s00000023092001004000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www11.a8.net/0.gif?a8mat=4BCL42+1U34XE+4Y6G+5Z6WX" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBN+FG2VSI+4AHY+5Z6WX" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www23.a8.net/svt/bgt?aid=260917619934&wid=001&eno=01&mid=s00000020023001004000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www14.a8.net/0.gif?a8mat=4BCDBN+FG2VSI+4AHY+5Z6WX" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+6XGN8Y+5FAA+609HT" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www28.a8.net/svt/bgt?aid=260927714419&wid=001&eno=01&mid=s00000025309001009000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www18.a8.net/0.gif?a8mat=4BCL42+6XGN8Y+5FAA+609HT" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+3KMEQ+1892+6XHHD" rel="nofollow">\n<img border="0" width="728" height="90" alt="" src="https://www29.a8.net/svt/bgt?aid=260917620006&wid=001&eno=01&mid=s00000005735001164000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4BCDBO+3KMEQ+1892+6XHHD" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+5DHWDU+4RNG+61RI9" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620325&wid=001&eno=01&mid=s00000022246001016000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www16.a8.net/0.gif?a8mat=4BCDBO+5DHWDU+4RNG+61RI9" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+UD4MQ+37DC+60WN5" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www29.a8.net/svt/bgt?aid=260917620051&wid=001&eno=01&mid=s00000014952001012000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www12.a8.net/0.gif?a8mat=4BCDBO+UD4MQ+37DC+60WN5" alt="">',
+    '<a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+5CB16A+41ZK+661TT" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260927714323&wid=001&eno=01&mid=s00000018920001036000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4BCL42+5CB16A+41ZK+661TT" alt="">',
+]
 INTRO_HEADING = "【イチコミ特典＋の説明】"
 INTRO_NOTES = [
     "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
@@ -1354,13 +1367,6 @@ def _html_document(
       padding: 0 16px;
       overflow: hidden;
     }}
-    .ad-pr {{
-      margin: 0 0 6px;
-      color: #9a9088;
-      font-size: 0.65rem;
-      letter-spacing: 0.16em;
-      font-weight: 700;
-    }}
     .ad-slot {{
       position: relative;
       display: flex;
@@ -1404,14 +1410,18 @@ def _html_document(
       max-width: 1px;
       border: 0;
     }}
+    .ad-header {{
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }}
     .ad-header .ad-row {{
-      max-width: 640px;
+      max-width: 728px;
       align-items: center;
     }}
     .ad-header .ad-slot {{
-      width: auto;
-      max-width: 100%;
-      min-height: 50px;
+      width: 100%;
+      max-width: 728px;
+      min-height: 60px;
     }}
     .ad-footer {{
       margin-bottom: 8px;
@@ -1679,42 +1689,24 @@ def _html_document(
     </p>
     </div>
   </header>
-  <div class="ad-container ad-header">
-    <p class="ad-pr">PR</p>
-    <div class="ad-row">
-      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+5DHWDU+4RNG+5ZU29" rel="nofollow">
-<img border="0" width="120" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620325&wid=001&eno=01&mid=s00000022246001007000&mc=1"></a>
-<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4BCDBO+5DHWDU+4RNG+5ZU29" alt=""></div>
-      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+1U34XE+4Y6G+5ZEMP" rel="nofollow">
-<img border="0" width="320" height="50" alt="" src="https://www22.a8.net/svt/bgt?aid=260927714111&wid=001&eno=01&mid=s00000023092001005000&mc=1"></a>
-<img border="0" width="1" height="1" src="https://www17.a8.net/0.gif?a8mat=4BCL42+1U34XE+4Y6G+5ZEMP" alt=""></div>
-      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+5CB16A+41ZK+601S1" rel="nofollow">
-<img border="0" width="120" height="60" alt="" src="https://www29.a8.net/svt/bgt?aid=260927714323&wid=001&eno=01&mid=s00000018920001008000&mc=1"></a>
-<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4BCL42+5CB16A+41ZK+601S1" alt=""></div>
-    </div>
-  </div>
   <nav class="pager pager-top" id="pager-top" aria-label="ページ送り（上部）" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
     <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
+  <div class="ad-container ad-header" id="ad-header">
+    <div class="ad-row">
+      <div class="ad-slot" id="ad-slot-top"></div>
+    </div>
+  </div>
   <p class="month-count" id="month-count"></p>
   <main>
     {body}
     <p class="empty" id="search-empty" hidden>一致する作品がありません。</p>
   </main>
-  <div class="ad-container ad-footer">
-    <p class="ad-pr">PR</p>
+  <div class="ad-container ad-footer" id="ad-footer">
     <div class="ad-row">
-      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+UD4MQ+37DC+5ZMCH" rel="nofollow">
-<img border="0" width="120" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620051&wid=001&eno=01&mid=s00000014952001006000&mc=1"></a>
-<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4BCDBO+UD4MQ+37DC+5ZMCH" alt=""></div>
-      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+3KMEQ+1892+6QEUP" rel="nofollow">
-<img border="0" width="120" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260917620006&wid=001&eno=01&mid=s00000005735001131000&mc=1"></a>
-<img border="0" width="1" height="1" src="https://www17.a8.net/0.gif?a8mat=4BCDBO+3KMEQ+1892+6QEUP" alt=""></div>
-      <div class="ad-slot"><a href="https://px.a8.net/svt/ejp?a8mat=4BCDBN+FG2VSI+4AHY+5ZU29" rel="nofollow">
-<img border="0" width="120" height="60" alt="" src="https://www21.a8.net/svt/bgt?aid=260917619934&wid=001&eno=01&mid=s00000020023001007000&mc=1"></a>
-<img border="0" width="1" height="1" src="https://www16.a8.net/0.gif?a8mat=4BCDBN+FG2VSI+4AHY+5ZU29" alt=""></div>
+      <div class="ad-slot" id="ad-slot-bottom"></div>
     </div>
   </div>
   <nav class="pager pager-bottom" id="pager" aria-label="ページ送り" hidden>
@@ -1791,6 +1783,37 @@ def _html_document(
       var FAV_KEY = "ichikomi-favorites-v1";
       var favMode = false;
       var favs = {{}};
+      var INDEX_ADS = {json.dumps(INDEX_AD_TAGS, ensure_ascii=False)};
+      function shuffleAds() {{
+        var tags = INDEX_ADS.slice();
+        var i, j, tmp;
+        for (i = tags.length - 1; i > 0; i--) {{
+          j = Math.floor(Math.random() * (i + 1));
+          tmp = tags[i];
+          tags[i] = tags[j];
+          tags[j] = tmp;
+        }}
+        var top = document.getElementById("ad-slot-top");
+        var bottom = document.getElementById("ad-slot-bottom");
+        if (top) top.innerHTML = tags[0] || "";
+        if (bottom) bottom.innerHTML = tags.length > 1 ? tags[1] : (tags[0] || "");
+      }}
+      shuffleAds();
+      function stickyHeaderOffset() {{
+        var header = document.querySelector(".site-top");
+        return header ? Math.ceil(header.getBoundingClientRect().height) + 8 : 8;
+      }}
+      function scrollToPagerAndAds() {{
+        var tabs = document.querySelector(".month-tabs");
+        var pager = document.getElementById("pager-top");
+        var target = tabs || ((pager && !pager.hidden) ? pager : document.getElementById("ad-header"));
+        if (!target) {{
+          window.scrollTo({{ top: 0, behavior: "smooth" }});
+          return;
+        }}
+        var y = target.getBoundingClientRect().top + window.scrollY - stickyHeaderOffset();
+        window.scrollTo({{ top: Math.max(0, y), behavior: "smooth" }});
+      }}
       function loadFavs() {{
         try {{
           var raw = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
@@ -1995,6 +2018,8 @@ def _html_document(
         updateDayBar();
         renderList();
         if (!keepQuery) closeSuggest();
+        shuffleAds();
+        scrollToPagerAndAds();
       }}
       function closeSuggest() {{
         if (!suggest) return;
@@ -2123,12 +2148,13 @@ def _html_document(
         }});
       }}
       function goToPage(page) {{
+        var changed = page !== currentPage;
         currentPage = page;
         renderList();
         saveMonthState();
         saveListPos();
-        var topPager = document.getElementById("pager-top") || document.querySelector("main");
-        if (topPager && topPager.scrollIntoView) topPager.scrollIntoView({{ behavior: "smooth", block: "start" }});
+        if (changed) shuffleAds();
+        scrollToPagerAndAds();
       }}
       function updateSuggest() {{
         if (!suggest) return;
@@ -2219,7 +2245,7 @@ def _html_document(
         window.addEventListener("scroll", onScroll, {{ passive: true }});
         onScroll();
         topBtn.addEventListener("click", function () {{
-          window.scrollTo({{ top: 0, behavior: "smooth" }});
+          scrollToPagerAndAds();
         }});
       }}
       if (!input) {{
