@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Callable
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
-from manga_checker.dates import parse_release_date, year_month_from_pubdate
+from manga_checker.dates import parse_release_date, today_jst, year_month_from_pubdate
 from manga_checker.links import isbn13
 from manga_checker.models import Comic
 from manga_checker.publishers import canonical_publisher
@@ -22,6 +22,8 @@ SearchFn = Callable[[str], list[str]]
 OFFICIAL_HOSTS = (
     "shonenjumpplus.com",
     "plus.shonenjump.com",
+    "rimacomiplus.jp",
+    "www.rimacomiplus.jp",
     "pocket.shonenmagazine.com",
     "magazine-pocket.com",
     "sunday.webry.com",
@@ -276,7 +278,7 @@ def search_queries(comic: Comic, *, include_sites: bool = True) -> list[str]:
         queries.append(f"{short} 1話")
     queries.append(f"{base_full} 試し読み")
     if include_sites:
-        for site in preview_hosts_for(comic)[:6]:
+        for site in preview_hosts_for(comic)[:12]:
             queries.append(f"{base_full} site:{site}")
             if short != full:
                 queries.append(f"{short} 1話 site:{site}")
@@ -297,6 +299,7 @@ _CROSS_PREVIEW_SITES = (
     "comic-days.com",
     "pocket.shonenmagazine.com",
     "shonenjumpplus.com",
+    "rimacomiplus.jp",
     "comic-walker.com",
     "shonen-sirius.com",
     "manga-one.com",
@@ -344,6 +347,7 @@ def preview_hosts_for(comic: Comic) -> tuple[str, ...]:
 _PUBLISHER_SITES = {
     "集英社": (
         "shonenjumpplus.com",
+        "rimacomiplus.jp",
         "tonarinoyj.jp",
         "youngjump.jp",
         "plus.shonenjump.com",
@@ -351,6 +355,9 @@ _PUBLISHER_SITES = {
         "jumpsq.shueisha.co.jp",
         "grandjump.shueisha.co.jp",
         "ultrasj.jp",
+        "cookie.shueisha.co.jp",
+        "you.shueisha.co.jp",
+        "ribon.shueisha.co.jp",
     ),
     "小学館": (
         "manga-one.com",
@@ -416,7 +423,7 @@ def cmoa_search_url(comic: Comic) -> str:
 
 def is_released(pubdate: str, today: date | None = None) -> bool:
     """発売日が今日以前なら発売済み（シーモアボタン用）。"""
-    today = today or date.today()
+    today = today or today_jst()
     parsed = parse_release_date(pubdate)
     if parsed:
         return parsed <= today
@@ -556,7 +563,7 @@ def pick_official_url(
         seen.add(key)
         path = urlparse(url).path.lower()
         score = 0
-        if "/episode" in path or "/chapter" in path:
+        if "/episode" in path or "/episodes" in path or "/chapter" in path:
             score += 6
         if "/viewer" in path:
             score += 5
@@ -650,7 +657,10 @@ def _google_html_search(query: str, max_results: int = 10) -> list[str]:
         return []
     if response.status_code >= 400:
         return []
-    soup = BeautifulSoup(response.text, "html.parser")
+    text = response.text or ""
+    if "enablejs" in text and "/httpservice/retry/enablejs" in text:
+        return []
+    soup = BeautifulSoup(text, "html.parser")
     urls: list[str] = []
     seen: set[str] = set()
     for a in soup.select("a[href]"):
@@ -688,7 +698,7 @@ def _bing_html_search(query: str, max_results: int = 10) -> list[str]:
     soup = BeautifulSoup(response.text, "html.parser")
     urls: list[str] = []
     seen: set[str] = set()
-    for a in soup.select("li.b_algo h2 a, h2 a"):
+    for a in soup.select("li.b_algo h2 a"):
         href = _unwrap_search_url((a.get("href") or "").strip())
         if not href.startswith("http"):
             continue
@@ -705,6 +715,7 @@ def _bing_html_search(query: str, max_results: int = 10) -> list[str]:
 _NOISE_HOST_PARTS = (
     "crowdworks.jp",
     "translate.google",
+    "maps.google",
     "yahoo.co.jp",
     "yahoo.com",
     "login.live.com",
@@ -740,14 +751,21 @@ def _first_official_search_hits(batches: list[list[str]]) -> list[str]:
 
 
 def default_web_search(query: str) -> list[str]:
-    batches: list[list[str]] = []
+    """Google が空でも Bing / DDG の公式ヒットを捨てない。"""
+    seen: set[str] = set()
+    merged: list[str] = []
     for fn in (_google_html_search, _bing_html_search, _ddg_html_search, _ddg_library_search):
         try:
             urls = fn(query) or []
         except Exception:
             urls = []
-        batches.append(urls)
-    return _first_official_search_hits(batches)
+        for url in _filter_noise_urls(urls):
+            key = url.split("#")[0]
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(url)
+    return merged
 
 
 def _compact_text(text: str) -> str:
@@ -856,7 +874,7 @@ def pick_matching_preview_link(
         score = 0
         if _title_hit(name, hay):
             score += 5
-        if "/episode" in path:
+        if "/episode" in path or "/episodes" in path:
             score += 4
         if "/viewer" in path:
             score += 4
@@ -1044,7 +1062,7 @@ def preview_fetch_order(
     today: date | None = None,
 ) -> list[Comic]:
     """当月→未来月→過去月の順。時間切れでも来月分が後回しにならないようにする。"""
-    today = today or date.today()
+    today = today or today_jst()
     current = (today.year, today.month)
 
     def key(comic: Comic) -> tuple[int, tuple[int, int], str]:

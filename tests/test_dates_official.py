@@ -1,5 +1,5 @@
 import unittest
-from datetime import date
+from datetime import date, datetime, timezone
 from unittest.mock import MagicMock
 
 from manga_checker.dates import (
@@ -12,6 +12,7 @@ from manga_checker.dates import (
     month_datetime_span,
     month_query_range,
     prefer_pubdate,
+    today_jst,
     year_month_from_pubdate,
 )
 from manga_checker.official import OfficialHit, OfficialIndex, _load_link_list, lookup_status
@@ -74,6 +75,22 @@ class DateFormatTests(unittest.TestCase):
                 (2026, 12),
                 (2027, 1),
                 (2027, 2),
+            ],
+        )
+
+    def test_today_jst_is_october_when_utc_is_still_september(self) -> None:
+        utc_night = datetime(2026, 9, 30, 16, 0, tzinfo=timezone.utc)
+        self.assertEqual(today_jst(now=utc_night), date(2026, 10, 1))
+        self.assertEqual(
+            iter_month_offsets(today=today_jst(now=utc_night)),
+            [
+                (2026, 7),
+                (2026, 8),
+                (2026, 9),
+                (2026, 10),
+                (2026, 11),
+                (2026, 12),
+                (2027, 1),
             ],
         )
 

@@ -4,9 +4,18 @@ from __future__ import annotations
 
 import calendar
 import re
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta, timezone
 
 _WEEKDAYS = "月火水木金土日"
+JST = timezone(timedelta(hours=9))
+
+
+def today_jst(*, now: datetime | None = None) -> date:
+    """サイトの『今日』は日本時間。Actions の UTC 日付だと月初に1日遅れる。"""
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return current.astimezone(JST).date()
 
 
 def prefer_pubdate(*candidates: str) -> str:
@@ -126,7 +135,7 @@ def year_month_from_pubdate(raw: str) -> tuple[int, int] | None:
 
 def is_unreleased(pubdate: str, today: date | None = None) -> bool:
     """発売日が今日以降（または年月だけ分かって当月以降）なら未発売。"""
-    today = today or date.today()
+    today = today or today_jst()
     parsed = parse_release_date(pubdate)
     if parsed:
         return parsed > today
@@ -174,7 +183,7 @@ def iter_month_offsets(
     """基準月の before ヶ月前から after ヶ月後まで（既定は -3〜+3 の7ヶ月）。"""
     if before < 0 or after < 0:
         raise ValueError("before / after は 0 以上にしてください。")
-    today = today or date.today()
+    today = today or today_jst()
     y = today.year if year is None else year
     m = today.month if month is None else month
     if not 1 <= m <= 12:

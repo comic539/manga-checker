@@ -23,7 +23,7 @@ from urllib.parse import urlencode
 
 import requests
 
-from manga_checker.dates import month_query_range, year_month_from_pubdate
+from manga_checker.dates import month_query_range, today_jst, year_month_from_pubdate
 from manga_checker.http import make_session
 from manga_checker.models import Comic
 from manga_checker.publishers import canonical_publisher, publisher_sort_key
@@ -82,7 +82,7 @@ def fetch_month_volume_ones(
     session: requests.Session | None = None,
     limit: int = 0,
 ) -> list[Comic]:
-    today = date.today()
+    today = today_jst()
     year = year or today.year
     month = month or today.month
     session = session or make_session()
@@ -135,7 +135,7 @@ def catalog_month_is_frozen(
     """一度取れた過去月は楽天の棚を再走査しない。当月・未来月と空の過去月は対象。"""
     if refetch_past or saved_count <= 0:
         return False
-    today = today or date.today()
+    today = today or today_jst()
     return (year, month) < (today.year, today.month)
 
 
@@ -153,7 +153,7 @@ def fetch_months_volume_ones(
     """
     if not months:
         return {}
-    today = today or date.today()
+    today = today or today_jst()
     saved = saved or {}
     session = session or make_session()
     result: dict[tuple[int, int], list[Comic]] = {key: [] for key in months}

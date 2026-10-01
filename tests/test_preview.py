@@ -103,6 +103,16 @@ class PreviewUrlTests(unittest.TestCase):
             is_official_preview_url("https://shogakukan-comic.jp/book?isbn=9784098734719")
         )
         self.assertFalse(is_official_preview_url("https://pocket.shonenmagazine.com/article/ABJ"))
+        self.assertTrue(
+            is_official_preview_url(
+                "https://rimacomiplus.jp/cocohana/episodes/73b5eb672977e"
+            )
+        )
+        self.assertTrue(
+            is_official_preview_url(
+                "https://rimacomiplus.jp/betsuma/episodes/abc"
+            )
+        )
 
     def test_unwraps_bing_redirect(self) -> None:
         import base64
@@ -112,6 +122,22 @@ class PreviewUrlTests(unittest.TestCase):
         wrapped = "https://www.bing.com/ck/a?!&&p=abc&u=a1" + payload
         self.assertEqual(_unwrap_search_url(wrapped), target)
         self.assertTrue(is_official_preview_url(wrapped))
+
+    def test_web_search_keeps_ddg_when_google_empty_and_bing_is_maps(self) -> None:
+        from unittest.mock import patch
+
+        from manga_checker.preview import default_web_search
+
+        rima = "https://rimacomiplus.jp/cocohana/episodes/73b5eb672977e"
+        with patch("manga_checker.preview._google_html_search", return_value=[]), patch(
+            "manga_checker.preview._bing_html_search",
+            return_value=["https://maps.google.co.jp/mapfiles/home3.html"],
+        ), patch(
+            "manga_checker.preview._ddg_html_search",
+            return_value=[rima, "https://www.cmoa.jp/title/1"],
+        ), patch("manga_checker.preview._ddg_library_search", return_value=[]):
+            hits = default_web_search("バツイチ人魚、恋に溺れる。 1話")
+        self.assertEqual(pick_official_url(hits), rima)
 
     def test_skips_non_official_engine_hits(self) -> None:
         from manga_checker.preview import _first_official_search_hits
@@ -235,6 +261,7 @@ class PreviewUrlTests(unittest.TestCase):
         self.assertNotIn("第1巻", queries[0])
         self.assertNotRegex(queries[0], r"\(\s*1\s*\)")
         self.assertTrue(any("1話 site:shonenjumpplus.com" in q for q in queries))
+        self.assertTrue(any("1話 site:rimacomiplus.jp" in q for q in queries))
 
     def test_long_title_keeps_full_query_and_kadokawa_sirius(self) -> None:
         long_title = "非の打ち所のない令息から婚約の打診が来たので、断ってみました(1)"
@@ -291,6 +318,16 @@ class PreviewUrlTests(unittest.TestCase):
         self.assertEqual(
             pick_official_url(urls, allowed_hosts=("pocket.shonenmagazine.com", "comic-days.com")),
             "https://comic-days.com/episode/kodansha",
+        )
+
+    def test_pick_prefers_rimacomiplus_episode(self) -> None:
+        urls = [
+            "https://www.s-manga.net/reader/main.php?cid=9784088433158",
+            "https://rimacomiplus.jp/cocohana/episodes/73b5eb672977e",
+        ]
+        self.assertEqual(
+            pick_official_url(urls),
+            "https://rimacomiplus.jp/cocohana/episodes/73b5eb672977e",
         )
 
     def test_cmoa_and_fallback(self) -> None:

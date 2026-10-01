@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import warnings
-from datetime import date
 from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
@@ -16,7 +15,7 @@ from manga_checker.catalog import (
     merge_catalog_months,
     write_catalog_json,
 )
-from manga_checker.dates import format_year_month, iter_month_offsets, iter_months
+from manga_checker.dates import format_year_month, iter_month_offsets, iter_months, today_jst
 from manga_checker.http import configure_ssl, make_session
 from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
@@ -27,7 +26,7 @@ from manga_checker.stores import check_stores
 
 
 def parse_args() -> argparse.Namespace:
-    today = date.today()
+    today = today_jst()
     parser = argparse.ArgumentParser(
         description="今日を基準に前後3ヶ月を走査し、保存済みの過去月も残して書店特典の確認用一覧を作ります。"
     )
@@ -146,7 +145,7 @@ def main() -> None:
             extra_csv=args.csv_in,
             session=session,
             saved=saved_catalog,
-            today=date.today(),
+            today=today_jst(),
             refetch_past=args.refetch_past,
         )
         comics_by_month = (

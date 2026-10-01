@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import html
 import re
-from datetime import date
 from pathlib import Path
 
-from manga_checker.dates import format_release_date
+from manga_checker.dates import format_release_date, today_jst
 from manga_checker.links import amazon_url, mercari_url, rakuten_url
 from manga_checker.models import ComicReport
 from manga_checker.preview import (
@@ -101,7 +100,7 @@ def write_sitemap(
         if slug and slug not in seen:
             seen.add(slug)
             slugs.append(slug)
-    today = date.today().isoformat()
+    today = today_jst().isoformat()
     lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
