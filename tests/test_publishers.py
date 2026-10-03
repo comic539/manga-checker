@@ -131,10 +131,10 @@ class HtmlSearchTests(unittest.TestCase):
             html.find("過去に掲載した月は残し、現在月から前後３カ月も合わせて掲載しております"),
             html.find("当サイトはアフィリエイト広告(PR)を利用しています。"),
         )
-        self.assertIn("情報収集エラー", html)
-        self.assertIn("検知できなかった店舗は『特典なし』", html)
-        self.assertNotIn("『未確認』の表示", html)
         self.assertIn("アフィリエイト広告(PR)", html)
+        self.assertIn("特典があるのに『特典なし』となる場合がございます", html)
+        self.assertNotIn("『未確認』", html)
+        self.assertNotIn("検知できなかった店舗は『未確認』", html)
         self.assertNotIn("イチコミ特典＋はアフィリエイト広告（Amazonアソシエイト", html)
         self.assertNotIn('class="affiliate-note"', html)
         self.assertIn("イチコミ特典＋｜新刊コミック第1巻 書店特典チェック", html)
@@ -214,7 +214,7 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertGreater(html.find('id="pager"'), html.find('class="ad-container ad-footer"'))
         self.assertGreater(html.find('class="ad-container ad-footer"'), html.find("</main>"))
 
-    def test_unknown_store_status_shows_as_no(self) -> None:
+    def test_unknown_store_status_shows_as_no_privilege(self) -> None:
         reports = [
             ComicReport(
                 Comic(title="未確認作品 1", isbn="9784000000001"),

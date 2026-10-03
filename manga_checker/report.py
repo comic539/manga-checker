@@ -48,7 +48,6 @@ INDEX_AD_TAGS = [
 INTRO_HEADING = "【イチコミ特典＋の説明】"
 INTRO_NOTES = [
     "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
-    "検知できなかった店舗は『特典なし』と表示します（取り扱いなし・情報収集エラーを含みます）。",
     "特典があるのに『特典なし』となる場合がございます。",
     "特典の配布状況の最終確認は各書店の公式商品ページにてご確認ください。",
     "過去に掲載した月は残し、現在月から前後３カ月も合わせて掲載しております",
@@ -189,8 +188,9 @@ def write_html(
         panels.append(
             f'<div class="month-panel{active}" id="month-{html.escape(month_id, quote=True)}" '
             f'data-month="{html.escape(month_id, quote=True)}" data-total="{len(month_items)}" '
-            f'data-yes="{counts.get(STATUS_YES, 0)}" data-no="{counts.get(STATUS_NO, 0)}" '
-            f'data-todo="{counts.get(STATUS_UNKNOWN, 0)}" role="tabpanel"{hidden}>'
+            f'data-yes="{counts.get(STATUS_YES, 0)}" '
+            f'data-no="{counts.get(STATUS_NO, 0) + counts.get(STATUS_UNKNOWN, 0)}" '
+            f'data-todo="0" role="tabpanel"{hidden}>'
             f"{inner}"
             "</div>"
         )
@@ -451,9 +451,9 @@ def _badge_html(check: StoreCheck) -> str:
 
 
 def _badge_view(status: str) -> tuple[str, str]:
-    if status == STATUS_UNKNOWN:
-        return "no", STATUS_NO
-    return _STATUS_CLASS.get(status, "no"), status
+    if status == STATUS_YES:
+        return "yes", STATUS_YES
+    return "no", STATUS_NO
 
 
 def _html_document(
@@ -1969,7 +1969,7 @@ def _html_document(
         var todo = document.getElementById("legend-todo");
         if (yes) yes.textContent = "特典あり " + (panel.getAttribute("data-yes") || "0");
         if (no) no.textContent = "特典なし " + (panel.getAttribute("data-no") || "0");
-        if (todo) todo.textContent = "未確認 " + (panel.getAttribute("data-todo") || "0");
+        if (todo) todo.textContent = "";
       }}
       function allCards() {{
         return Array.prototype.slice.call(document.querySelectorAll(".month-panel .card"));

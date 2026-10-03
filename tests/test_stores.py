@@ -166,6 +166,150 @@ class DetailFetchTests(unittest.TestCase):
         self.assertEqual(check.status, STATUS_NO)
         self.assertIn("product_id=1", check.url)
 
+    def test_melon_extracts_current_listing_card(self) -> None:
+        from manga_checker.melon import first_melon_detail_url
+
+        html = """
+        <div class="item-list"><ul>
+          <li class="product_3734143">
+            <p class="item-state item-state-special">特典</p>
+            <a href="/detail/detail.php?product_id=3734143" title="100年留年してるエルフ 1">
+              <div class="privilege_title">ペーパー</div>
+            </a>
+            <p class="item-ttl product_title">100年留年してるエルフ 1</p>
+          </li>
+        </ul></div>
+        """
+        url = first_melon_detail_url(
+            html,
+            "https://www.melonbooks.co.jp/search/search.php",
+            "100年留年してるエルフ(1)",
+            "9784065450048",
+            "フタロウ",
+        )
+        self.assertEqual(
+            url, "https://www.melonbooks.co.jp/detail/detail.php?product_id=3734143"
+        )
+
+    def test_melon_keeps_detail_url_when_detail_request_fails(self) -> None:
+        comic = Comic(title="100年留年してるエルフ 1", isbn="9784065450048")
+        search_html = """
+        <a href="/detail/detail.php?product_id=3734143">100年留年してるエルフ 1</a>
+        """
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            if "product_id=3734143" in url:
+                resp.status_code = 403
+                resp.text = ""
+            else:
+                resp.status_code = 200
+                resp.text = search_html
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_melonbooks(
+                comic,
+                "https://www.melonbooks.co.jp/search/search.php?name=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_UNKNOWN)
+        self.assertIn("product_id=3734143", check.url)
+
+    def test_melon_listing_card_privilege_when_detail_blocked(self) -> None:
+        comic = Comic(title="100年留年してるエルフ 1", isbn="9784065450048")
+        search_html = """
+        <li class="product_3734143">
+          <p class="item-state">特典</p>
+          <a href="/detail/detail.php?product_id=3734143">100年留年してるエルフ 1</a>
+          <div class="privilege_title">ペーパー</div>
+        </li>
+        """
+
+        def fake_get(url, timeout=25, **kwargs):
+            resp = MagicMock()
+            if "product_id=3734143" in url:
+                resp.status_code = 403
+                resp.text = ""
+            else:
+                resp.status_code = 200
+                resp.text = search_html
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_melonbooks(
+                comic,
+                "https://www.melonbooks.co.jp/search/search.php?name=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_YES)
+        self.assertIn("product_id=3734143", check.url)
+
+    def test_melon_extracts_product_class_without_href(self) -> None:
+        from manga_checker.melon import first_melon_detail_url
+
+        html = '<li class="product_3734143"><p>100年留年してるエルフ 1</p></li>'
+        url = first_melon_detail_url(
+            html,
+            "https://www.melonbooks.co.jp/search/search.php",
+            "100年留年してるエルフ(1)",
+            "9784065450048",
+        )
+        self.assertEqual(
+            url, "https://www.melonbooks.co.jp/detail/detail.php?product_id=3734143"
+        )
+
+    def test_melon_isbn_takes_first_product_id_in_page(self) -> None:
+        from manga_checker.melon import first_melon_detail_url
+
+        html = '<script>window.list=[{product_id:3734143,"title":"x"}];</script>'
+        url = first_melon_detail_url(
+            html,
+            "https://www.melonbooks.co.jp/search/search.php",
+            "別タイトル",
+            "9784065450048",
+        )
+        self.assertEqual(
+            url, "https://www.melonbooks.co.jp/detail/detail.php?product_id=3734143"
+        )
+
+    def test_melon_isbn_zero_then_hit_still_opens_detail(self) -> None:
+        comic = Comic(title="100年留年してるエルフ 1", isbn="9784065450048")
+        empty = "<p>該当する商品はございません</p>"
+        hit = '<a href="/detail/detail.php?product_id=3734143">100年留年してるエルフ 1</a>'
+        detail = "<div>特典情報 描き下ろしイラストカード</div>"
+        calls: list[str] = []
+
+        def fake_get(url, timeout=25, **kwargs):
+            calls.append(url)
+            resp = MagicMock()
+            resp.status_code = 200
+            if "product_id=3734143" in url:
+                resp.text = detail
+            elif "category_id=4" in url:
+                resp.text = hit
+            elif "text_type=all" in url:
+                resp.text = empty
+            else:
+                resp.text = empty
+            return resp
+
+        session = MagicMock()
+        session.get.side_effect = fake_get
+        with patch("manga_checker.stores.time.sleep"):
+            check = _fetch_melonbooks(
+                comic,
+                "https://www.melonbooks.co.jp/search/search.php?name=x",
+                session,
+            )
+        self.assertEqual(check.status, STATUS_YES)
+        self.assertIn("product_id=3734143", check.url)
+        self.assertTrue(any("category_id=4" in url for url in calls))
+
     def test_melon_isbn_search_is_tried_before_title(self) -> None:
         comic = Comic(title="ヒトナー 1", isbn="9784088852317")
         isbn_html = """
@@ -281,7 +425,7 @@ class DetailFetchTests(unittest.TestCase):
         catalog = OfficialIndex()
         catalog.loaded = True
         with patch("manga_checker.stores.time.sleep"):
-            checks = check_stores(comic, fetch=True, session=session, catalog=catalog)
+            checks = check_stores(comic, fetch=False, session=session, catalog=catalog)
         by_id = {c.store_id: c for c in checks}
         self.assertEqual(by_id["animate"].url, "https://www.animate-onlineshop.jp/pd/222/")
         self.assertEqual(by_id["animate"].status, STATUS_YES)
@@ -306,7 +450,12 @@ class DetailFetchTests(unittest.TestCase):
                 ["メロン特典"],
             )
         ]
-        checks = check_stores(comic, fetch=False, delay_sec=0, catalog=catalog)
+        session = MagicMock()
+        resp = MagicMock(status_code=200, text="<html></html>")
+        session.get.return_value = resp
+        checks = check_stores(
+            comic, fetch=False, delay_sec=0, catalog=catalog, session=session
+        )
         by_id = {c.store_id: c for c in checks}
         self.assertEqual(by_id["melonbooks"].status, STATUS_YES)
         self.assertEqual(by_id["animate"].status, STATUS_UNKNOWN)
@@ -319,7 +468,12 @@ class DetailFetchTests(unittest.TestCase):
         comic = Comic(title="2年B組 勇者デストロイヤーズ 1")
         catalog = OfficialIndex()
         catalog.loaded = True
-        checks = check_stores(comic, fetch=False, delay_sec=0, catalog=catalog)
+        session = MagicMock()
+        resp = MagicMock(status_code=200, text="<html></html>")
+        session.get.return_value = resp
+        checks = check_stores(
+            comic, fetch=False, delay_sec=0, catalog=catalog, session=session
+        )
         by_id = {c.store_id: c for c in checks}
         self.assertEqual(by_id["kikuya"].status, STATUS_UNKNOWN)
         self.assertNotEqual(by_id["kikuya"].status, STATUS_NO)
@@ -416,7 +570,7 @@ class DetailFetchTests(unittest.TestCase):
         )
         self.assertIn("product_id=222", url_m)
 
-    def test_search_hit_but_detail_blocked_is_no(self) -> None:
+    def test_search_hit_but_detail_blocked_is_unknown(self) -> None:
         comic = Comic(title="初凪ヒメリウム 1", isbn="9784000000000")
         search_html = '<ul><li><a href="/pd/222/">初凪ヒメリウム 1</a></li></ul>'
 
@@ -438,7 +592,8 @@ class DetailFetchTests(unittest.TestCase):
                 "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
                 session,
             )
-        self.assertEqual(check.status, STATUS_NO)
+        self.assertEqual(check.status, STATUS_UNKNOWN)
+        self.assertIn("/pd/222/", check.url)
 
     def test_empty_search_is_no(self) -> None:
         comic = Comic(title="存在しない作品 1", isbn="9999999999999")
@@ -587,7 +742,8 @@ class DetailFetchTests(unittest.TestCase):
                 "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
                 session,
             )
-        self.assertEqual(check.status, STATUS_NO)
+        self.assertEqual(check.status, STATUS_UNKNOWN)
+        self.assertIn("未確認", check.detail)
         self.assertIn("検索ヒットあり", check.detail)
 
     def test_gamers_skips_popular_keyword_and_opens_matching_title(self) -> None:
@@ -816,7 +972,7 @@ class DetailFetchTests(unittest.TestCase):
                 "https://www.animate-onlineshop.jp/products/list.php?mode=search&smt=x",
                 session,
             )
-        self.assertEqual(check.status, STATUS_NO)
+        self.assertEqual(check.status, STATUS_UNKNOWN)
         self.assertEqual(check.url, "https://www.animate-onlineshop.jp/pd/222/")
 
 

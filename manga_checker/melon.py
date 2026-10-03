@@ -82,6 +82,12 @@ _MAIN_SELECTORS = (
 _MAIN_WRAPPER_IDS = frozenset({"contents", "item", "item_detail", "detail", "wrapper"})
 
 
+_LISTING_HINT = re.compile(
+    r"item[-_]?list|product[-_]?list|search[-_]?(?:result|item)|product_\d+",
+    re.I,
+)
+
+
 def first_melon_detail_url(
     html: str,
     page_url: str,
@@ -90,12 +96,26 @@ def first_melon_detail_url(
     author: str = "",
     allow_first: bool = False,
 ) -> str:
-    """検索結果から作品に一致する detail.php?product_id= を返す。"""
+    """ISBN検索なら先頭の商品、それ以外も一覧の detail.php?product_id= を返す。"""
     soup = BeautifulSoup(html or "", "html.parser")
     base = page_url or "https://www.melonbooks.co.jp/"
     ranked: list[tuple[int, str]] = []
     seen: set[str] = set()
     isbn_digits = re.sub(r"\D", "", isbn or "")
+
+    def _score(blob: str, tag) -> int:
+        score = 0
+        blob_digits = re.sub(r"\D", "", blob or "")
+        if isbn_digits and isbn_digits in blob_digits:
+            score += 5
+        if listing_matches_work(title, blob, isbn, author=author):
+            score += 2
+        if _in_listing_card(tag):
+            score += 4
+        if isbn_digits:
+            score += 1
+        return score
+
     for tag in soup.find_all("a", href=True):
         abs_url = _melon_detail_url(str(tag.get("href") or ""), base)
         if not abs_url or abs_url in seen:
@@ -105,20 +125,40 @@ def first_melon_detail_url(
         blob = " ".join(
             part for part in (tag.get_text(" ", strip=True), parent.get_text(" ", strip=True)) if part
         )
-        blob_digits = re.sub(r"\D", "", blob)
-        score = 0
-        if isbn_digits and isbn_digits in blob_digits:
-            score += 5
-        if listing_matches_work(title, blob, isbn, author=author):
-            score += 2
-        ranked.append((score, abs_url))
-    for tag in soup.find_all(attrs={"data-product_id": True}):
+        ranked.append((_score(blob, tag), abs_url))
+    for tag in soup.find_all(True):
+        class_blob = " ".join(tag.get("class") or [])
+        class_match = re.search(r"(?:^|\s)product_(\d+)(?:\s|$)", class_blob)
         pid = str(tag.get("data-product_id") or "")
+        if class_match and not pid:
+            pid = class_match.group(1)
+        if not pid.isdigit():
+            continue
         abs_url = _melon_detail_url(f"/detail/detail.php?product_id={pid}", base)
         if abs_url and abs_url not in seen:
             seen.add(abs_url)
-            ranked.append((0, abs_url))
+            ranked.append((_score(tag.get_text(" ", strip=True), tag), abs_url))
+    if not ranked:
+        for match in re.finditer(r"product_id\s*[=:]\s*[\"']?(\d+)", html or "", re.I):
+            abs_url = _melon_detail_url(
+                f"/detail/detail.php?product_id={match.group(1)}", base
+            )
+            if abs_url:
+                ranked.append((0, abs_url))
+                break
     return pick_ranked_detail_url(ranked, allow_first=True)
+
+
+def _in_listing_card(tag) -> bool:
+    current = tag
+    for _ in range(8):
+        if current is None or not getattr(current, "get", None):
+            return False
+        cid = f"{current.get('id') or ''} {' '.join(current.get('class') or [])}"
+        if _LISTING_HINT.search(cid):
+            return True
+        current = getattr(current, "parent", None)
+    return False
 
 
 def evaluate_melon_detail(html: str) -> tuple[str, str]:

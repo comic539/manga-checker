@@ -203,8 +203,8 @@ def check_stores(
             comic.isbn,
             url,
         )
-        if official_yes == STATUS_YES and (
-            store.store_id not in DETAIL_PAGE_STORES or not fetch
+        if official_yes == STATUS_YES and store.store_id not in (
+            DETAIL_PAGE_STORES | LISTING_FETCH_STORES
         ):
             check = StoreCheck(
                 store.store_id, store.name, official_yes, detail, official_url
@@ -240,39 +240,151 @@ def check_stores(
         if remembered is not None:
             results.append(remembered)
             continue
-        if store.store_id in DETAIL_PAGE_STORES or store.store_id in LISTING_FETCH_STORES:
-            if not fetch:
-                results.append(
-                    StoreCheck(
-                        store.store_id,
-                        store.name,
-                        STATUS_UNKNOWN,
-                        "未取得。リンク先の商品カードで確認してください。",
-                        url,
-                    )
-                )
-                continue
+        needs_product_page = (
+            store.store_id in DETAIL_PAGE_STORES or store.store_id in LISTING_FETCH_STORES
+        )
+        if needs_product_page or fetch:
             fetched = _fetch_store(store, comic, url, session)
+            if official_yes == STATUS_YES:
+                fetched = _merge_official_product(
+                    fetched,
+                    official_status=official_yes,
+                    official_detail=detail,
+                    official_url=official_url,
+                )
             remember_check(cache, fetched, comic)
             results.append(fetched)
             time.sleep(delay_sec)
             continue
-        if not fetch:
-            results.append(
-                StoreCheck(
-                    store.store_id,
-                    store.name,
-                    STATUS_UNKNOWN,
-                    "未取得。リンク先の商品カードで確認してください。",
-                    url,
-                )
+        if official_yes == STATUS_YES:
+            check = StoreCheck(
+                store.store_id, store.name, official_yes, detail, official_url
             )
+            remember_check(cache, check, comic)
+            results.append(check)
             continue
-        fetched = _fetch_store(store, comic, url, session)
-        remember_check(cache, fetched, comic)
-        results.append(fetched)
-        time.sleep(delay_sec)
+        results.append(
+            StoreCheck(
+                store.store_id,
+                store.name,
+                STATUS_UNKNOWN,
+                "未取得。リンク先の商品カードで確認してください。",
+                url,
+            )
+        )
     return results
+
+
+def _is_store_product_url(store_id: str, url: str) -> bool:
+    target = url or ""
+    if store_id == "melonbooks":
+        return "detail.php" in target and "product_id=" in target
+    if store_id == "animate":
+        return "/pd/" in target or "/pn/" in target
+    if store_id == "toranoana":
+        return "/tora/ec/item/" in target
+    if store_id == "gamers":
+        return "/pd/" in target or "product_id=" in target
+    if store_id == "kinokuniya":
+        return "CSfGoodsPage" in target or "/dsgst/" in target
+    return False
+
+
+def _merge_official_product(
+    fetched: StoreCheck,
+    *,
+    official_status: str,
+    official_detail: str,
+    official_url: str,
+) -> StoreCheck:
+    product_url = (
+        fetched.url
+        if _is_store_product_url(fetched.store_id, fetched.url)
+        else official_url
+    )
+    if fetched.status in {STATUS_YES, STATUS_NO} and _is_store_product_url(
+        fetched.store_id, fetched.url
+    ):
+        return fetched
+    if official_status == STATUS_YES:
+        return StoreCheck(
+            fetched.store_id,
+            fetched.store_name,
+            STATUS_YES,
+            official_detail,
+            product_url,
+        )
+    return fetched
+
+
+def _privilege_from_listing_card(
+    html: str, detail_url: str, evaluate
+) -> tuple[str, str] | None:
+    if not html or not detail_url:
+        return None
+    markers: list[str] = []
+    parsed = urlparse(detail_url)
+    query = parse_qs(parsed.query)
+    for key in ("product_id", "id"):
+        if query.get(key) and query[key][0]:
+            markers.append(query[key][0])
+    for match in re.finditer(r"/(?:pd|item)/(\d+)", parsed.path, re.I):
+        markers.append(match.group(1))
+    if not markers:
+        return None
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup.find_all("a", href=True):
+        href = str(tag.get("href") or "")
+        if not any(marker in href for marker in markers):
+            continue
+        parent = tag.find_parent(["li", "article", "section", "div"]) or tag
+        status, detail = evaluate(str(parent))
+        if status == STATUS_YES:
+            return status, detail.replace("詳細ページで検出", "検索カードで検出")
+    return None
+
+
+def _raw_first_product_url(store_id: str, html: str, page_url: str) -> str:
+    markup = html or ""
+    if store_id == "melonbooks":
+        match = re.search(r"product_id\s*[=:]\s*[\"']?(\d+)", markup, re.I)
+        if match:
+            return (
+                "https://www.melonbooks.co.jp/detail/detail.php?product_id="
+                + match.group(1)
+            )
+        match = re.search(r"(?:^|\s)product_(\d+)(?:\s|$)", markup)
+        if match:
+            return (
+                "https://www.melonbooks.co.jp/detail/detail.php?product_id="
+                + match.group(1)
+            )
+    if store_id == "animate":
+        match = re.search(r"/pd/(\d+)/?", markup, re.I)
+        if match:
+            return f"https://www.animate-onlineshop.jp/pd/{match.group(1)}/"
+        match = re.search(r"product_id=(\d+)", markup, re.I)
+        if match:
+            return f"https://www.animate-onlineshop.jp/pd/{match.group(1)}/"
+    if store_id == "toranoana":
+        match = re.search(r"/tora/ec/item/(\d+)/?", markup, re.I)
+        if match:
+            return f"https://ecs.toranoana.jp/tora/ec/item/{match.group(1)}/"
+    if store_id == "gamers":
+        match = re.search(r"/pd/(\d+)/?", markup, re.I)
+        if match:
+            return f"https://www.gamers.co.jp/pd/{match.group(1)}/"
+        match = re.search(r"product_id=(\d+)", markup, re.I)
+        if match:
+            return (
+                "https://www.gamers.co.jp/products/detail.php?product_id="
+                + match.group(1)
+            )
+    if store_id == "kinokuniya":
+        match = re.search(r"/f/dsg-01-(\d+)", markup, re.I)
+        if match:
+            return f"https://www.kinokuniya.co.jp/f/dsg-01-{match.group(1)}"
+    return ""
 
 
 def _fetch_store(store: Store, comic: Comic, url: str, session: requests.Session) -> StoreCheck:
@@ -460,11 +572,14 @@ def _fetch_detail_attempts(
     last_error: Exception | None = None
     no_hit_url = fallback_url
     last_detail_url = ""
+    isbn_absent = False
     try:
         for index, (list_url, from_isbn) in enumerate(attempts):
             last_search = list_url
             if index:
                 time.sleep(0.8)
+            if not from_isbn and isbn_absent:
+                continue
             try:
                 search_resp = get_with_retry(
                     session,
@@ -483,14 +598,10 @@ def _fetch_detail_attempts(
                 saw_no_hit = True
                 no_hit_url = list_url
                 if from_isbn and store_id in ISBN_NO_HIT_IS_ABSENT:
-                    return StoreCheck(
-                        store_id,
-                        name,
-                        STATUS_NO,
-                        "ISBN検索が0件のため、取り扱いなし（特典なし）と扱います。",
-                        list_url,
-                    )
+                    isbn_absent = True
                 continue
+            if from_isbn:
+                isbn_absent = False
             if search_resp.status_code < 400:
                 last_http = 0
                 saw_search_page = True
@@ -504,6 +615,8 @@ def _fetch_detail_attempts(
                 comic.author,
                 allow_first=True,
             )
+            if not detail_url:
+                detail_url = _raw_first_product_url(store_id, html, list_url)
             if not detail_url:
                 if listing_has_products(html):
                     had_product_hit = True
@@ -522,12 +635,22 @@ def _fetch_detail_attempts(
                 )
             except requests.RequestException as exc:
                 last_error = exc
+                listing_hit = _privilege_from_listing_card(html, detail_url, evaluate)
+                if listing_hit is not None:
+                    status, detail = listing_hit
+                    return StoreCheck(store_id, name, status, detail, detail_url)
                 continue
             if detail_resp.status_code >= 400:
                 last_http = detail_resp.status_code
+                listing_hit = _privilege_from_listing_card(html, detail_url, evaluate)
+                if listing_hit is not None:
+                    status, detail = listing_hit
+                    return StoreCheck(store_id, name, status, detail, detail_url)
                 continue
-            if store_id == "gamers" and not _detail_page_matches(
-                comic, detail_resp.text or ""
+            if (
+                store_id == "gamers"
+                and not from_isbn
+                and not _detail_page_matches(comic, detail_resp.text or "")
             ):
                 continue
             status, detail = evaluate(detail_resp.text)
@@ -536,8 +659,8 @@ def _fetch_detail_attempts(
             return StoreCheck(
                 store_id,
                 name,
-                STATUS_NO,
-                "検索ヒットあり。詳細ページへ進めなかったため特典なしと扱います。",
+                STATUS_UNKNOWN,
+                "検索ヒットあり。詳細ページを開けなかったため未確認です。",
                 last_detail_url or fallback_url,
             )
         if saw_no_hit:
@@ -665,10 +788,10 @@ def first_gamers_detail_url(
             score += 2
         if _is_gamers_listing_link(tag):
             score += 1
-        if score == 0 and not _is_gamers_listing_link(tag):
+        if score == 0 and not _is_gamers_listing_link(tag) and not isbn_digits:
             continue
         ranked.append((score, abs_url))
-    return pick_ranked_detail_url(ranked, allow_first=False)
+    return pick_ranked_detail_url(ranked, allow_first=bool(isbn_digits) or allow_first)
 
 
 def _gamers_detail_url(href: str, base: str) -> str:
