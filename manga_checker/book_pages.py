@@ -49,7 +49,7 @@ def write_book_pages(
     preview_cache_path: Path | None = None,
     fetch_preview: bool = False,
     preview_limit: int = 0,
-    preview_delay_sec: float = 1.2,
+    preview_delay_sec: float = 0.4,
     search_fn: SearchFn | None = None,
     prune_missing: bool = True,
 ) -> list[str]:
@@ -71,9 +71,8 @@ def write_book_pages(
             limit=preview_limit,
             delay_sec=preview_delay_sec,
             search_fn=search_fn,
+            cache_path=preview_cache_path,
         )
-        if preview_cache_path is not None:
-            save_preview_cache(preview_cache_path, cache)
     written = set()
     for slug, report in unique.items():
         links = preview_links_for(report.comic, cache.get(preview_cache_key(report.comic)))

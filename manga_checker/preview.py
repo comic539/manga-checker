@@ -6,6 +6,7 @@ import base64
 import json
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 from pathlib import Path
 from typing import Callable
@@ -751,10 +752,10 @@ def _first_official_search_hits(batches: list[list[str]]) -> list[str]:
 
 
 def default_web_search(query: str) -> list[str]:
-    """Google が空でも Bing / DDG の公式ヒットを捨てない。"""
+    """公式URLが見つかったエンジンで打ち切る。Google の空結果で後続を捨てない。"""
     seen: set[str] = set()
     merged: list[str] = []
-    for fn in (_google_html_search, _bing_html_search, _ddg_html_search, _ddg_library_search):
+    for fn in (_ddg_html_search, _ddg_library_search, _bing_html_search, _google_html_search):
         try:
             urls = fn(query) or []
         except Exception:
@@ -765,6 +766,8 @@ def default_web_search(query: str) -> list[str]:
                 continue
             seen.add(key)
             merged.append(url)
+        if pick_official_url(merged):
+            return merged
     return merged
 
 
@@ -897,16 +900,12 @@ def search_giga_preview(comic: Comic) -> str:
         return ""
     session = make_session()
     terms = [name]
-    if short and short not in terms:
-        terms.append(short)
-    first = name.split()[0]
-    if first and first not in terms:
-        terms.append(first)
+    hosts = hosts[:4]
     for host in hosts:
         for term in terms:
             for search_url in _host_search_urls(host, term):
                 try:
-                    response = session.get(search_url, timeout=20)
+                    response = session.get(search_url, timeout=8)
                 except Exception:
                     response = None
                 url = ""
@@ -919,27 +918,6 @@ def search_giga_preview(comic: Comic) -> str:
                     )
                 if url:
                     return url
-        try:
-            hits = default_web_search(f"{name} 1話 site:{host}")
-        except Exception:
-            hits = []
-        url = pick_official_url(hits, allowed_hosts=(host,))
-        if not url and short != name:
-            try:
-                hits = default_web_search(f"{short} 1話 site:{host}")
-            except Exception:
-                hits = []
-            url = pick_official_url(hits, allowed_hosts=(host,))
-        if not url:
-            tiny = _short_search_name(name)
-            if tiny:
-                try:
-                    hits = default_web_search(f"{tiny} 1話 site:{host}")
-                except Exception:
-                    hits = []
-                url = pick_official_url(hits, allowed_hosts=(host,))
-        if url:
-            return _normalize_preview_url(url)
         time.sleep(0.12)
     return ""
 
@@ -996,14 +974,7 @@ def search_official_preview(comic: Comic, *, search_fn: SearchFn | None = None) 
         if url:
             return url
     fn = search_fn or default_web_search
-    web_queries = search_queries(comic, include_sites=False)
-    for query in web_queries:
-        url = _pick_official_from_query(fn, query)
-        if url:
-            return url
-    for query in search_queries(comic, include_sites=True):
-        if query in web_queries:
-            continue
+    for query in search_queries(comic, include_sites=False):
         url = _pick_official_from_query(fn, query)
         if url:
             return url
@@ -1087,9 +1058,10 @@ def resolve_preview_cache(
     delay_sec: float = 1.2,
     search_fn: SearchFn | None = None,
     today: date | None = None,
+    cache_path: Path | None = None,
 ) -> int:
     """キャッシュを更新する。戻り値は新規検索した件数。"""
-    searched = 0
+    pending: list[Comic] = []
     for comic in preview_fetch_order(comics, today=today):
         key = preview_cache_key(comic)
         if not key:
@@ -1100,14 +1072,44 @@ def resolve_preview_cache(
         existing = row.get("official_url") or ""
         if existing and is_official_preview_url(existing):
             continue
-        if limit and searched >= limit:
-            continue
+        pending.append(comic)
+        if limit and len(pending) >= limit:
+            break
+    if not pending:
+        return 0
+
+    def _one(comic: Comic) -> tuple[str, str, str]:
+        key = preview_cache_key(comic)
         url = search_official_preview(comic, search_fn=search_fn)
-        cache[key] = {
-            "official_url": url,
-            "title": comic.display_title,
-        }
+        return key, url, comic.display_title
+
+    searched = 0
+    workers = 1 if search_fn is not None else 8
+    if workers == 1:
+        rows = [_one(comic) for comic in pending]
+    else:
+        rows = []
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(_one, comic) for comic in pending]
+            for future in as_completed(futures):
+                rows.append(future.result())
+                searched = len(rows)
+                key, url, title = rows[-1]
+                cache[key] = {"official_url": url, "title": title}
+                if cache_path is not None and searched % 10 == 0:
+                    save_preview_cache(cache_path, cache)
+                    print(f"試し読み検索 {searched}/{len(pending)} 件（公式 {sum(1 for r in cache.values() if r.get('official_url'))}）")
+        if cache_path is not None:
+            save_preview_cache(cache_path, cache)
+        return searched
+
+    for key, url, title in rows:
+        cache[key] = {"official_url": url, "title": title}
         searched += 1
+        if cache_path is not None and searched % 10 == 0:
+            save_preview_cache(cache_path, cache)
         if delay_sec > 0:
             time.sleep(delay_sec)
+    if cache_path is not None:
+        save_preview_cache(cache_path, cache)
     return searched
