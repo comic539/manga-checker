@@ -14,6 +14,7 @@ from manga_checker.dates import (
     prefer_pubdate,
     today_jst,
     year_month_from_pubdate,
+    comiczin_months,
 )
 from manga_checker.official import OfficialHit, OfficialIndex, _load_link_list, lookup_status
 from manga_checker.privilege import STATUS_NO, STATUS_YES
@@ -38,6 +39,20 @@ class DateFormatTests(unittest.TestCase):
         self.assertEqual(
             iter_months(2026, 9, 4),
             [(2026, 9), (2026, 10), (2026, 11), (2026, 12)],
+        )
+
+    def test_comiczin_months_stop_at_next_month(self) -> None:
+        catalog = [
+            (2026, 6),
+            (2026, 9),
+            (2026, 10),
+            (2026, 11),
+            (2026, 12),
+            (2027, 1),
+        ]
+        self.assertEqual(
+            comiczin_months(catalog, today=date(2026, 10, 4)),
+            [(2026, 6), (2026, 9), (2026, 10), (2026, 11)],
         )
 
     def test_iter_months_wraps_year(self) -> None:

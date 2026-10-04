@@ -96,7 +96,7 @@ class BulkListingLookupTests(unittest.TestCase):
         zin = index.check(
             "comiczin",
             "COMIC ZIN",
-            Comic(title="ルノリータ 1"),
+            Comic(title="ルノリータ 1", isbn="9784088852621"),
             "https://shop.comiczin.jp/products/list.php",
         )
         self.assertEqual(zin.status, STATUS_YES)

@@ -196,6 +196,17 @@ def privilege_months(today: date | None = None) -> list[tuple[int, int]]:
     return iter_month_offsets(before=1, after=2, today=today)
 
 
+def comiczin_months(
+    catalog_months: list[tuple[int, int]] | None = None,
+    today: date | None = None,
+) -> list[tuple[int, int]]:
+    """COMIC ZIN 入荷日検索: 掲載済みの過去月＋当月＋翌月まで。"""
+    current = today or today_jst()
+    limit = add_months(current.year, current.month, 1)
+    source = catalog_months or privilege_months(today=current)
+    return [ym for ym in source if ym <= limit]
+
+
 def iter_month_days(months: list[tuple[int, int]]) -> list[date]:
     days: list[date] = []
     for year, month in months:
