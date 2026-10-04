@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="愛を誓うには早すぎる 1
 各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand35">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand36">
   <style>
     :root {
       --bg: #ffffff;
@@ -333,8 +333,26 @@
       animation: jelly-wobble 0.7s cubic-bezier(0.22, 0.82, 0.32, 1);
       z-index: 2;
     }
+    .btn-press {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .btn-press:active {
+      transform: scale(0.96);
+      filter: brightness(0.95);
+      transition: transform 0.05s ease, filter 0.05s ease;
+    }
+    .badge.yes.btn-press:active {
+      animation: none;
+    }
     @media (prefers-reduced-motion: reduce) {
       .badge.yes:hover { animation: none; }
+      .btn-press,
+      .btn-press:active {
+        transition: none;
+        transform: none;
+      }
     }
     .badge.yes .store, .badge.yes .status { color: #fff; }
     .badge.no { background: #eceae6; color: #3f3c39; }
@@ -720,7 +738,7 @@
     <div class="site-top-inner">
       <div class="site-top-row">
         <a class="logo-link" href="../index.html">
-          <img class="site-logo" src="../logo.png?v=brand35" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+          <img class="site-logo" src="../logo.png?v=brand36" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
         </a>
         <nav class="smart-header" aria-label="主要メニュー">
           <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
@@ -736,7 +754,7 @@
     <section class="hero">
       <div class="hero-info">
       <div class="hero-cover">
-        <div class="cover"><img src="https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/5904/9784592225904_1_26.jpg?_ex=200x200" alt="愛を誓うには早すぎる 1" loading="lazy" referrerpolicy="no-referrer" onerror="const p=this.parentElement; p.classList.add('ph'); p.innerHTML='<span>書影なし</span>';"></div>
+        <div class="cover btn-press"><img src="https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/5904/9784592225904_1_26.jpg?_ex=200x200" alt="愛を誓うには早すぎる 1" loading="lazy" referrerpolicy="no-referrer" onerror="const p=this.parentElement; p.classList.add('ph'); p.innerHTML='<span>書影なし</span>';"></div>
         <p class="credit">出典: 楽天ブックス</p><p class="credit">Supported by Rakuten Developers</p>
       </div>
       <div class="hero-meta">
@@ -760,9 +778,9 @@
         <div class="action-block">
           <p class="buy-label">購入</p>
           <div class="buy">
-            <a class="ext amazon" href="https://www.amazon.co.jp/dp/4592225902" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">a</span>Amazon</a>
-            <a class="ext rakuten" href="https://hb.afl.rakuten.co.jp/hgc/5746de47.1f89351a.5746de48.8130d10a/?pc=https%3A%2F%2Fbooks.rakuten.co.jp%2Fsearch%3Fg%3D001%26sitem%3D9784592225904" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">R</span>楽天ブックス</a>
-            <a class="ext mercari" href="https://jp.mercari.com/search?afid=7668762322&amp;keyword=%E6%84%9B%E3%82%92%E8%AA%93%E3%81%86%E3%81%AB%E3%81%AF%E6%97%A9%E3%81%99%E3%81%8E%E3%82%8B" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">m</span>mercari</a>
+            <a class="ext amazon btn-press" href="https://www.amazon.co.jp/dp/4592225902" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">a</span>Amazon</a>
+            <a class="ext rakuten btn-press" href="https://hb.afl.rakuten.co.jp/hgc/5746de47.1f89351a.5746de48.8130d10a/?pc=https%3A%2F%2Fbooks.rakuten.co.jp%2Fsearch%3Fg%3D001%26sitem%3D9784592225904" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">R</span>楽天ブックス</a>
+            <a class="ext mercari btn-press" href="https://jp.mercari.com/search?afid=7668762322&amp;keyword=%E6%84%9B%E3%82%92%E8%AA%93%E3%81%86%E3%81%AB%E3%81%AF%E6%97%A9%E3%81%99%E3%81%8E%E3%82%8B" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">m</span>mercari</a>
           </div>
         </div>
       </div>
@@ -782,7 +800,7 @@
       </aside>
     </section>
     <h2>各書店の特典</h2>
-    <div class="store-confirm"><div class="store-confirm-row"><a class="badge no" href="https://www.animate-onlineshop.jp/pd/3493002/" target="_blank" rel="noopener noreferrer" title="詳細ページに特典情報はありません。"><span class='store'>アニメイト</span><span class='status'>特典なし</span></a><p class="store-detail">詳細ページに特典情報はありません。</p></div><div class="store-confirm-row"><a class="badge yes" href="https://www.melonbooks.co.jp/detail/detail.php?product_id=3651687" target="_blank" rel="noopener noreferrer" title="ブックス特典 描き下ろしまんがリーフレット ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。"><span class='store'>メロンブックス</span><span class='status'>特典あり</span></a><p class="store-detail">ブックス特典 描き下ろしまんがリーフレット ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。</p></div><div class="store-confirm-row"><a class="badge yes" href="https://www.gamers.co.jp/pd/10900779/" target="_blank" rel="noopener noreferrer" title="ゲーマーズ特典 描き下ろしブロマイド ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。 さらに見"><span class='store'>ゲーマーズ</span><span class='status'>特典あり</span></a><p class="store-detail">ゲーマーズ特典 描き下ろしブロマイド ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。 さらに見</p></div><div class="store-confirm-row"><a class="badge no" href="https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784592225904" target="_blank" rel="noopener noreferrer" title="特典一覧に該当タイトルはありません。"><span class='store'>とらのあな</span><span class='status'>特典なし</span></a><p class="store-detail">特典一覧に該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no" href="https://shop.comiczin.jp/products/list.php" target="_blank" rel="noopener noreferrer" title="特典一覧に該当タイトルはありません。"><span class='store'>COMIC ZIN</span><span class='status'>特典なし</span></a><p class="store-detail">特典一覧に該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no" href="https://comirano.info/category/comic/" target="_blank" rel="noopener noreferrer" title="特典一覧に該当タイトルはありません。"><span class='store'>こみらの！</span><span class='status'>特典なし</span></a><p class="store-detail">特典一覧に該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no" href="https://kikuyashoten.myshopify.com/search?q=%E6%84%9B%E3%82%92%E8%AA%93%E3%81%86%E3%81%AB%E3%81%AF%E6%97%A9%E3%81%99%E3%81%8E%E3%82%8B" target="_blank" rel="noopener noreferrer" title="公式特典ページに該当タイトルはありません。"><span class='store'>喜久屋書店</span><span class='status'>特典なし</span></a><p class="store-detail">公式特典ページに該当タイトルはありません。</p></div></div>
+    <div class="store-confirm"><div class="store-confirm-row"><a class="badge no btn-press" href="https://www.animate-onlineshop.jp/pd/3493002/" target="_blank" rel="noopener noreferrer" title="詳細ページに特典情報はありません。"><span class='store'>アニメイト</span><span class='status'>特典なし</span></a><p class="store-detail">詳細ページに特典情報はありません。</p></div><div class="store-confirm-row"><a class="badge yes btn-press" href="https://www.melonbooks.co.jp/detail/detail.php?product_id=3651687" target="_blank" rel="noopener noreferrer" title="ブックス特典 描き下ろしまんがリーフレット ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。"><span class='store'>メロンブックス</span><span class='status'>特典あり</span></a><p class="store-detail">ブックス特典 描き下ろしまんがリーフレット ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。</p></div><div class="store-confirm-row"><a class="badge yes btn-press" href="https://www.gamers.co.jp/pd/10900779/" target="_blank" rel="noopener noreferrer" title="ゲーマーズ特典 描き下ろしブロマイド ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。 さらに見"><span class='store'>ゲーマーズ</span><span class='status'>特典あり</span></a><p class="store-detail">ゲーマーズ特典 描き下ろしブロマイド ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。 さらに見</p></div><div class="store-confirm-row"><a class="badge no btn-press" href="https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784592225904" target="_blank" rel="noopener noreferrer" title="特典一覧に該当タイトルはありません。"><span class='store'>とらのあな</span><span class='status'>特典なし</span></a><p class="store-detail">特典一覧に該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no btn-press" href="https://shop.comiczin.jp/products/list.php" target="_blank" rel="noopener noreferrer" title="特典一覧に該当タイトルはありません。"><span class='store'>COMIC ZIN</span><span class='status'>特典なし</span></a><p class="store-detail">特典一覧に該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no btn-press" href="https://comirano.info/category/comic/" target="_blank" rel="noopener noreferrer" title="特典一覧に該当タイトルはありません。"><span class='store'>こみらの！</span><span class='status'>特典なし</span></a><p class="store-detail">特典一覧に該当タイトルはありません。</p></div><div class="store-confirm-row"><a class="badge no btn-press" href="https://kikuyashoten.myshopify.com/search?q=%E6%84%9B%E3%82%92%E8%AA%93%E3%81%86%E3%81%AB%E3%81%AF%E6%97%A9%E3%81%99%E3%81%8E%E3%82%8B" target="_blank" rel="noopener noreferrer" title="公式特典ページに該当タイトルはありません。"><span class='store'>喜久屋書店</span><span class='status'>特典なし</span></a><p class="store-detail">公式特典ページに該当タイトルはありません。</p></div></div>
   </div>
   
   <footer class="site-legal">
@@ -797,7 +815,7 @@
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
-      <img class="legal-about-logo" src="../logo.png?v=brand35" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+      <img class="legal-about-logo" src="../logo.png?v=brand36" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>

@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand35"
+ASSET_VER = "brand36"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -323,11 +323,11 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
     credit = _credit_html(comic)
     ext = (
         '<div class="ext-links">'
-        f'<a class="ext amazon" href="{html.escape(amazon)}" target="_blank" '
+        f'<a class="ext amazon btn-press" href="{html.escape(amazon)}" target="_blank" '
         'rel="noopener noreferrer"><span class="mark" aria-hidden="true">a</span>Amazon</a>'
-        f'<a class="ext rakuten" href="{html.escape(rakuten)}" target="_blank" '
+        f'<a class="ext rakuten btn-press" href="{html.escape(rakuten)}" target="_blank" '
         'rel="noopener noreferrer"><span class="mark" aria-hidden="true">R</span>楽天ブックス</a>'
-        f'<a class="ext mercari" href="{html.escape(mercari)}" target="_blank" '
+        f'<a class="ext mercari btn-press" href="{html.escape(mercari)}" target="_blank" '
         'rel="noopener noreferrer"><span class="mark" aria-hidden="true">m</span>mercari</a>'
         "</div>"
     )
@@ -425,14 +425,14 @@ def _rakuten_cover_url(comic: Comic) -> str:
 
 
 def _cover_html(comic: Comic) -> str:
-    placeholder = '<div class="cover ph" aria-hidden="true"><span>書影なし</span></div>'
+    placeholder = '<div class="cover ph btn-press" aria-hidden="true"><span>書影なし</span></div>'
     src_url = _rakuten_cover_url(comic)
     if not src_url:
         return placeholder
     src = html.escape(src_url, quote=True)
     alt = html.escape(comic.display_title)
     return (
-        '<div class="cover">'
+        '<div class="cover btn-press">'
         f'<img src="{src}" alt="{alt}" loading="lazy" referrerpolicy="no-referrer" '
         "onerror=\"const p=this.parentElement; p.classList.add('ph'); p.innerHTML='<span>書影なし</span>';\">"
         "</div>"
@@ -711,7 +711,7 @@ def _badge_html(check: StoreCheck) -> str:
     css, label = _badge_view(check.status)
     title = html.escape(privilege_display_text(check.status, check.detail))
     return (
-        f'<a class="badge {css}" href="{html.escape(check.url)}" '
+        f'<a class="badge {css} btn-press" href="{html.escape(check.url)}" '
         f'target="_blank" rel="noopener noreferrer" title="{title}">'
         f"<span class='store'>{html.escape(check.store_name)}</span>"
         f"<span class='status'>{html.escape(label)}</span>"
@@ -1865,8 +1865,26 @@ def _html_document(
       animation: jelly-wobble 0.7s cubic-bezier(0.22, 0.82, 0.32, 1);
       z-index: 2;
     }}
+    .btn-press {{
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }}
+    .btn-press:active {{
+      transform: scale(0.96);
+      filter: brightness(0.95);
+      transition: transform 0.05s ease, filter 0.05s ease;
+    }}
+    .badge.yes.btn-press:active {{
+      animation: none;
+    }}
     @media (prefers-reduced-motion: reduce) {{
       .badge.yes:hover {{ animation: none; }}
+      .btn-press,
+      .btn-press:active {{
+        transition: none;
+        transform: none;
+      }}
     }}
     .badge.yes .store,
     .badge.yes .status {{ color: #fff; }}
