@@ -506,26 +506,8 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       animation: jelly-wobble 0.7s cubic-bezier(0.22, 0.82, 0.32, 1);
       z-index: 2;
     }}
-    .btn-press {{
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform 0.12s ease, filter 0.12s ease;
-    }}
-    .btn-press:active {{
-      transform: scale(0.96);
-      filter: brightness(0.95);
-      transition: transform 0.05s ease, filter 0.05s ease;
-    }}
-    .badge.yes.btn-press:active {{
-      animation: none;
-    }}
     @media (prefers-reduced-motion: reduce) {{
       .badge.yes:hover {{ animation: none; }}
-      .btn-press,
-      .btn-press:active {{
-        transition: none;
-        transform: none;
-      }}
     }}
     .badge.yes .store, .badge.yes .status {{ color: #fff; }}
     .badge.no {{ background: #eceae6; color: #3f3c39; }}
@@ -795,9 +777,9 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         <div class="action-block">
           <p class="buy-label">購入</p>
           <div class="buy">
-            <a class="ext amazon btn-press" href="{html.escape(amazon)}" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">a</span>Amazon</a>
-            <a class="ext rakuten btn-press" href="{html.escape(rakuten)}" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">R</span>楽天ブックス</a>
-            <a class="ext mercari btn-press" href="{html.escape(mercari)}" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">m</span>mercari</a>
+            <a class="ext amazon" href="{html.escape(amazon)}" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">a</span>Amazon</a>
+            <a class="ext rakuten" href="{html.escape(rakuten)}" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">R</span>楽天ブックス</a>
+            <a class="ext mercari" href="{html.escape(mercari)}" target="_blank" rel="noopener noreferrer"><span class="mark" aria-hidden="true">m</span>mercari</a>
           </div>
         </div>
       </div>
@@ -907,7 +889,7 @@ def _store_confirm_row(check) -> str:
     )
     return (
         '<div class="store-confirm-row">'
-        f"{_badge_html(check)}"
+        f"{_badge_html(check, press=False)}"
         f"{detail_html}"
         "</div>"
     )

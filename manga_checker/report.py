@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand37"
+ASSET_VER = "brand38"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -353,8 +353,10 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
             f'<a class="title-link" href="{html.escape(href, quote=True)}">{title_html}</a>'
         )
         cover = (
-            f'<a class="cover-link" href="{html.escape(href, quote=True)}">{cover}</a>'
+            f'<a class="cover-link book-card" href="{html.escape(href, quote=True)}">{cover}</a>'
         )
+    else:
+        cover = f'<div class="book-card">{cover}</div>'
     parsed = parse_release_date(comic.pubdate)
     pub_iso = parsed.isoformat() if parsed else ""
     cover_attr = html.escape(_rakuten_cover_url(comic), quote=True)
@@ -425,14 +427,14 @@ def _rakuten_cover_url(comic: Comic) -> str:
 
 
 def _cover_html(comic: Comic) -> str:
-    placeholder = '<div class="cover ph btn-press" aria-hidden="true"><span>書影なし</span></div>'
+    placeholder = '<div class="cover ph" aria-hidden="true"><span>書影なし</span></div>'
     src_url = _rakuten_cover_url(comic)
     if not src_url:
         return placeholder
     src = html.escape(src_url, quote=True)
     alt = html.escape(comic.display_title)
     return (
-        '<div class="cover btn-press">'
+        '<div class="cover">'
         f'<img src="{src}" alt="{alt}" loading="lazy" referrerpolicy="no-referrer" '
         "onerror=\"const p=this.parentElement; p.classList.add('ph'); p.innerHTML='<span>書影なし</span>';\">"
         "</div>"
@@ -707,11 +709,12 @@ def _site_legal_script() -> str:
 """
 
 
-def _badge_html(check: StoreCheck) -> str:
+def _badge_html(check: StoreCheck, *, press: bool = True) -> str:
     css, label = _badge_view(check.status)
     title = html.escape(privilege_display_text(check.status, check.detail))
+    press_cls = " btn-press" if press else ""
     return (
-        f'<a class="badge {css} btn-press" href="{html.escape(check.url)}" '
+        f'<a class="badge {css}{press_cls}" href="{html.escape(check.url)}" '
         f'target="_blank" rel="noopener noreferrer" title="{title}">'
         f"<span class='store'>{html.escape(check.store_name)}</span>"
         f"<span class='status'>{html.escape(label)}</span>"
@@ -1557,6 +1560,25 @@ def _html_document(
       display: block;
       color: inherit;
       text-decoration: none;
+    }}
+    .book-card {{
+      display: block;
+      width: 110px;
+      border-radius: 8px;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+    }}
+    .book-card:hover {{
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.12);
+      z-index: 2;
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+      .book-card,
+      .book-card:hover {{
+        transition: none;
+        transform: none;
+        box-shadow: none;
+      }}
     }}
     .copy-title {{
       flex: 0 0 auto;

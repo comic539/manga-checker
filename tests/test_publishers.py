@@ -121,6 +121,8 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn("jelly-wobble", html)
         self.assertIn("btn-press", html)
         self.assertIn(".btn-press:active", html)
+        self.assertIn("book-card", html)
+        self.assertIn("translateY(-4px)", html)
         self.assertIn("#1877f2", html)
         self.assertIn("#c41e3a", html)
         self.assertIn("#4ba7ee", html)
