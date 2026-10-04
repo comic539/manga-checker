@@ -1612,7 +1612,7 @@ def _html_document(
       justify-content: center;
       min-height: 22px;
       padding: 3px 10px;
-      border: 1.5px solid #1a1a1a;
+      border: 1.5px solid var(--accent);
       border-radius: 999px;
       background: #fff;
       color: var(--ink);
@@ -1637,7 +1637,7 @@ def _html_document(
       border-right: 6px solid transparent;
     }}
     .preview-bubble::before {{
-      border-top: 7px solid #1a1a1a;
+      border-top: 7px solid var(--accent);
     }}
     .preview-bubble::after {{
       margin-top: -1.5px;

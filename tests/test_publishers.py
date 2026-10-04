@@ -128,7 +128,7 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn("translateY(-10px)", html)
         self.assertNotIn("scale(0.95)", html)
         self.assertIn("preview-bubble", html)
-        self.assertIn("1.5px solid #1a1a1a", html)
+        self.assertIn("1.5px solid var(--accent)", html)
         self.assertIn("試し読み！", html)
         self.assertIn("pointer-events: none", html)
         self.assertIn("google.com/search", html)
