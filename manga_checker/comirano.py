@@ -100,7 +100,7 @@ def urlparse_path(url: str) -> str:
 def load_comirano_items(
     session: requests.Session,
     delay_sec: float = 0.25,
-    max_pages: int = 40,
+    max_pages: int = 2,
 ) -> list[ComiranoItem]:
     items: list[ComiranoItem] = []
     seen: set[str] = set()

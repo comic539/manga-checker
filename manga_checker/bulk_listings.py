@@ -8,7 +8,7 @@ import requests
 
 from manga_checker.comiczin import ZinItem, load_comiczin_items
 from manga_checker.comirano import ComiranoItem, load_comirano_items
-from manga_checker.dates import comiczin_months, privilege_months
+from manga_checker.dates import comiczin_months, privilege_rematch_months
 from manga_checker.models import Comic, StoreCheck
 from manga_checker.privilege import STATUS_NO, STATUS_YES
 from manga_checker.privilege_index import (
@@ -44,7 +44,7 @@ class BulkListingIndex:
     ) -> None:
         if self.loaded:
             return
-        priv_months = privilege_months_window or privilege_months()
+        priv_months = privilege_months_window or privilege_rematch_months()
         wanted = only or {
             "comiczin",
             "comirano",
@@ -65,7 +65,7 @@ class BulkListingIndex:
             print(
                 "COMIC ZIN: 入荷日検索を "
                 + "、".join(f"{y}年{m}月" for y, m in zin_months)
-                + "（当月〜翌月と掲載済み過去月）で取得します"
+                + "（当月〜翌月）で取得します"
             )
             zin = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)

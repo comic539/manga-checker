@@ -15,6 +15,8 @@ from manga_checker.dates import (
     today_jst,
     year_month_from_pubdate,
     comiczin_months,
+    is_privilege_rematch_month,
+    privilege_rematch_months,
 )
 from manga_checker.official import OfficialHit, OfficialIndex, _load_link_list, lookup_status
 from manga_checker.privilege import STATUS_NO, STATUS_YES
@@ -52,8 +54,17 @@ class DateFormatTests(unittest.TestCase):
         ]
         self.assertEqual(
             comiczin_months(catalog, today=date(2026, 10, 4)),
-            [(2026, 6), (2026, 9), (2026, 10), (2026, 11)],
+            [(2026, 10), (2026, 11)],
         )
+
+    def test_privilege_rematch_is_current_plus_three(self) -> None:
+        self.assertEqual(
+            privilege_rematch_months(today=date(2026, 10, 4)),
+            [(2026, 10), (2026, 11), (2026, 12), (2027, 1)],
+        )
+        self.assertTrue(is_privilege_rematch_month(2026, 10, today=date(2026, 10, 4)))
+        self.assertTrue(is_privilege_rematch_month(2027, 1, today=date(2026, 10, 4)))
+        self.assertFalse(is_privilege_rematch_month(2026, 9, today=date(2026, 10, 4)))
 
     def test_iter_months_wraps_year(self) -> None:
         self.assertEqual(
@@ -176,6 +187,21 @@ class DateFormatTests(unittest.TestCase):
         self.assertEqual(parse_retail_pubdate(html), "2026-08-27")
 
 
+class KikuyaCollectionParseTests(unittest.TestCase):
+    def test_product_card_becomes_hit(self) -> None:
+        from manga_checker.official import parse_kikuya_collection
+
+        html = """
+        <a href="/products/sekai-de-ichiban-shiawase-1">
+          世界で一番幸せ！ 1巻 描き下ろしモノクロイラストカード付き
+        </a>
+        """
+        hits = parse_kikuya_collection(html)
+        self.assertEqual(len(hits), 1)
+        self.assertIn("世界で一番幸せ", hits[0].text)
+        self.assertIn("/products/sekai-de-ichiban-shiawase-1", hits[0].url)
+
+
 class KikuyaLookupTests(unittest.TestCase):
     def test_hit_uses_search_fallback_url(self) -> None:
         index = OfficialIndex()
@@ -191,7 +217,7 @@ class KikuyaLookupTests(unittest.TestCase):
         fallback = "https://kikuyashoten.myshopify.com/search?q=test"
         status, _, url = lookup_status(index, "kikuya", "初凪ヒメリウム", "", fallback)
         self.assertEqual(status, STATUS_YES)
-        self.assertEqual(url, fallback)
+        self.assertEqual(url, "https://kikuyashoten.myshopify.com/products/example")
 
     def test_miss_uses_inventory_search(self) -> None:
         index = OfficialIndex()

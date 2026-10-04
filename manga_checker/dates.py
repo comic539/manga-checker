@@ -192,19 +192,36 @@ def iter_month_offsets(
 
 
 def privilege_months(today: date | None = None) -> list[tuple[int, int]]:
-    """特典一覧の走査窓: 前月・当月・翌月・翌々月。"""
+    """特典一覧の走査窓（後方互換）: 前月・当月・翌月・翌々月。"""
     return iter_month_offsets(before=1, after=2, today=today)
+
+
+def privilege_rematch_months(today: date | None = None) -> list[tuple[int, int]]:
+    """毎日の特典再照合: 当月＋未来3か月。"""
+    return iter_month_offsets(before=0, after=3, today=today)
+
+
+def is_privilege_rematch_month(
+    year: int,
+    month: int,
+    today: date | None = None,
+) -> bool:
+    today = today or today_jst()
+    current = (today.year, today.month)
+    limit = add_months(today.year, today.month, 3)
+    return current <= (year, month) <= limit
 
 
 def comiczin_months(
     catalog_months: list[tuple[int, int]] | None = None,
     today: date | None = None,
 ) -> list[tuple[int, int]]:
-    """COMIC ZIN 入荷日検索: 掲載済みの過去月＋当月＋翌月まで。"""
-    current = today or today_jst()
-    limit = add_months(current.year, current.month, 1)
-    source = catalog_months or privilege_months(today=current)
-    return [ym for ym in source if ym <= limit]
+    """COMIC ZIN 入荷日検索: 当月＋翌月。"""
+    current_date = today or today_jst()
+    current = (current_date.year, current_date.month)
+    limit = add_months(current_date.year, current_date.month, 1)
+    source = catalog_months or [current, limit]
+    return [ym for ym in source if current <= ym <= limit]
 
 
 def iter_month_days(months: list[tuple[int, int]]) -> list[date]:

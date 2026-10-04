@@ -6,20 +6,24 @@ import json
 import re
 import time
 from dataclasses import dataclass
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, quote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
 
 from manga_checker.dates import (
+    add_months,
     iter_month_days,
     month_bounds,
     parse_release_date,
-    privilege_months,
+    privilege_rematch_months,
     today_jst,
+    year_month_from_pubdate,
 )
 from manga_checker.http import get_with_retry
 from manga_checker.models import Comic
+from manga_checker.search_title import toranoana_search_word
+from manga_checker.title_match import titles_match
 from manga_checker.volume import normalize_text
 
 ANIMATE_LIST = "https://www.animate-onlineshop.jp/products/privilege_list.php"
@@ -61,7 +65,7 @@ def load_animate_privileges(
     months: list[tuple[int, int]] | None = None,
     delay_sec: float = 1.2,
 ) -> list[PrivilegeItem]:
-    months = months or privilege_months()
+    months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
     for year, month in months:
@@ -118,7 +122,7 @@ def load_melon_privileges(
     months: list[tuple[int, int]] | None = None,
     delay_sec: float = 1.2,
 ) -> list[PrivilegeItem]:
-    months = months or privilege_months()
+    months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
     seed = f"{MELON_LIST}?category=4&disp_number=100&pageno=1"
@@ -176,7 +180,7 @@ def load_gamers_privileges(
     months: list[tuple[int, int]] | None = None,
     delay_sec: float = 1.2,
 ) -> list[PrivilegeItem]:
-    months = months or privilege_months()
+    months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
     for year, month in months:
@@ -253,48 +257,72 @@ def load_toranoana_privileges(
     issue_dates: list[str] | None = None,
     comics: list[Comic] | None = None,
 ) -> list[PrivilegeItem]:
-    del issue_dates, comics
-    months = months or privilege_months()
+    del issue_dates
+    del months
     today = today_jst()
     current = (today.year, today.month)
-    calendar_months = [(year, month) for year, month in months if (year, month) <= current]
+    next_month = add_months(today.year, today.month, 1)
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
 
-    print(f"とらのあな特典: 月別カレンダー {len(calendar_months)} ヶ月を取得します")
-    for year, month in calendar_months:
-        page = 1
-        while page <= 20:
-            page_url = TORA_BENEFIT_PAGE.format(
-                year=year, month=f"{month:02d}", page=page
-            )
-            html = _get_tora(
-                session, page_url, f"とらのあな特典カレンダー {year}/{month:02d} p{page}"
-            )
-            time.sleep(delay_sec)
-            if html is None:
-                break
-            if page == 1:
-                for item in _load_toranoana_month_json(session, year, month):
-                    if item.url in seen:
-                        continue
-                    seen.add(item.url)
-                    items.append(item)
-                time.sleep(delay_sec)
-            page_items = parse_toranoana_calendar(html, page_url)
-            added = 0
-            for item in page_items:
-                if item.url in seen:
-                    continue
-                seen.add(item.url)
-                items.append(item)
-                added += 1
-            if added == 0:
-                break
-            page += 1
-        print(f"  {year}年{month}月 累計 {len(items)} 件")
+    print(f"とらのあな特典: 当月カレンダー {current[0]}年{current[1]}月を取得します")
+    year, month = current
+    page_url = TORA_BENEFIT_PAGE.format(year=year, month=f"{month:02d}", page=1)
+    html = _get_tora(session, page_url, f"とらのあな特典カレンダー {year}/{month:02d}")
+    time.sleep(delay_sec)
+    for item in _load_toranoana_month_json(session, year, month):
+        if item.url in seen:
+            continue
+        seen.add(item.url)
+        items.append(item)
+    time.sleep(delay_sec)
+    if html:
+        for item in parse_toranoana_calendar(html, page_url):
+            if item.url in seen:
+                continue
+            seen.add(item.url)
+            items.append(item)
+    print(f"  当月カレンダー {len(items)} 件")
+
+    future_comics = [
+        comic
+        for comic in (comics or [])
+        if year_month_from_pubdate(comic.pubdate) == next_month
+    ]
+    print(f"とらのあな特典: 翌月タイトル検索 {len(future_comics)} 件")
+    for comic in future_comics:
+        item = search_toranoana_title_privilege(session, comic, delay_sec=delay_sec)
+        if item is None or item.url in seen:
+            continue
+        seen.add(item.url)
+        items.append(item)
     print(f"とらのあな特典: {len(items)} 件")
     return items
+
+
+def search_toranoana_title_privilege(
+    session: requests.Session,
+    comic: Comic,
+    delay_sec: float = 1.0,
+) -> PrivilegeItem | None:
+    word = toranoana_search_word(comic.title, comic.volume) or comic.search_query
+    if not word:
+        return None
+    url = (
+        "https://ecs.toranoana.jp/tora/ec/app/catalog/list/"
+        f"?searchWord={quote(word)}&searchCategoryCode=bok"
+    )
+    html = _get_tora(session, url, f"とらのあな検索 {word}")
+    time.sleep(delay_sec)
+    if not html:
+        return None
+    for item in parse_toranoana_calendar(html, url):
+        blob = f"{item.title} {item.extra}"
+        if titles_match(comic.search_query, blob, comic.isbn, comic.author):
+            return item
+        if titles_match(comic.title, blob, comic.isbn, comic.author):
+            return item
+    return None
 
 
 def _load_toranoana_month_json(

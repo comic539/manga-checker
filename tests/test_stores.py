@@ -913,6 +913,85 @@ class DetailFetchTests(unittest.TestCase):
         self.assertEqual(check.status, STATUS_UNKNOWN)
         self.assertEqual(check.url, "https://www.animate-onlineshop.jp/pd/222/")
 
+    def test_past_month_keeps_cached_yes(self) -> None:
+        from manga_checker.bulk_listings import BulkListingIndex
+        from manga_checker.official import OfficialIndex
+        from manga_checker.privilege import STATUS_YES
+        from manga_checker.store_cache import cache_key
+        from manga_checker.stores import check_stores
+
+        comic = Comic(title="過去作品 1", isbn="9784000000001", pubdate="2026-09-04")
+        cache = {
+            cache_key(comic, "animate"): {
+                "status": STATUS_YES,
+                "detail": "保存済み",
+                "url": "https://example.com/a",
+                "store_name": "アニメイト",
+            }
+        }
+        listings = BulkListingIndex()
+        listings.loaded = True
+        listings.items["animate"] = []
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        checks = check_stores(
+            comic,
+            fetch=False,
+            delay_sec=0,
+            catalog=catalog,
+            cache=cache,
+            listings=listings,
+            rematch=False,
+        )
+        by_id = {c.store_id: c for c in checks}
+        self.assertEqual(by_id["animate"].status, STATUS_YES)
+
+    def test_comirano_listing_hit_is_yes_and_miss_keeps_cache(self) -> None:
+        from manga_checker.bulk_listings import BulkListingIndex, ListingItem
+        from manga_checker.official import OfficialIndex
+        from manga_checker.privilege import STATUS_YES
+        from manga_checker.store_cache import cache_key
+        from manga_checker.stores import check_stores
+
+        hit = Comic(title="なんぼの食卓 1", isbn="9784000000002", pubdate="2026-10-10")
+        miss = Comic(title="既存特典作品 1", isbn="9784000000003", pubdate="2026-10-11")
+        listings = BulkListingIndex()
+        listings.loaded = True
+        listings.items["comirano"] = [
+            ListingItem(
+                title="なんぼの食卓（1）",
+                url="https://comirano.info/example/",
+                extra="A5ペーパー",
+            )
+        ]
+        cache = {
+            cache_key(miss, "comirano"): {
+                "status": STATUS_YES,
+                "detail": "保存済み",
+                "url": "https://comirano.info/old/",
+                "store_name": "こみらの！",
+            }
+        }
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        hit_checks = check_stores(
+            hit, fetch=False, delay_sec=0, catalog=catalog, listings=listings, cache={}
+        )
+        miss_checks = check_stores(
+            miss,
+            fetch=False,
+            delay_sec=0,
+            catalog=catalog,
+            listings=listings,
+            cache=cache,
+        )
+        self.assertEqual(
+            {c.store_id: c.status for c in hit_checks}["comirano"], STATUS_YES
+        )
+        self.assertEqual(
+            {c.store_id: c.status for c in miss_checks}["comirano"], STATUS_YES
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

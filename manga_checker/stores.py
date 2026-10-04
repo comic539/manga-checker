@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from manga_checker.animate import evaluate_animate_detail, first_animate_detail_url
+from manga_checker.dates import add_months, today_jst, year_month_from_pubdate
 from manga_checker.http import get_with_retry, make_session
 from manga_checker.links import isbn_search_query
 from manga_checker.models import Comic, StoreCheck
@@ -45,6 +46,21 @@ ISBN_NO_HIT_IS_ABSENT = frozenset()
 BULK_LISTING_STORES = frozenset(
     {"animate", "melonbooks", "gamers", "toranoana", "comiczin", "comirano"}
 )
+def listing_covers_comic(store_id: str, comic: Comic, today=None) -> bool:
+    """一覧走査がその作品の月を完全に覆うなら、未ヒットを特典なしにしてよい。"""
+    if store_id in {"comirano", "kikuya"}:
+        return False
+    ym = year_month_from_pubdate(comic.pubdate)
+    current_date = today or today_jst()
+    current = (current_date.year, current_date.month)
+    nxt = add_months(current_date.year, current_date.month, 1)
+    if ym is None:
+        return store_id not in {"toranoana", "comiczin"}
+    if store_id == "toranoana":
+        return ym == current
+    if store_id == "comiczin":
+        return current <= ym <= nxt
+    return True
 
 
 @dataclass
@@ -180,21 +196,57 @@ def check_stores(
     catalog: OfficialIndex | None = None,
     cache: dict | None = None,
     listings: BulkListingIndex | None = None,
+    rematch: bool = True,
 ) -> list[StoreCheck]:
     session = session or make_session(
         extra_headers={"Accept-Language": "ja,en;q=0.8"}
     )
-    if catalog is None:
+    if rematch:
+        if catalog is None:
+            catalog = OfficialIndex()
+        if not catalog.loaded:
+            catalog.load(session)
+    elif catalog is None:
         catalog = OfficialIndex()
-    if not catalog.loaded:
-        catalog.load(session)
 
     results: list[StoreCheck] = []
     for store in STORES:
         url = store.search_url(comic)
+        if not rematch:
+            remembered = cached_check(cache, comic, store.store_id)
+            if remembered is not None:
+                results.append(remembered)
+                continue
+            results.append(
+                StoreCheck(
+                    store.store_id,
+                    store.name,
+                    STATUS_UNKNOWN,
+                    "過去月のため再照合していません。",
+                    url,
+                )
+            )
+            continue
         if store.store_id in BULK_LISTING_STORES:
             if listings is not None and store.store_id in listings.items:
                 check = listings.check(store.store_id, store.name, comic, url)
+                if check.status != STATUS_YES and not listing_covers_comic(
+                    store.store_id, comic
+                ):
+                    remembered = cached_check(cache, comic, store.store_id)
+                    if remembered is not None:
+                        results.append(remembered)
+                        continue
+                    results.append(
+                        StoreCheck(
+                            store.store_id,
+                            store.name,
+                            STATUS_UNKNOWN,
+                            "新着一覧の走査範囲に未掲載のため未確認。",
+                            url,
+                        )
+                    )
+                    continue
                 remember_check(cache, check, comic)
                 results.append(check)
                 continue
@@ -248,9 +300,26 @@ def check_stores(
                     )
                 )
                 continue
-            check = StoreCheck(store.store_id, store.name, official_yes, detail, url)
-            remember_check(cache, check, comic)
-            results.append(check)
+            if official_yes == STATUS_YES:
+                check = StoreCheck(
+                    store.store_id, store.name, official_yes, detail, official_url
+                )
+                remember_check(cache, check, comic)
+                results.append(check)
+                continue
+            remembered = cached_check(cache, comic, store.store_id)
+            if remembered is not None:
+                results.append(remembered)
+                continue
+            results.append(
+                StoreCheck(
+                    store.store_id,
+                    store.name,
+                    STATUS_UNKNOWN,
+                    "新着カタログ2ページに未掲載のため未確認。",
+                    url,
+                )
+            )
             continue
         remembered = cached_check(
             cache, comic, store.store_id, refresh_unreleased_no=fetch

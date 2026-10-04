@@ -16,7 +16,14 @@ from manga_checker.catalog import (
     merge_catalog_months,
     write_catalog_json,
 )
-from manga_checker.dates import format_year_month, iter_month_offsets, iter_months, privilege_months, today_jst
+from manga_checker.dates import (
+    format_year_month,
+    is_privilege_rematch_month,
+    iter_month_offsets,
+    iter_months,
+    privilege_rematch_months,
+    today_jst,
+)
 from manga_checker.http import configure_ssl, make_session
 from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
@@ -174,7 +181,7 @@ def main() -> None:
     listings.load(
         session,
         windows,
-        privilege_months_window=privilege_months(),
+        privilege_months_window=privilege_rematch_months(),
         comics=all_comics,
         only=only_listings or None,
     )
@@ -199,8 +206,14 @@ def main() -> None:
                 f"--limit {args.limit} により {format_year_month(year, month)}の出力を "
                 f"{len(comics)} 件に絞りました。"
             )
+        rematch = is_privilege_rematch_month(year, month)
+        if rematch:
+            print(f"{format_year_month(year, month)}の第1巻を特典再照合します: {len(comics)} 件")
         else:
-            print(f"{format_year_month(year, month)}の第1巻を全件処理します: {len(comics)} 件")
+            print(
+                f"{format_year_month(year, month)}は過去月のため特典は保存結果を維持します: "
+                f"{len(comics)} 件"
+            )
 
         reports: list[ComicReport] = []
         for i, comic in enumerate(comics, start=1):
@@ -210,12 +223,13 @@ def main() -> None:
                     comic=comic,
                     checks=check_stores(
                         comic,
-                        fetch=args.fetch,
-                        delay_sec=1.5 if args.fetch else 0,
+                        fetch=args.fetch and rematch,
+                        delay_sec=1.5 if args.fetch and rematch else 0,
                         session=session,
                         catalog=catalog,
                         cache=checks_cache,
-                        listings=listings,
+                        listings=listings if rematch else None,
+                        rematch=rematch,
                     ),
                     period_year=year,
                     period_month=month,

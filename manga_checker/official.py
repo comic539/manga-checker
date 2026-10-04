@@ -16,6 +16,9 @@ from manga_checker.volume import normalize_text
 
 KIKUYA_PRODUCTS = "https://kikuyashoten.myshopify.com/products.json"
 KIKUYA_SHOP = "https://kikuyashoten.myshopify.com"
+KIKUYA_COLLECTION = (
+    "https://kikuyashoten.myshopify.com/collections/all?sort_by=created-descending"
+)
 MELON_PRIVILEGE = "https://www.melonbooks.co.jp/privilege/privilege.php"
 GAMERS_PRIVILEGE = "https://www.gamers.co.jp/products/privilege_list.php"
 
@@ -86,7 +89,7 @@ class OfficialIndex:
         for hit in self.entries.get(store_id, []):
             if not titles_match(title, hit.text, isbn):
                 continue
-            if store_id == "kikuya" and not hit.keywords:
+            if store_id == "kikuya" and not hit.keywords and hit.source == "publisher":
                 continue
             if hit.source == "publisher" and publisher_hit is None:
                 publisher_hit = hit
@@ -108,39 +111,43 @@ def lookup_status(
         detail = f"{label}で確認"
         if hit.keywords:
             detail += ": " + " / ".join(hit.keywords[:3])
-        link = fallback_url
+        link = hit.url or fallback_url
         return STATUS_YES, detail, link
     return STATUS_NO, "公式特典ページに該当タイトルはありません。", fallback_url
 
 
 def _load_kikuya(session: requests.Session) -> list[OfficialHit]:
     hits: list[OfficialHit] = []
-    for page in range(1, 15):
-        try:
-            response = session.get(
-                KIKUYA_PRODUCTS,
-                params={"limit": 250, "page": page},
-                timeout=30,
-            )
-            if response.status_code >= 400:
-                break
-            payload = response.json()
-        except (requests.RequestException, ValueError):
-            break
-        products = payload.get("products") or []
-        if not products:
-            break
-        for product in products:
-            title = product.get("title") or ""
-            sku = ""
-            variants = product.get("variants") or []
-            if variants:
-                sku = str(variants[0].get("sku") or "")
-            blob = f"{title} {sku}"
-            keywords = _KIKUYA_BONUS.findall(normalize_text(title))
-            hits.append(OfficialHit("kikuya", blob, KIKUYA_SHOP, keywords))
+    for page in (1, 2):
+        url = KIKUYA_COLLECTION if page == 1 else f"{KIKUYA_COLLECTION}&page={page}"
+        html = _get(session, url)
+        if html:
+            hits.extend(parse_kikuya_collection(html, url))
         time.sleep(0.25)
-    return hits
+    print(f"喜久屋書店: 新着カタログ 2ページ {len(_dedupe_hits(hits))} 件")
+    return _dedupe_hits(hits)
+
+
+def parse_kikuya_collection(html: str, page_url: str = KIKUYA_COLLECTION) -> list[OfficialHit]:
+    soup = BeautifulSoup(html or "", "html.parser")
+    hits: list[OfficialHit] = []
+    for tag in soup.select("a[href*='/products/']"):
+        href = str(tag.get("href") or "")
+        title = normalize_text(tag.get_text(" ", strip=True))
+        if not title or len(title) < 4:
+            continue
+        url = urljoin(KIKUYA_SHOP, href).split("?")[0]
+        if "/products/" not in url:
+            continue
+        hits.append(
+            OfficialHit(
+                "kikuya",
+                title,
+                url,
+                _KIKUYA_BONUS.findall(title),
+            )
+        )
+    return _dedupe_hits(hits)
 
 
 def _load_link_list(session: requests.Session, url: str, store_id: str) -> list[OfficialHit]:
