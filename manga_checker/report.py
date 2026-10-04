@@ -10,6 +10,7 @@ from pathlib import Path
 
 from manga_checker.dates import (
     format_release_date,
+    format_site_updated_at,
     parse_release_date,
     year_month_from_pubdate,
 )
@@ -499,6 +500,9 @@ def _site_legal_html(*, logo_src: str = "logo.png") -> str:
     form = html.escape(CONTACT_FORM_URL, quote=True)
     logo = html.escape(f"{logo_src}?v={ASSET_VER}", quote=True)
     logo_alt = html.escape(LOGO_ALT, quote=True)
+    updated_label, updated_iso = format_site_updated_at()
+    updated = html.escape(updated_label)
+    updated_attr = html.escape(updated_iso, quote=True)
     return f"""
   <footer class="site-legal">
     <nav class="site-legal-nav" aria-label="サイト情報">
@@ -524,6 +528,8 @@ def _site_legal_html(*, logo_src: str = "logo.png") -> str:
       <h3>著作権・商標権について</h3>
       <p>掲載されている書影、特典名、作品名等の権利は、各出版社、著者、書店等の各権利所有者に帰属します。権利を侵害することを目的としたものではありません。</p>
       <p>掲載内容や画像等に問題がある場合は、確認のうえ速やかに修正・削除等の対応をいたします。お問い合わせよりご連絡ください。</p>
+      <h3>最終更新日時</h3>
+      <p class="legal-updated"><time datetime="{updated_attr}">{updated}</time>（日本時間）</p>
     </div>
   </div>
   <div class="legal-modal" id="legal-ad" hidden>
@@ -646,6 +652,10 @@ def _site_legal_css() -> str:
       font-size: 0.84rem;
       line-height: 1.75;
       color: #4a433e;
+    }
+    .legal-updated {
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
     .legal-close {
       position: absolute;
@@ -1824,6 +1834,10 @@ def _html_document(
       font-size: 0.84rem;
       line-height: 1.75;
       color: #4a433e;
+    }}
+    .legal-updated {{
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }}
     .legal-close {{
       position: absolute;

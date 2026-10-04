@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 from manga_checker.dates import (
     format_release_date,
+    format_site_updated_at,
     format_year_month,
     is_unreleased,
     iter_month_offsets,
@@ -29,6 +30,12 @@ class DateFormatTests(unittest.TestCase):
 
     def test_year_month_only(self) -> None:
         self.assertEqual(format_release_date("2026.9"), "2026/09")
+
+    def test_site_updated_at_is_jst(self) -> None:
+        utc = datetime(2026, 10, 4, 14, 7, tzinfo=timezone.utc)
+        label, iso = format_site_updated_at(now=utc)
+        self.assertEqual(label, "2026年10月4日 23:07")
+        self.assertTrue(iso.startswith("2026-10-04T23:07"))
 
     def test_unreleased_uses_today(self) -> None:
         self.assertTrue(is_unreleased("2099-12-31", today=date(2026, 9, 26)))

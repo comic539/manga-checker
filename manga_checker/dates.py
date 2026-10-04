@@ -12,10 +12,25 @@ JST = timezone(timedelta(hours=9))
 
 def today_jst(*, now: datetime | None = None) -> date:
     """サイトの『今日』は日本時間。Actions の UTC 日付だと月初に1日遅れる。"""
+    return now_jst(now=now).date()
+
+
+def now_jst(*, now: datetime | None = None) -> datetime:
     current = now or datetime.now(timezone.utc)
     if current.tzinfo is None:
         current = current.replace(tzinfo=timezone.utc)
-    return current.astimezone(JST).date()
+    return current.astimezone(JST)
+
+
+def format_site_updated_at(*, now: datetime | None = None) -> tuple[str, str]:
+    """サイトについての最終更新。表示用と datetime 属性用。"""
+    current = now_jst(now=now)
+    label = (
+        f"{current.year}年{current.month}月{current.day}日 "
+        f"{current.hour:02d}:{current.minute:02d}"
+    )
+    iso = current.isoformat(timespec="minutes")
+    return label, iso
 
 
 def prefer_pubdate(*candidates: str) -> str:
