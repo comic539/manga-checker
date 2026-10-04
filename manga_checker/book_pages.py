@@ -17,7 +17,7 @@ from manga_checker.preview import (
     resolve_preview_cache,
     save_preview_cache,
 )
-from manga_checker.privilege import STATUS_YES
+from manga_checker.privilege import STATUS_YES, privilege_display_text
 from manga_checker.report import (
     ASSET_VER,
     LOGO_ALT,
@@ -34,6 +34,7 @@ from manga_checker.report import (
 )
 
 _ISBN_CHARS = re.compile(r"[^0-9Xx]")
+BOOK_PAGE_LEAD = "各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】"
 
 
 def isbn_slug(isbn: str) -> str:
@@ -157,7 +158,7 @@ def _trial_buttons_html(preview: dict[str, str] | None) -> str:
 def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -> str:
     comic = report.comic
     title = comic.display_title
-    page_title = f"『{title}』店舗別購入特典・発売日情報まとめ｜{SITE_NAME}"
+    page_title = f"{title}\n{BOOK_PAGE_LEAD}"
     cover = _cover_html(comic)
     credit = _credit_html(comic)
     release = format_release_date(comic.pubdate) or "未登録"
@@ -169,7 +170,6 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     rakuten = rakuten_url(comic.isbn, comic.search_query)
     mercari = mercari_url(comic.search_query)
     yes = sum(1 for c in report.checks if c.status == STATUS_YES)
-    no = sum(1 for c in report.checks if c.status != STATUS_YES)
     store_confirm = "".join(_store_confirm_row(check) for check in report.checks)
     trial_html = _trial_buttons_html(preview)
     ndl = ""
@@ -274,6 +274,22 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }}
     .cal-btn:hover {{ background: #d6ebff; }}
+    .pub-btn {{
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: #eefaf1;
+      color: #1b7a3a;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }}
+    .pub-btn:hover {{ background: #d8f3e0; }}
     .fav-list-btn {{
       flex: 0 0 auto;
       display: inline-flex;
@@ -333,6 +349,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     h1 .copy-title.done {{
       color: #1f7a3a;
+    }}
+    .page-lead {{
+      display: block;
+      margin: 8px 0 0;
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--ink);
     }}
     .hero {{
       display: grid;
@@ -560,6 +584,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       background: transparent;
       cursor: pointer;
     }}
+    .page-lead {{
+      display: block;
+      margin: 8px 0 0;
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--ink);
+    }}
     .fav-heart {{
       width: 36px;
       height: 36px;
@@ -681,13 +713,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       </a>
       <div class="header-actions">
         <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
+        <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
         <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
       </div>
     </div>
   </div>
   <div class="wrap">
+    <h1>{html.escape(title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button><span class="page-lead">{html.escape(BOOK_PAGE_LEAD)}</span></h1>
     <a class="back" href="../index.html">← 一覧へ戻る</a>
-    <h1>{html.escape(title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button></h1>
     <section class="hero">
       <div class="hero-info">
       <div class="hero-cover">
@@ -704,7 +737,6 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         {ndl}
         <div class="summary-chips">
           <span class="chip yes">特典あり {yes}</span>
-          <span class="chip no">特典なし {no}</span>
         </div>
       </div>
       <div class="hero-actions">
@@ -816,10 +848,18 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
 """
 
 
+def _store_privilege_text(check) -> str:
+    return privilege_display_text(check.status, check.detail)
+
+
 def _store_confirm_row(check) -> str:
+    detail = _store_privilege_text(check)
+    detail_html = (
+        f'<p class="store-detail">{html.escape(detail)}</p>' if detail else ""
+    )
     return (
         '<div class="store-confirm-row">'
         f"{_badge_html(check)}"
-        f'<p class="store-detail">{html.escape(check.detail)}</p>'
+        f"{detail_html}"
         "</div>"
     )

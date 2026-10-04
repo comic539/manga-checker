@@ -27,7 +27,7 @@ class BookPageTests(unittest.TestCase):
                     isbn="978-4-8322-0000-1",
                 ),
                 checks=[
-                    StoreCheck("animate", "アニメイト", STATUS_YES, "公式特典ページで確認", "https://example.com/a"),
+                    StoreCheck("animate", "アニメイト", STATUS_YES, "詳細ページで検出: イラストカード", "https://example.com/a"),
                     StoreCheck("kikuya", "喜久屋書店", STATUS_NO, "なし", "https://example.com/k"),
                 ],
             )
@@ -54,9 +54,16 @@ class BookPageTests(unittest.TestCase):
             page = books / "9784832200001.html"
             self.assertTrue(page.is_file())
             body = page.read_text(encoding="utf-8")
-            self.assertIn("<title>『初凪ヒメリウム 1』店舗別購入特典・発売日情報まとめ｜イッコミ特典＋</title>", body)
+            self.assertIn("<title>初凪ヒメリウム 1\n各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】</title>", body)
+            self.assertIn("各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】", body)
+            self.assertIn('class="page-lead"', body)
+            self.assertIn("../index.html?pub=1", body)
+            self.assertIn("特典あり 1", body)
+            self.assertNotIn("特典なし 1", body)
+            self.assertIn("イラストカード", body)
+            self.assertNotIn("詳細ページで検出", body)
             self.assertIn('og:site_name" content="イッコミ特典＋"', body)
-            self.assertIn("一覧へ戻る", body)
+            self.assertLess(body.find("<h1>"), body.find("一覧へ戻る"))
             self.assertIn('href="../index.html"', body)
             self.assertIn('id="fav-list-btn"', body)
             self.assertIn("../index.html?fav=1", body)
@@ -76,11 +83,11 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("min-height: 22px", body)
             self.assertIn("min-height: 44px", body)
             self.assertIn("芳文社（まんがタイムKRコミックス）", body)
-            self.assertIn("770円（税込）", body)
-            self.assertLess(body.find("作品名"), body.find("出版社"))
-            self.assertLess(body.find(">出版社<"), body.find(">著者<"))
-            self.assertLess(body.find(">著者<"), body.find(">ISBN<"))
-            self.assertLess(body.find(">ISBN<"), body.find(">価格<"))
+            self.assertIn("税込み770円", body)
+            self.assertLess(body.find("<span>作品名</span>"), body.find("<span>出版社</span>"))
+            self.assertLess(body.find("<span>出版社</span>"), body.find("<span>著者</span>"))
+            self.assertLess(body.find("<span>著者</span>"), body.find("<span>ISBN</span>"))
+            self.assertLess(body.find("<span>ISBN</span>"), body.find("<span>価格</span>"))
             self.assertNotIn("buy-amazon.png", body)
             self.assertIn("各書店の特典", body)
             self.assertNotIn("ad-book-leader", body)

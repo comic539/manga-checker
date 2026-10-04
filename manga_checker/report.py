@@ -10,13 +10,12 @@ from pathlib import Path
 
 from manga_checker.dates import (
     format_release_date,
-    format_year_month,
     parse_release_date,
     year_month_from_pubdate,
 )
 from manga_checker.links import amazon_url, mercari_url, rakuten_url
 from manga_checker.models import Comic, ComicReport, StoreCheck
-from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES
+from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES, privilege_display_text
 from manga_checker.publishers import (
     PUBLISHER_ORDER,
     OTHER_PUBLISHER_LABEL,
@@ -32,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand28"
+ASSET_VER = "brand29"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -168,7 +167,7 @@ def write_html(
             active_total = len(month_items)
         month_id = f"{year:04d}-{month:02d}" if year and month else f"panel-{index}"
         if year and month:
-            label = format_year_month(year, month)
+            label = f"{year}/{month}"
         else:
             label = "一覧"
         grouped = _group_by_publisher(month_items)
@@ -206,7 +205,13 @@ def write_html(
             f"{html.escape(label)}</button>"
         )
     tabs_html = (
-        f'<nav class="month-tabs" role="tablist" aria-label="発売月">{"".join(tabs)}</nav>'
+        '<nav class="month-nav" aria-label="発売月">'
+        '<button type="button" class="month-shift" id="month-prev">前へ</button>'
+        '<div class="month-tabs-scroll" id="month-tabs-scroll">'
+        f'<div class="month-tabs" role="tablist">{"".join(tabs)}</div>'
+        "</div>"
+        '<button type="button" class="month-shift" id="month-next">次へ</button>'
+        "</nav>"
         if tabs
         else ""
     )
@@ -229,6 +234,7 @@ def write_html(
             active_counts,
             tabs_html=tabs_html,
             summary=summary,
+            publishers=_publisher_catalog(all_reports),
         ),
         encoding="utf-8",
     )
@@ -290,6 +296,19 @@ def _group_by_publisher(reports: list[ComicReport]) -> list[tuple[str, list[Comi
     if OTHER_PUBLISHER_LABEL in buckets:
         ordered.append((OTHER_PUBLISHER_LABEL, sort_items(buckets[OTHER_PUBLISHER_LABEL])))
     return ordered
+
+
+def _publisher_catalog(reports: list[ComicReport]) -> list[dict[str, object]]:
+    counts: Counter[str] = Counter()
+    for report in reports:
+        counts[publisher_group_label(report.comic.publisher)] += 1
+    items: list[dict[str, object]] = []
+    for name in PUBLISHER_ORDER:
+        if counts.get(name):
+            items.append({"name": name, "count": counts[name]})
+    if counts.get(OTHER_PUBLISHER_LABEL):
+        items.append({"name": OTHER_PUBLISHER_LABEL, "count": counts[OTHER_PUBLISHER_LABEL]})
+    return items
 
 
 def _card_html(report: ComicReport, card_id: int = 0) -> str:
@@ -355,6 +374,7 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         f'data-author="{html.escape(comic.author or "", quote=True)}" '
         f'data-kana="{html.escape(" ".join(p for p in (comic.title_kana, comic.author_kana) if p), quote=True)}" '
         f'data-publisher="{html.escape(comic.publisher or "出版社未登録", quote=True)}" '
+        f'data-pub-group="{html.escape(publisher_group_label(comic.publisher), quote=True)}" '
         f'data-date="{release}" data-release-month="{release_month_attr}" '
         f'data-pubdate="{html.escape(pub_iso, quote=True)}">'
         '<div class="cover-col">'
@@ -689,7 +709,7 @@ def _site_legal_script() -> str:
 
 def _badge_html(check: StoreCheck) -> str:
     css, label = _badge_view(check.status)
-    title = html.escape(check.detail)
+    title = html.escape(privilege_display_text(check.status, check.detail))
     return (
         f'<a class="badge {css}" href="{html.escape(check.url)}" '
         f'target="_blank" rel="noopener noreferrer" title="{title}">'
@@ -713,6 +733,7 @@ def _html_document(
     counts: Counter,
     tabs_html: str = "",
     summary: str = "",
+    publishers: list[dict[str, object]] | None = None,
 ) -> str:
     page_size = 50
     if total <= 0:
@@ -723,6 +744,8 @@ def _html_document(
         initial_hit = f"{total}件中 1〜{page_size}件表示"
     if not summary:
         summary = INTRO_NOTES[0]
+    publishers = publishers or []
+    publishers_json = json.dumps(publishers, ensure_ascii=False)
     legal_html = _site_legal_html()
     return f"""<!DOCTYPE html>
 <html lang="ja" data-build="{ASSET_VER}">
@@ -856,14 +879,53 @@ def _html_document(
       max-width: 46rem;
       margin: 0 0 10px;
     }}
-    .month-tabs {{
+    .month-nav {{
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 8px;
       margin: 16px 0 4px;
+      min-width: 0;
+    }}
+    .month-shift {{
+      flex: 0 0 auto;
+      min-width: 3.6em;
+      height: 36px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 999px;
+      background: #fffaf3;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      cursor: pointer;
+      white-space: nowrap;
+    }}
+    .month-shift:hover:not(:disabled) {{
+      background: #f3e6d6;
+    }}
+    .month-shift:disabled {{
+      opacity: 0.35;
+      cursor: default;
+    }}
+    .month-tabs-scroll {{
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }}
+    .month-tabs {{
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      width: max-content;
+      margin: 0;
     }}
     .month-tab {{
-      min-width: 7.5em;
+      min-width: 6.4em;
       padding: 8px 12px;
       border: 0;
       border-radius: 999px;
@@ -875,6 +937,7 @@ def _html_document(
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       cursor: pointer;
       white-space: nowrap;
+      scroll-snap-align: start;
     }}
     .month-tab:hover {{
       background: #f3e6d6;
@@ -882,6 +945,9 @@ def _html_document(
     .month-tab.is-active {{
       background: var(--accent);
       color: #fff;
+    }}
+    .month-tab[hidden] {{
+      display: none !important;
     }}
     .index-tabs {{
       display: flex;
@@ -948,79 +1014,92 @@ def _html_document(
     }}
     .search-bar {{
       display: flex;
-      flex: 1 1 auto;
+      flex: 0 1 280px;
       flex-wrap: nowrap;
       align-items: center;
-      gap: 10px 16px;
-      margin: 0;
-      min-width: 0;
-    }}
-    .search-cluster {{
-      display: flex;
-      align-items: center;
       gap: 8px;
-      flex: 1 1 auto;
-      max-width: 720px;
+      margin: 0 auto;
       min-width: 0;
-      position: relative;
-      z-index: 50;
+      max-width: 280px;
+      width: min(280px, 42%);
     }}
     .search-wrap {{
       position: relative;
-      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      width: 100%;
       min-width: 0;
+      z-index: 50;
+      height: 40px;
+      padding: 0 6px 0 14px;
+      border: 1px solid #e5e5e5;
+      border-radius: 999px;
+      background: #f6f6f6;
+    }}
+    .search-wrap:focus-within {{
+      background: #fff;
+      border-color: #d0d0d0;
+      box-shadow: 0 0 0 3px rgba(196, 92, 38, 0.12);
     }}
     .search-wrap input {{
+      flex: 1 1 auto;
       width: 100%;
-      padding: 10px 36px 10px 12px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background: #fff;
-      color: var(--ink);
-      font-size: 0.95rem;
-      font-family: inherit;
-    }}
-    .search-wrap input:focus {{
-      outline: 2px solid #e8b48a;
-      outline-offset: 1px;
-    }}
-    .search-clear {{
-      position: absolute;
-      right: 6px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      border: 0;
-      border-radius: 50%;
-      background: #efe7dc;
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1;
-      cursor: pointer;
-    }}
-    .search-clear:hover {{
-      background: #f3e6d6;
-      color: var(--ink);
-    }}
-    .search-go {{
-      flex: 0 0 auto;
-      width: 44px;
-      height: 44px;
-      padding: 0;
+      min-width: 0;
+      height: 38px;
+      padding: 0 4px;
       border: 0;
       border-radius: 0;
       background: transparent;
+      color: var(--ink);
+      font-size: 0.86rem;
+      font-family: inherit;
+    }}
+    .search-wrap input:focus {{
+      outline: none;
+    }}
+    .search-wrap input::-webkit-search-cancel-button {{
+      -webkit-appearance: none;
+    }}
+    .search-clear {{
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
+      margin-right: 2px;
+      border: 0;
+      border-radius: 50%;
+      background: #d8d8d8;
+      color: #fff;
+      font-size: 0.85rem;
+      line-height: 1;
       cursor: pointer;
     }}
-    .search-go img {{
+    .search-clear[hidden] {{
+      display: none !important;
+    }}
+    .search-clear:hover {{
+      background: #bfbfbf;
+    }}
+    .search-go {{
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #8a8a8a;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }}
+    .search-go svg {{
       display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      width: 18px;
+      height: 18px;
     }}
     .search-go:hover {{
-      transform: scale(1.06);
+      color: var(--ink);
     }}
     .search-suggest {{
       position: fixed;
@@ -1081,8 +1160,32 @@ def _html_document(
     }}
     .search-hit {{
       font-weight: 700;
-      margin: 0;
+      margin: 0 auto 12px;
+      padding: 0 16px;
+      text-align: center;
       white-space: nowrap;
+    }}
+    .search-hit[hidden] {{ display: none !important; }}
+    .pub-btn {{
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: #eefaf1;
+      color: #1b7a3a;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }}
+    .pub-btn:hover {{
+      background: #d8f3e0;
+    }}
+    .pub-btn.is-on {{
+      background: #1b7a3a;
+      color: #fff;
     }}
     .fav-list-btn {{
       flex: 0 0 auto;
@@ -1149,6 +1252,64 @@ def _html_document(
       box-shadow: 0 16px 40px rgba(80, 50, 20, 0.22);
       padding: 16px 16px 20px;
     }}
+    .pub-list {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }}
+    .pub-item {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 12px;
+      border: 1px solid #eee;
+      border-radius: 14px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }}
+    .pub-item:hover,
+    .pub-item.is-on {{
+      border-color: #e8d5c2;
+      background: #fffaf3;
+    }}
+    .pub-mark {{
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.92rem;
+    }}
+    .pub-item strong {{
+      display: block;
+      font-size: 0.92rem;
+    }}
+    .pub-item span {{
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }}
+    .pub-clear {{
+      margin: 0 0 12px;
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: #f3e6d6;
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }}
     .cal-head {{
       display: flex;
       align-items: center;
@@ -1156,10 +1317,21 @@ def _html_document(
       margin: 0 0 12px;
     }}
     .cal-head h2 {{
-      flex: 1 1 auto;
       margin: 0;
       text-align: center;
       font-size: 1.05rem;
+      line-height: 1.2;
+    }}
+    .cal-title-block {{
+      flex: 1 1 auto;
+      min-width: 0;
+      text-align: center;
+    }}
+    .cal-month-total {{
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
     }}
     .cal-nav,
     .cal-close {{
@@ -1828,12 +2000,12 @@ def _html_document(
       text-align: center;
     }}
     .month-count[hidden] {{ display: none !important; }}
-    .pager-pages {{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
+    .pager-status {{
+      min-width: 3.6em;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
     }}
     .pager-btn {{
       min-width: 40px;
@@ -1924,30 +2096,28 @@ def _html_document(
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
       h1 {{ font-size: 1.28rem; }}
-      .search-hit {{ display: none; }}
       .search-bar {{
-        width: 100%;
-        min-width: 0;
-        margin: 0;
-        gap: 0;
+        width: min(180px, 42vw);
+        max-width: 180px;
+        flex: 0 1 180px;
+        margin: 0 auto;
       }}
-      .search-cluster {{
-        max-width: none;
-        gap: 4px;
-        align-items: center;
+      .search-wrap {{
+        height: 34px;
+        padding: 0 4px 0 10px;
       }}
       .search-wrap input {{
-        padding: 5px 26px 5px 8px;
+        height: 32px;
+        padding: 0 2px;
         font-size: 0.72rem;
-        border-radius: 8px;
       }}
       .search-clear {{
-        width: 22px;
-        height: 22px;
-        font-size: 0.9rem;
-        right: 4px;
+        width: 18px;
+        height: 18px;
+        font-size: 0.75rem;
       }}
       .search-go {{ width: 26px; height: 26px; }}
+      .search-go svg {{ width: 15px; height: 15px; }}
       .header-actions {{
         flex-direction: column;
         align-items: stretch;
@@ -1956,7 +2126,8 @@ def _html_document(
         align-self: center;
       }}
       .fav-list-btn,
-      .cal-btn {{
+      .cal-btn,
+      .pub-btn {{
         font-size: 0.58rem;
         padding: 4px 6px;
         line-height: 1.2;
@@ -2039,22 +2210,23 @@ def _html_document(
         <img class="site-logo" src="logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
       </a>
       <div class="search-bar">
-        <div class="search-cluster">
-          <div class="search-wrap">
-            <input id="comic-search" type="search" placeholder="タイトル・著者で検索"
-                   autocomplete="off" spellcheck="false" aria-label="作品を検索"
-                   aria-autocomplete="list" aria-controls="search-suggest">
-            <button type="button" class="search-clear" id="search-clear" aria-label="検索をクリア">×</button>
-            <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
-          </div>
+        <div class="search-wrap" id="search-wrap">
+          <input id="comic-search" type="search" placeholder="タイトル・著者で検索"
+                 autocomplete="off" spellcheck="false" aria-label="作品を検索"
+                 aria-autocomplete="list" aria-controls="search-suggest">
+          <button type="button" class="search-clear" id="search-clear" hidden aria-label="検索をクリア">×</button>
           <button type="button" class="search-go" id="search-go" aria-label="検索する">
-            <img src="search-icon.png?v={ASSET_VER}" alt="" width="44" height="44">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M16.2 16.2L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
           </button>
+          <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
         </div>
-        <p class="search-hit" id="search-hit">{initial_hit}</p>
       </div>
       <div class="header-actions">
         <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">📅 カレンダー</button>
+        <button type="button" class="pub-btn" id="pub-btn" aria-haspopup="dialog" aria-controls="pub-modal">出版社一覧</button>
         <button type="button" class="fav-list-btn" id="fav-list-btn">お気に入り一覧</button>
       </div>
     </div>
@@ -2066,11 +2238,15 @@ def _html_document(
       <span id="day-filter-label"></span>
       <button type="button" id="day-filter-clear">この日の絞り込みを解除</button>
     </p>
+    <p class="day-filter-bar" id="pub-filter-bar" hidden>
+      <span id="pub-filter-label"></span>
+      <button type="button" id="pub-filter-clear">出版社の絞り込みを解除</button>
+    </p>
     </div>
   </header>
   <nav class="pager pager-top" id="pager-top" aria-label="ページ送り（上部）" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
-    <div class="pager-pages"></div>
+    <span class="pager-status"></span>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
   <div class="ad-container ad-header" id="ad-header">
@@ -2078,7 +2254,7 @@ def _html_document(
       <div class="ad-slot" id="ad-slot-top"></div>
     </div>
   </div>
-  <p class="month-count" id="month-count"></p>
+  <p class="search-hit" id="search-hit">{initial_hit}</p>
   <main>
     {body}
     <p class="empty" id="search-empty" hidden>一致する作品がありません。</p>
@@ -2090,7 +2266,7 @@ def _html_document(
   </div>
   <nav class="pager pager-bottom" id="pager" aria-label="ページ送り" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
-    <div class="pager-pages"></div>
+    <span class="pager-status"></span>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
   {legal_html}
@@ -2102,13 +2278,26 @@ def _html_document(
     <div class="cal-dialog" role="dialog" aria-modal="true" aria-labelledby="cal-title">
       <div class="cal-head">
         <button type="button" class="cal-nav" id="cal-prev" aria-label="前の月">‹</button>
-        <h2 id="cal-title">カレンダー</h2>
+        <div class="cal-title-block">
+          <h2 id="cal-title">カレンダー</h2>
+          <p class="cal-month-total" id="cal-month-total"></p>
+        </div>
         <button type="button" class="cal-nav" id="cal-next" aria-label="次の月">›</button>
         <button type="button" class="cal-close" id="cal-close" aria-label="閉じる">×</button>
       </div>
       <div class="cal-week" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-day-list" id="cal-day-list" hidden></div>
+    </div>
+  </div>
+  <div class="cal-modal" id="pub-modal" hidden>
+    <div class="cal-dialog" role="dialog" aria-modal="true" aria-labelledby="pub-title">
+      <div class="cal-head">
+        <h2 id="pub-title">出版社一覧</h2>
+        <button type="button" class="cal-close" id="pub-close" aria-label="閉じる">×</button>
+      </div>
+      <button type="button" class="pub-clear" id="pub-clear">絞り込みを解除</button>
+      <div class="pub-list" id="pub-list"></div>
     </div>
   </div>
   <script>
@@ -2150,18 +2339,19 @@ def _html_document(
       var goBtn = document.getElementById("search-go");
       var suggest = document.getElementById("search-suggest");
       var hit = document.getElementById("search-hit");
-      var monthCount = document.getElementById("month-count");
       var empty = document.getElementById("search-empty");
       var pagers = document.querySelectorAll(".pager");
-      var cluster = input ? input.closest(".search-cluster") : null;
+      var cluster = input ? input.closest(".search-wrap") : null;
       var PAGE_SIZE = 50;
       var currentPage = 1;
       var dayFilter = "";
+      var publisherFilter = "";
       var monthState = {{}};
       var MAX_SUGGEST = 8;
       var FAV_KEY = "ichikomi-favorites-v1";
       var favMode = false;
       var favs = {{}};
+      var PUBLISHERS = {publishers_json};
       var INDEX_ADS = {json.dumps(INDEX_AD_TAGS, ensure_ascii=False)};
       function shuffleAds() {{
         var tags = INDEX_ADS.slice();
@@ -2183,9 +2373,8 @@ def _html_document(
         return header ? Math.ceil(header.getBoundingClientRect().height) + 8 : 8;
       }}
       function scrollToPagerAndAds() {{
-        var tabs = document.querySelector(".month-tabs");
         var pager = document.getElementById("pager-top");
-        var target = tabs || ((pager && !pager.hidden) ? pager : document.getElementById("ad-header"));
+        var target = document.querySelector(".month-nav") || ((pager && !pager.hidden) ? pager : document.getElementById("ad-header"));
         if (!target) {{
           window.scrollTo({{ top: 0, behavior: "smooth" }});
           return;
@@ -2238,6 +2427,10 @@ def _html_document(
             panel.hidden = !onp;
           }});
         }}
+        if (on) {{
+          publisherFilter = "";
+          updatePubBar();
+        }}
         currentPage = 1;
         renderList();
       }}
@@ -2287,6 +2480,7 @@ def _html_document(
             page: currentPage,
             query: input ? input.value : "",
             fav: favMode,
+            pub: publisherFilter,
             day: dayFilter,
             card: extra.card || "",
             scroll: (typeof extra.scroll === "number") ? extra.scroll : window.scrollY
@@ -2326,9 +2520,12 @@ def _html_document(
         }}
         if (input && typeof st.query === "string") input.value = st.query;
         if (typeof st.day === "string") dayFilter = st.day;
+        if (typeof st.pub === "string") publisherFilter = st.pub;
         currentPage = st.page || 1;
         updateLegend();
         updateDayBar();
+        updatePubBar();
+        syncSearchClear();
         renderList();
         window.setTimeout(function () {{
           var card = st.card ? document.getElementById(st.card) : null;
@@ -2354,6 +2551,10 @@ def _html_document(
         return Array.prototype.slice.call(document.querySelectorAll(".month-panel .card"));
       }}
       function cardMatches(card, q) {{
+        if (publisherFilter) {{
+          var g = card.getAttribute("data-pub-group") || "";
+          if (g !== publisherFilter) return false;
+        }}
         if (favMode && !isFav(card.getAttribute("data-isbn") || "")) return false;
         if (!q) return true;
         var title = fold(card.getAttribute("data-title") || "");
@@ -2395,10 +2596,12 @@ def _html_document(
         if (input) input.value = keepQuery ? q : (st.query || "");
         updateLegend();
         updateDayBar();
+        updatePubBar();
         renderList();
         if (!keepQuery) closeSuggest();
         shuffleAds();
         scrollToPagerAndAds();
+        syncMonthWindow();
       }}
       function closeSuggest() {{
         if (!suggest) return;
@@ -2490,38 +2693,25 @@ def _html_document(
           else if (matched.length <= PAGE_SIZE) hit.textContent = total + "件中 " + matched.length + "件表示";
           else hit.textContent = matched.length + "件中 " + shownFrom + "〜" + shownTo + "件表示";
         }}
-        if (monthCount) {{
-          if (favMode) {{
-            monthCount.textContent = "お気に入り " + matched.length + "作品";
-          }} else {{
-            monthCount.textContent = "この月 " + total + "作品";
-          }}
-        }}
         if (empty) empty.hidden = matched.length !== 0;
         renderPager(pages, matched.length);
+        syncSearchClear();
+      }}
+      function circled(n) {{
+        if (n >= 1 && n <= 20) return String.fromCharCode(0x245F + n);
+        return String(n);
       }}
       function renderPager(pages, matchedCount) {{
         pagers.forEach(function (nav) {{
-          if (matchedCount === 0) {{
+          if (matchedCount === 0 || pages <= 1) {{
             nav.hidden = true;
             return;
           }}
           nav.hidden = false;
-          var pagesEl = nav.querySelector(".pager-pages");
+          var status = nav.querySelector(".pager-status");
           var prevBtn = nav.querySelector(".pager-prev");
           var nextBtn = nav.querySelector(".pager-next");
-          if (pagesEl) {{
-            pagesEl.innerHTML = "";
-            for (var p = 1; p <= pages; p++) {{
-              var btn = document.createElement("button");
-              btn.type = "button";
-              btn.className = "pager-btn" + (p === currentPage ? " is-current" : "");
-              btn.textContent = String(p);
-              if (p === currentPage) btn.setAttribute("aria-current", "page");
-              btn.setAttribute("data-page", String(p));
-              pagesEl.appendChild(btn);
-            }}
-          }}
+          if (status) status.textContent = circled(currentPage) + "/" + circled(pages);
           if (prevBtn) prevBtn.disabled = currentPage <= 1;
           if (nextBtn) nextBtn.disabled = currentPage >= pages;
         }});
@@ -2592,18 +2782,12 @@ def _html_document(
       pagers.forEach(function (nav) {{
         var prevBtn = nav.querySelector(".pager-prev");
         var nextBtn = nav.querySelector(".pager-next");
-        var pagesEl = nav.querySelector(".pager-pages");
         if (prevBtn) prevBtn.addEventListener("click", function () {{
           if (currentPage > 1) goToPage(currentPage - 1);
         }});
         if (nextBtn) nextBtn.addEventListener("click", function () {{
           var pages = Math.max(1, Math.ceil(matchingCards().length / PAGE_SIZE));
           if (currentPage < pages) goToPage(currentPage + 1);
-        }});
-        if (pagesEl) pagesEl.addEventListener("click", function (ev) {{
-          var btn = ev.target.closest("[data-page]");
-          if (!btn) return;
-          goToPage(parseInt(btn.getAttribute("data-page"), 10) || 1);
         }});
       }});
       document.querySelectorAll(".month-tab").forEach(function (tab) {{
@@ -2615,6 +2799,120 @@ def _html_document(
           switchMonth(id);
         }});
       }});
+      function monthTabs() {{
+        return Array.prototype.slice.call(document.querySelectorAll(".month-tab[data-month]"));
+      }}
+      function syncMonthWindow() {{
+        var tabs = monthTabs();
+        if (!tabs.length) return;
+        var active = 0;
+        tabs.forEach(function (tab, i) {{
+          if (tab.classList.contains("is-active")) active = i;
+        }});
+        var start = Math.max(0, Math.min(active - 1, Math.max(0, tabs.length - 3)));
+        tabs.forEach(function (tab, i) {{
+          tab.hidden = tabs.length > 3 && (i < start || i >= start + 3);
+        }});
+        var prev = document.getElementById("month-prev");
+        var next = document.getElementById("month-next");
+        if (prev) prev.disabled = start <= 0;
+        if (next) next.disabled = start + 3 >= tabs.length;
+      }}
+      function shiftMonthWindow(delta) {{
+        var tabs = monthTabs();
+        if (!tabs.length) return;
+        var first = 0;
+        for (var i = 0; i < tabs.length; i++) {{
+          if (!tabs[i].hidden) {{ first = i; break; }}
+        }}
+        var start = Math.max(0, Math.min(first + delta, Math.max(0, tabs.length - 3)));
+        tabs.forEach(function (tab, i) {{
+          tab.hidden = tabs.length > 3 && (i < start || i >= start + 3);
+        }});
+        var prev = document.getElementById("month-prev");
+        var next = document.getElementById("month-next");
+        if (prev) prev.disabled = start <= 0;
+        if (next) next.disabled = start + 3 >= tabs.length;
+      }}
+      var monthPrev = document.getElementById("month-prev");
+      var monthNext = document.getElementById("month-next");
+      if (monthPrev) monthPrev.addEventListener("click", function () {{ shiftMonthWindow(-1); }});
+      if (monthNext) monthNext.addEventListener("click", function () {{ shiftMonthWindow(1); }});
+      var PUB_COLORS = ["#e53935","#1e88e5","#7b1fa2","#43a047","#fb8c00","#6d4c41","#00897b","#5c6bc0","#c2185b","#546e7a"];
+      function updatePubBar() {{
+        var bar = document.getElementById("pub-filter-bar");
+        var lab = document.getElementById("pub-filter-label");
+        var btn = document.getElementById("pub-btn");
+        if (btn) btn.classList.toggle("is-on", !!publisherFilter);
+        if (!bar) return;
+        if (!publisherFilter) {{
+          bar.hidden = true;
+          return;
+        }}
+        bar.hidden = false;
+        if (lab) lab.textContent = publisherFilter + "の作品";
+      }}
+      function setPublisherFilter(name) {{
+        publisherFilter = name || "";
+        if (publisherFilter && favMode) {{
+          favMode = false;
+          document.body.classList.remove("fav-mode");
+          var favListBtn = document.getElementById("fav-list-btn");
+          if (favListBtn) {{
+            favListBtn.classList.remove("is-on");
+            favListBtn.textContent = "お気に入り一覧";
+          }}
+        }}
+        if (publisherFilter) {{
+          var months = availableMonths();
+          var latest = "";
+          months.forEach(function (m) {{
+            var panel = document.getElementById("month-" + m);
+            if (!panel) return;
+            var hit = panel.querySelector('.card[data-pub-group="' + publisherFilter.replace(/"/g, "") + '"]');
+            if (hit) latest = m;
+          }});
+          if (latest && latest !== monthKey()) switchMonth(latest, true);
+          else {{
+            currentPage = 1;
+            renderList();
+          }}
+        }} else {{
+          currentPage = 1;
+          renderList();
+        }}
+        updatePubBar();
+        renderPubList();
+        closePubModal();
+      }}
+      function renderPubList() {{
+        var box = document.getElementById("pub-list");
+        if (!box) return;
+        box.innerHTML = PUBLISHERS.map(function (item, i) {{
+          var on = item.name === publisherFilter ? " is-on" : "";
+          var color = PUB_COLORS[i % PUB_COLORS.length];
+          var mark = (item.name || "?").slice(0, 1);
+          return '<button type="button" class="pub-item' + on + '" data-pub="' +
+            String(item.name).replace(/"/g, "") + '"><span class="pub-mark" style="background:' + color +
+            '">' + mark + "</span><div><strong></strong><span></span></div></button>";
+        }}).join("");
+        Array.prototype.forEach.call(box.querySelectorAll(".pub-item"), function (btn, i) {{
+          var item = PUBLISHERS[i];
+          if (!item) return;
+          btn.querySelector("strong").textContent = item.name;
+          btn.querySelector("span").textContent = "発売予定 " + item.count + "作品 →";
+        }});
+      }}
+      function openPubModal() {{
+        var modal = document.getElementById("pub-modal");
+        if (!modal) return;
+        renderPubList();
+        modal.hidden = false;
+      }}
+      function closePubModal() {{
+        var modal = document.getElementById("pub-modal");
+        if (modal) modal.hidden = true;
+      }}
       var topBtn = document.getElementById("back-to-top");
       if (topBtn) {{
         var onScroll = function () {{
@@ -2630,9 +2928,13 @@ def _html_document(
       if (!input) {{
         paintFavs();
         renderList();
+        syncMonthWindow();
         return;
       }}
-      input.addEventListener("input", updateSuggest);
+      input.addEventListener("input", function () {{
+        syncSearchClear();
+        updateSuggest();
+      }});
       window.addEventListener("resize", placeSuggest);
       window.addEventListener("scroll", placeSuggest, true);
       input.addEventListener("keydown", function (ev) {{
@@ -2655,9 +2957,14 @@ def _html_document(
       if (clearBtn) {{
         clearBtn.addEventListener("click", function () {{
           input.value = "";
+          syncSearchClear();
           input.focus();
           applyFilter();
         }});
+      }}
+      function syncSearchClear() {{
+        if (!clearBtn || !input) return;
+        clearBtn.hidden = !input.value;
       }}
       function updateDayBar() {{
         var bar = document.getElementById("day-filter-bar");
@@ -2750,10 +3057,12 @@ def _html_document(
         var days = new Date(calYear, calMonth, 0).getDate();
         var html = "";
         var i;
+        var monthTotal = 0;
         for (i = 0; i < start; i++) html += '<button type="button" class="cal-cell is-empty" disabled></button>';
         for (var d = 1; d <= days; d++) {{
           var iso = calYear + "-" + pad2(calMonth) + "-" + pad2(d);
           var n = (map[iso] || []).length;
+          monthTotal += n;
           var on = dayFilter === iso ? " is-on" : "";
           var zero = n ? "" : " is-zero";
           html += '<button type="button" class="cal-cell' + on + zero + '" data-date="' + iso + '"' +
@@ -2761,6 +3070,8 @@ def _html_document(
             '</span><span class="cal-count">' + n + "</span></button>";
         }}
         grid.innerHTML = html;
+        var totalEl = document.getElementById("cal-month-total");
+        if (totalEl) totalEl.textContent = monthTotal + "作品";
       }}
       function renderCalDayList(iso) {{
         var box = document.getElementById("cal-day-list");
@@ -2820,6 +3131,24 @@ def _html_document(
       }}
       var calBtn = document.getElementById("cal-btn");
       if (calBtn) calBtn.addEventListener("click", openCalendar);
+      var pubBtn = document.getElementById("pub-btn");
+      if (pubBtn) pubBtn.addEventListener("click", openPubModal);
+      var pubClose = document.getElementById("pub-close");
+      if (pubClose) pubClose.addEventListener("click", closePubModal);
+      var pubClear = document.getElementById("pub-clear");
+      if (pubClear) pubClear.addEventListener("click", function () {{ setPublisherFilter(""); }});
+      var pubFilterClear = document.getElementById("pub-filter-clear");
+      if (pubFilterClear) pubFilterClear.addEventListener("click", function () {{ setPublisherFilter(""); }});
+      var pubList = document.getElementById("pub-list");
+      if (pubList) pubList.addEventListener("click", function (ev) {{
+        var item = ev.target.closest(".pub-item[data-pub]");
+        if (!item) return;
+        setPublisherFilter(item.getAttribute("data-pub") || "");
+      }});
+      var pubModal = document.getElementById("pub-modal");
+      if (pubModal) pubModal.addEventListener("click", function (ev) {{
+        if (ev.target === pubModal) closePubModal();
+      }});
       var calClose = document.getElementById("cal-close");
       if (calClose) calClose.addEventListener("click", closeCalendar);
       var calPrev = document.getElementById("cal-prev");
@@ -2847,6 +3176,7 @@ def _html_document(
           var modal = document.getElementById(id);
           if (!modal) return;
           closeCalendar();
+          closePubModal();
           closeLegalModals();
           modal.hidden = false;
         }});
@@ -2870,6 +3200,7 @@ def _html_document(
       document.addEventListener("keydown", function (ev) {{
         if (ev.key === "Escape") {{
           closeCalendar();
+          closePubModal();
           closeLegalModals();
         }}
       }});
@@ -2915,6 +3246,11 @@ def _html_document(
           applyFilter();
         }}
         if (params.get("cal") === "1") openCalendar();
+        var pubParam = params.get("pub");
+        if (pubParam === "1") openPubModal();
+        else if (pubParam) setPublisherFilter(pubParam);
+        syncMonthWindow();
+        syncSearchClear();
       }} catch (e) {{
         renderList();
       }}

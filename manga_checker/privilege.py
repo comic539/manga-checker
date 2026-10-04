@@ -107,6 +107,16 @@ _KINO_CHROME = re.compile(
 STATUS_YES = "特典あり"
 STATUS_NO = "特典なし"
 STATUS_UNKNOWN = "未確認"
+_YES_DETAIL_PREFIX = re.compile(
+    r"^(詳細ページで検出|商品ページで検出|特典一覧でヒット|特典一覧で該当)[:：]\s*"
+)
+
+
+def privilege_display_text(status: str, detail: str) -> str:
+    text = (detail or "").strip()
+    if status != STATUS_YES:
+        return text
+    return _YES_DETAIL_PREFIX.sub("", text).strip()
 
 _DETAIL_BLOCK_WORDS = (
     "有償特典",
