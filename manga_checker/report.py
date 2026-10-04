@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand31"
+ASSET_VER = "brand32"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -206,11 +206,11 @@ def write_html(
         )
     tabs_html = (
         '<nav class="month-nav" aria-label="発売月">'
-        '<button type="button" class="month-shift" id="month-prev">前へ</button>'
+        '<button type="button" class="month-shift" id="month-prev" aria-label="前の月">‹</button>'
         '<div class="month-tabs-scroll" id="month-tabs-scroll">'
         f'<div class="month-tabs" role="tablist">{"".join(tabs)}</div>'
         "</div>"
-        '<button type="button" class="month-shift" id="month-next">次へ</button>'
+        '<button type="button" class="month-shift" id="month-next" aria-label="次の月">›</button>'
         "</nav>"
         if tabs
         else ""
@@ -898,16 +898,18 @@ def _html_document(
     }}
     .month-shift {{
       flex: 0 0 auto;
-      min-width: 3.6em;
+      width: 36px;
+      min-width: 36px;
       height: 36px;
-      padding: 0 10px;
+      padding: 0;
       border: 0;
       border-radius: 999px;
       background: #fffaf3;
       color: var(--ink);
       font: inherit;
-      font-size: 0.82rem;
+      font-size: 1.35rem;
       font-weight: 800;
+      line-height: 1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       cursor: pointer;
       white-space: nowrap;
@@ -922,7 +924,7 @@ def _html_document(
     .month-tabs-scroll {{
       flex: 0 1 auto;
       width: max-content;
-      max-width: min(22.8em, calc(100vw - 8.4em));
+      max-width: min(22.8em, calc(100vw - 6.2em));
       min-width: 0;
       overflow-x: auto;
       overscroll-behavior-x: contain;
@@ -1183,8 +1185,8 @@ def _html_document(
       padding: 8px 12px;
       border: 0;
       border-radius: 999px;
-      background: #eefaf1;
-      color: #1b7a3a;
+      background: #e9f7ef;
+      color: #1b6b40;
       font: inherit;
       font-size: 0.78rem;
       font-weight: 800;
@@ -1193,11 +1195,11 @@ def _html_document(
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }}
     .pub-btn:hover {{
-      background: #d8f3e0;
+      background: #d4eedf;
     }}
     .pub-btn.is-on {{
-      background: #1b7a3a;
-      color: #fff;
+      background: #c5e8d3;
+      color: #14532d;
     }}
     .fav-list-btn {{
       flex: 0 0 auto;
@@ -1272,44 +1274,27 @@ def _html_document(
     .pub-item {{
       display: flex;
       align-items: center;
-      gap: 10px;
       width: 100%;
-      padding: 12px 12px;
-      border: 1px solid #eee;
+      min-height: 52px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
       border-radius: 14px;
-      background: #fff;
       text-align: left;
       cursor: pointer;
       font: inherit;
-      color: inherit;
+      font-weight: 800;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }}
     .pub-item:hover,
     .pub-item.is-on {{
-      border-color: #e8d5c2;
-      background: #fffaf3;
-    }}
-    .pub-mark {{
-      flex: 0 0 auto;
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 0.92rem;
+      box-shadow: 0 2px 8px rgba(80, 50, 20, 0.12);
+      filter: saturate(1.08);
     }}
     .pub-item strong {{
       display: block;
-      font-size: 0.92rem;
-    }}
-    .pub-item span {{
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 0.72rem;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      font-weight: 800;
     }}
     .pub-clear {{
       margin: 0 0 12px;
@@ -2108,19 +2093,44 @@ def _html_document(
       header {{ padding: 0; }}
       .site-top-inner {{
         display: grid;
-        grid-template-columns: 132px minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "logo actions"
+          "search search";
         align-items: center;
-        padding: 2px 8px;
-        gap: 4px 8px;
+        padding: 6px 8px 8px;
+        gap: 6px 8px;
+      }}
+      .logo-link {{
+        grid-area: logo;
+      }}
+      .header-actions {{
+        grid-area: actions;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+      }}
+      .search-bar {{
+        grid-area: search;
+        width: 100%;
+        max-width: none;
+        flex: 1 1 auto;
+        margin: 0;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
       h1 {{ font-size: 1.28rem; }}
-      .search-bar {{
-        width: min(160px, 38vw);
-        max-width: 160px;
-        flex: 0 1 160px;
-        margin: 0;
+      .logo-link,
+      .site-logo {{
+        flex: none;
+        width: 132px;
+        max-width: 132px;
+      }}
+      .site-logo {{
+        height: 42px;
       }}
       .search-wrap {{
         height: 34px;
@@ -2138,19 +2148,18 @@ def _html_document(
       }}
       .search-go {{ width: 26px; height: 26px; }}
       .search-go svg {{ width: 15px; height: 15px; }}
-      .header-actions {{
-        flex-direction: column;
-        align-items: stretch;
-        gap: 4px;
-        margin: 0;
-        align-self: center;
-      }}
       .fav-list-btn,
       .cal-btn,
       .pub-btn {{
         font-size: 0.58rem;
         padding: 4px 6px;
         line-height: 1.2;
+      }}
+      .month-shift {{
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
       }}
       .card-grid {{
         grid-template-columns: 1fr;
@@ -2882,7 +2891,28 @@ def _html_document(
           updateMonthShift();
         }}, {{ passive: false }});
       }}
-      var PUB_COLORS = ["#e53935","#1e88e5","#7b1fa2","#43a047","#fb8c00","#6d4c41","#00897b","#5c6bc0","#c2185b","#546e7a"];
+      var PUB_TONES = [
+        {{bg:"#fdecea", fg:"#b71c1c"}},
+        {{bg:"#e8f1fb", fg:"#0d47a1"}},
+        {{bg:"#f3e5f5", fg:"#6a1b9a"}},
+        {{bg:"#e8f5e9", fg:"#1b5e20"}},
+        {{bg:"#fff3e0", fg:"#e65100"}},
+        {{bg:"#efebe9", fg:"#4e342e"}},
+        {{bg:"#e0f2f1", fg:"#00695c"}},
+        {{bg:"#e8eaf6", fg:"#283593"}},
+        {{bg:"#fce4ec", fg:"#ad1457"}},
+        {{bg:"#eceff1", fg:"#37474f"}},
+        {{bg:"#fff8e1", fg:"#f57f17"}},
+        {{bg:"#e0f7fa", fg:"#00838f"}},
+        {{bg:"#f1f8e9", fg:"#33691e"}},
+        {{bg:"#fbe9e7", fg:"#d84315"}},
+        {{bg:"#ede7f6", fg:"#4527a0"}},
+        {{bg:"#e3f2fd", fg:"#0277bd"}},
+        {{bg:"#f9fbe7", fg:"#827717"}},
+        {{bg:"#f3e5de", fg:"#6d4c41"}},
+        {{bg:"#e8f5e8", fg:"#2e7d32"}},
+        {{bg:"#fff0f0", fg:"#c62828"}}
+      ];
       function updatePubBar() {{
         var bar = document.getElementById("pub-filter-bar");
         var lab = document.getElementById("pub-filter-label");
@@ -2934,17 +2964,15 @@ def _html_document(
         if (!box) return;
         box.innerHTML = PUBLISHERS.map(function (item, i) {{
           var on = item.name === publisherFilter ? " is-on" : "";
-          var color = PUB_COLORS[i % PUB_COLORS.length];
-          var mark = (item.name || "?").slice(0, 1);
+          var tone = PUB_TONES[i % PUB_TONES.length];
           return '<button type="button" class="pub-item' + on + '" data-pub="' +
-            String(item.name).replace(/"/g, "") + '"><span class="pub-mark" style="background:' + color +
-            '">' + mark + "</span><div><strong></strong><span></span></div></button>";
+            String(item.name).replace(/"/g, "") + '" style="background:' + tone.bg +
+            ";color:" + tone.fg + '"><strong></strong></button>';
         }}).join("");
         Array.prototype.forEach.call(box.querySelectorAll(".pub-item"), function (btn, i) {{
           var item = PUBLISHERS[i];
           if (!item) return;
-          btn.querySelector("strong").textContent = item.name;
-          btn.querySelector("span").textContent = "発売予定 " + item.count + "作品 →";
+          btn.querySelector("strong").textContent = item.name + " " + item.count + "作品";
         }});
       }}
       function openPubModal() {{

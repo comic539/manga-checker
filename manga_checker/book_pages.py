@@ -279,8 +279,8 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       padding: 8px 12px;
       border: 0;
       border-radius: 999px;
-      background: #eefaf1;
-      color: #1b7a3a;
+      background: #e9f7ef;
+      color: #1b6b40;
       font: inherit;
       font-size: 0.78rem;
       font-weight: 800;
@@ -289,7 +289,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       white-space: nowrap;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }}
-    .pub-btn:hover {{ background: #d8f3e0; }}
+    .pub-btn:hover {{ background: #d4eedf; }}
     .fav-list-btn {{
       flex: 0 0 auto;
       display: inline-flex;
@@ -644,13 +644,15 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         height: 42px;
       }}
       .header-actions {{
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
         gap: 4px;
         margin: 0 0 0 auto;
       }}
       .fav-list-btn,
-      .cal-btn {{
+      .cal-btn,
+      .pub-btn {{
         font-size: 0.58rem;
         padding: 4px 8px;
         line-height: 1.2;

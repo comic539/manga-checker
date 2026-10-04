@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-build="brand31">
+<html lang="ja" data-build="brand32">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -15,8 +15,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="イッコミ特典＋｜コミック第1巻 書店特典チェック">
   <meta name="twitter:image" content="https://comic539.github.io/manga-checker/logo.png">
-  <link rel="icon" type="image/png" href="icon-3.png?v=brand31">
-  <link rel="shortcut icon" href="favicon.ico?v=brand31">
+  <link rel="icon" type="image/png" href="icon-3.png?v=brand32">
+  <link rel="shortcut icon" href="favicon.ico?v=brand32">
   <style>
     :root {
       --bg: #ffffff;
@@ -142,16 +142,18 @@
     }
     .month-shift {
       flex: 0 0 auto;
-      min-width: 3.6em;
+      width: 36px;
+      min-width: 36px;
       height: 36px;
-      padding: 0 10px;
+      padding: 0;
       border: 0;
       border-radius: 999px;
       background: #fffaf3;
       color: var(--ink);
       font: inherit;
-      font-size: 0.82rem;
+      font-size: 1.35rem;
       font-weight: 800;
+      line-height: 1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       cursor: pointer;
       white-space: nowrap;
@@ -166,7 +168,7 @@
     .month-tabs-scroll {
       flex: 0 1 auto;
       width: max-content;
-      max-width: min(22.8em, calc(100vw - 8.4em));
+      max-width: min(22.8em, calc(100vw - 6.2em));
       min-width: 0;
       overflow-x: auto;
       overscroll-behavior-x: contain;
@@ -427,8 +429,8 @@
       padding: 8px 12px;
       border: 0;
       border-radius: 999px;
-      background: #eefaf1;
-      color: #1b7a3a;
+      background: #e9f7ef;
+      color: #1b6b40;
       font: inherit;
       font-size: 0.78rem;
       font-weight: 800;
@@ -437,11 +439,11 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     .pub-btn:hover {
-      background: #d8f3e0;
+      background: #d4eedf;
     }
     .pub-btn.is-on {
-      background: #1b7a3a;
-      color: #fff;
+      background: #c5e8d3;
+      color: #14532d;
     }
     .fav-list-btn {
       flex: 0 0 auto;
@@ -516,44 +518,27 @@
     .pub-item {
       display: flex;
       align-items: center;
-      gap: 10px;
       width: 100%;
-      padding: 12px 12px;
-      border: 1px solid #eee;
+      min-height: 52px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
       border-radius: 14px;
-      background: #fff;
       text-align: left;
       cursor: pointer;
       font: inherit;
-      color: inherit;
+      font-weight: 800;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .pub-item:hover,
     .pub-item.is-on {
-      border-color: #e8d5c2;
-      background: #fffaf3;
-    }
-    .pub-mark {
-      flex: 0 0 auto;
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 0.92rem;
+      box-shadow: 0 2px 8px rgba(80, 50, 20, 0.12);
+      filter: saturate(1.08);
     }
     .pub-item strong {
       display: block;
-      font-size: 0.92rem;
-    }
-    .pub-item span {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 0.72rem;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      font-weight: 800;
     }
     .pub-clear {
       margin: 0 0 12px;
@@ -1352,19 +1337,44 @@
       header { padding: 0; }
       .site-top-inner {
         display: grid;
-        grid-template-columns: 132px minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "logo actions"
+          "search search";
         align-items: center;
-        padding: 2px 8px;
-        gap: 4px 8px;
+        padding: 6px 8px 8px;
+        gap: 6px 8px;
+      }
+      .logo-link {
+        grid-area: logo;
+      }
+      .header-actions {
+        grid-area: actions;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+      }
+      .search-bar {
+        grid-area: search;
+        width: 100%;
+        max-width: none;
+        flex: 1 1 auto;
+        margin: 0;
       }
       .site-intro { padding: 10px 12px 8px; }
       main { padding: 0 10px 32px; }
       h1 { font-size: 1.28rem; }
-      .search-bar {
-        width: min(160px, 38vw);
-        max-width: 160px;
-        flex: 0 1 160px;
-        margin: 0;
+      .logo-link,
+      .site-logo {
+        flex: none;
+        width: 132px;
+        max-width: 132px;
+      }
+      .site-logo {
+        height: 42px;
       }
       .search-wrap {
         height: 34px;
@@ -1382,19 +1392,18 @@
       }
       .search-go { width: 26px; height: 26px; }
       .search-go svg { width: 15px; height: 15px; }
-      .header-actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 4px;
-        margin: 0;
-        align-self: center;
-      }
       .fav-list-btn,
       .cal-btn,
       .pub-btn {
         font-size: 0.58rem;
         padding: 4px 6px;
         line-height: 1.2;
+      }
+      .month-shift {
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
       }
       .card-grid {
         grid-template-columns: 1fr;
@@ -1471,7 +1480,7 @@
   <div class="site-top">
     <div class="site-top-inner">
       <a class="logo-link" href="./index.html">
-        <img class="site-logo" src="logo.png?v=brand31" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+        <img class="site-logo" src="logo.png?v=brand32" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       </a>
       <div class="search-bar">
         <div class="search-wrap" id="search-wrap">
@@ -1497,7 +1506,7 @@
   </div>
   <header>
     <div class="site-intro">
-    <nav class="month-nav" aria-label="発売月"><button type="button" class="month-shift" id="month-prev">前へ</button><div class="month-tabs-scroll" id="month-tabs-scroll"><div class="month-tabs" role="tablist"><button type="button" class="month-tab" role="tab" data-month="2026-06" aria-selected="false" aria-controls="month-2026-06">2026/6</button><button type="button" class="month-tab" role="tab" data-month="2026-07" aria-selected="false" aria-controls="month-2026-07">2026/7</button><button type="button" class="month-tab" role="tab" data-month="2026-08" aria-selected="false" aria-controls="month-2026-08">2026/8</button><button type="button" class="month-tab" role="tab" data-month="2026-09" aria-selected="false" aria-controls="month-2026-09">2026/9</button><button type="button" class="month-tab is-active" role="tab" data-month="2026-10" aria-selected="true" aria-controls="month-2026-10">2026/10</button><button type="button" class="month-tab" role="tab" data-month="2026-11" aria-selected="false" aria-controls="month-2026-11">2026/11</button><button type="button" class="month-tab" role="tab" data-month="2026-12" aria-selected="false" aria-controls="month-2026-12">2026/12</button><button type="button" class="month-tab" role="tab" data-month="2027-01" aria-selected="false" aria-controls="month-2027-01">2027/1</button></div></div><button type="button" class="month-shift" id="month-next">次へ</button></nav>
+    <nav class="month-nav" aria-label="発売月"><button type="button" class="month-shift" id="month-prev" aria-label="前の月">‹</button><div class="month-tabs-scroll" id="month-tabs-scroll"><div class="month-tabs" role="tablist"><button type="button" class="month-tab" role="tab" data-month="2026-06" aria-selected="false" aria-controls="month-2026-06">2026/6</button><button type="button" class="month-tab" role="tab" data-month="2026-07" aria-selected="false" aria-controls="month-2026-07">2026/7</button><button type="button" class="month-tab" role="tab" data-month="2026-08" aria-selected="false" aria-controls="month-2026-08">2026/8</button><button type="button" class="month-tab" role="tab" data-month="2026-09" aria-selected="false" aria-controls="month-2026-09">2026/9</button><button type="button" class="month-tab is-active" role="tab" data-month="2026-10" aria-selected="true" aria-controls="month-2026-10">2026/10</button><button type="button" class="month-tab" role="tab" data-month="2026-11" aria-selected="false" aria-controls="month-2026-11">2026/11</button><button type="button" class="month-tab" role="tab" data-month="2026-12" aria-selected="false" aria-controls="month-2026-12">2026/12</button><button type="button" class="month-tab" role="tab" data-month="2027-01" aria-selected="false" aria-controls="month-2027-01">2027/1</button></div></div><button type="button" class="month-shift" id="month-next" aria-label="次の月">›</button></nav>
     <p class="day-filter-bar" id="day-filter-bar" hidden>
       <span id="day-filter-label"></span>
       <button type="button" id="day-filter-clear">この日の絞り込みを解除</button>
@@ -1682,7 +1691,7 @@
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
-      <img class="legal-about-logo" src="logo.png?v=brand31" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+      <img class="legal-about-logo" src="logo.png?v=brand32" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>
@@ -2313,7 +2322,28 @@
           updateMonthShift();
         }, { passive: false });
       }
-      var PUB_COLORS = ["#e53935","#1e88e5","#7b1fa2","#43a047","#fb8c00","#6d4c41","#00897b","#5c6bc0","#c2185b","#546e7a"];
+      var PUB_TONES = [
+        {bg:"#fdecea", fg:"#b71c1c"},
+        {bg:"#e8f1fb", fg:"#0d47a1"},
+        {bg:"#f3e5f5", fg:"#6a1b9a"},
+        {bg:"#e8f5e9", fg:"#1b5e20"},
+        {bg:"#fff3e0", fg:"#e65100"},
+        {bg:"#efebe9", fg:"#4e342e"},
+        {bg:"#e0f2f1", fg:"#00695c"},
+        {bg:"#e8eaf6", fg:"#283593"},
+        {bg:"#fce4ec", fg:"#ad1457"},
+        {bg:"#eceff1", fg:"#37474f"},
+        {bg:"#fff8e1", fg:"#f57f17"},
+        {bg:"#e0f7fa", fg:"#00838f"},
+        {bg:"#f1f8e9", fg:"#33691e"},
+        {bg:"#fbe9e7", fg:"#d84315"},
+        {bg:"#ede7f6", fg:"#4527a0"},
+        {bg:"#e3f2fd", fg:"#0277bd"},
+        {bg:"#f9fbe7", fg:"#827717"},
+        {bg:"#f3e5de", fg:"#6d4c41"},
+        {bg:"#e8f5e8", fg:"#2e7d32"},
+        {bg:"#fff0f0", fg:"#c62828"}
+      ];
       function updatePubBar() {
         var bar = document.getElementById("pub-filter-bar");
         var lab = document.getElementById("pub-filter-label");
@@ -2365,17 +2395,15 @@
         if (!box) return;
         box.innerHTML = PUBLISHERS.map(function (item, i) {
           var on = item.name === publisherFilter ? " is-on" : "";
-          var color = PUB_COLORS[i % PUB_COLORS.length];
-          var mark = (item.name || "?").slice(0, 1);
+          var tone = PUB_TONES[i % PUB_TONES.length];
           return '<button type="button" class="pub-item' + on + '" data-pub="' +
-            String(item.name).replace(/"/g, "") + '"><span class="pub-mark" style="background:' + color +
-            '">' + mark + "</span><div><strong></strong><span></span></div></button>";
+            String(item.name).replace(/"/g, "") + '" style="background:' + tone.bg +
+            ";color:" + tone.fg + '"><strong></strong></button>';
         }).join("");
         Array.prototype.forEach.call(box.querySelectorAll(".pub-item"), function (btn, i) {
           var item = PUBLISHERS[i];
           if (!item) return;
-          btn.querySelector("strong").textContent = item.name;
-          btn.querySelector("span").textContent = "発売予定 " + item.count + "作品 →";
+          btn.querySelector("strong").textContent = item.name + " " + item.count + "作品";
         });
       }
       function openPubModal() {

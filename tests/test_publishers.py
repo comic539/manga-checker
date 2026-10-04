@@ -263,7 +263,9 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertNotIn("<span class='status'>未確認</span>", text)
         self.assertIn("📋 コピー", text)
         self.assertIn("</a><button type=\"button\" class=\"copy-title\"", text)
-        self.assertIn("grid-template-columns: 132px minmax(0, 1fr) auto", text)
+        self.assertIn('grid-template-areas:', text)
+        self.assertIn('"logo actions"', text)
+        self.assertIn('"search search"', text)
         self.assertIn("grid-template-columns: 1fr;", text)
 
     def test_rakuten_credit_and_lazy_cover(self) -> None:
@@ -345,6 +347,12 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn('class="month-tabs"', html)
         self.assertIn('class="month-nav"', html)
         self.assertIn('id="month-prev"', html)
+        self.assertIn('aria-label="前の月"', html)
+        self.assertIn('aria-label="次の月"', html)
+        self.assertNotIn('id="month-prev">前へ', html)
+        self.assertNotIn("pub-mark", html)
+        self.assertIn("PUB_TONES", html)
+        self.assertIn('grid-template-areas:', html)
         self.assertIn('id="pub-btn"', html)
         self.assertIn('id="pub-modal"', html)
         self.assertIn("cal-month-total", html)
