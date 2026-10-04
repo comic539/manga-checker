@@ -2,7 +2,9 @@ name: Update catalog
 
 on:
   schedule:
-    # 毎日 1:00 JST = 前日 16:00 UTC
+    # 毎日 0:00 JST。GitHub の cron は数時間遅れることがある。
+    - cron: "0 15 * * *"
+    # 毎日 1:00 JST（遅延・失敗時の予備）。前ジョブが動いていれば完了後に実行。
     - cron: "0 16 * * *"
   workflow_dispatch:
 
@@ -11,7 +13,7 @@ permissions:
 
 concurrency:
   group: update-index
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   TZ: Asia/Tokyo
@@ -19,10 +21,12 @@ env:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 350
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,38 +36,49 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Restore fetch caches
-        uses: actions/cache@v4
-        with:
-          path: |
-            output/catalog_by_month.json
-            output/store_checks.json
-            output/preview_urls.json
-          key: checker-data-${{ github.run_id }}
-          restore-keys: |
-            checker-data-
-            store-checks-
+      - name: Publish HTML from saved catalog
+        run: python main.py --html-only
 
-      - name: Generate full site
+      - name: Commit and push HTML timestamp
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sitemap.xml books \
+            output/catalog_by_month.json output/store_checks.json output/preview_urls.json
+          if git diff --staged --quiet; then
+            echo "No HTML changes."
+          else
+            git commit -m "Update site HTML (saved catalog)"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Fetch catalog, privileges, and previews
         env:
           PYTHONUNBUFFERED: "1"
           RAKUTEN_APPLICATION_ID: ${{ secrets.RAKUTEN_APPLICATION_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APPLICATION_ID }}
-        timeout-minutes: 360
-        run: python main.py --limit 0 --fetch --fetch-preview
+        timeout-minutes: 280
+        continue-on-error: true
+        run: python main.py --limit 0 --fetch --fetch-preview --preview-limit 80
 
-      - name: Commit and push if changed
+      - name: Rebuild HTML after fetch
+        if: always()
+        run: python main.py --html-only
+
+      - name: Commit and push catalog updates
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          mkdir -p output
-          git add -- index.html sitemap.xml books logo.png search-icon.png \
+          git add -- index.html sitemap.xml books \
             output/catalog_by_month.json output/store_checks.json output/preview_urls.json
           if git diff --staged --quiet; then
             echo "No catalog changes."
           else
             git commit -m "Update site (catalog, privileges, previews)"
+            git pull --rebase origin main
             git push
           fi

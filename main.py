@@ -29,6 +29,7 @@ from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
 from manga_checker.publishers import publisher_sort_key
 from manga_checker.rakuten_books import refresh_prices_from_rakuten
+from manga_checker.report import SITE_TITLE, write_csv, write_html
 from manga_checker.store_cache import load_checks_cache, save_checks_cache
 from manga_checker.stores import check_stores
 
@@ -62,6 +63,11 @@ def parse_args() -> argparse.Namespace:
         "--listings",
         default="",
         help="一括取得する書店ID（カンマ区切り）。空なら対象店すべて。例: toranoana",
+    )
+    parser.add_argument(
+        "--html-only",
+        action="store_true",
+        help="保存済みの書誌・特典キャッシュだけからHTMLを書き出す（書店取得をしない）",
     )
     parser.add_argument(
         "--reuse-catalog",
@@ -104,6 +110,94 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def write_published_site(
+    args: argparse.Namespace,
+    comics_by_month: dict[tuple[int, int], list],
+    windows: list[tuple[int, int]],
+    active_period: tuple[int, int],
+    *,
+    fetch: bool,
+    rematch_ok: bool,
+    session=None,
+    catalog: OfficialIndex | None = None,
+    listings: BulkListingIndex | None = None,
+    checks_cache: dict | None = None,
+) -> None:
+    checks_cache_path = args.out_dir / "store_checks.json"
+    checks_cache = checks_cache if checks_cache is not None else load_checks_cache(checks_cache_path)
+    if checks_cache and not fetch:
+        print(f"判定キャッシュを読みました: {checks_cache_path.resolve()}")
+    month_panels: list[tuple[int, int, list[ComicReport]]] = []
+    all_reports: list[ComicReport] = []
+    for year, month in windows:
+        comics = list(comics_by_month.get((year, month), []))
+        comics.sort(
+            key=lambda c: publisher_sort_key(c.publisher, c.pubdate, c.display_title)
+        )
+        if args.limit and args.limit > 0:
+            comics = comics[: args.limit]
+        rematch = rematch_ok and is_privilege_rematch_month(year, month)
+        print()
+        print(f"===== {format_year_month(year, month)} ===== {len(comics)} 件")
+        if rematch and fetch:
+            print("特典を再照合します。")
+        else:
+            print("保存済みの特典判定でHTMLを書きます。")
+        reports: list[ComicReport] = []
+        for i, comic in enumerate(comics, start=1):
+            if fetch:
+                print(f"[{i}/{len(comics)}] {comic.display_title}")
+            reports.append(
+                ComicReport(
+                    comic=comic,
+                    checks=check_stores(
+                        comic,
+                        fetch=fetch and rematch,
+                        delay_sec=1.5 if fetch and rematch else 0,
+                        session=session,
+                        catalog=catalog,
+                        cache=checks_cache,
+                        listings=listings if rematch else None,
+                        rematch=rematch,
+                    ),
+                    period_year=year,
+                    period_month=month,
+                )
+            )
+            if fetch:
+                save_checks_cache(checks_cache_path, checks_cache)
+        month_panels.append((year, month, reports))
+        all_reports.extend(reports)
+    save_checks_cache(checks_cache_path, checks_cache)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    heading = SITE_TITLE
+    csv_path = args.out_dir / "volume1_privileges.csv"
+    html_path = args.out_dir / "volume1_privileges.html"
+    index_path = Path("index.html")
+    write_csv(all_reports, csv_path)
+    write_html(
+        all_reports,
+        html_path,
+        heading,
+        month_panels=month_panels,
+        active_period=active_period,
+        book_dir=Path("books"),
+        sitemap_path=Path("sitemap.xml"),
+        preview_cache_path=args.out_dir / "preview_urls.json",
+        fetch_preview=bool(args.fetch_preview) and fetch,
+        preview_limit=args.preview_limit,
+    )
+    if not args.no_index and html_path.resolve() != index_path.resolve():
+        index_path.write_bytes(html_path.read_bytes())
+    print()
+    print("完了しました。")
+    print(f"  CSV : {csv_path.resolve()}")
+    print(f"  HTML: {html_path.resolve()}")
+    print(f"  Pages: {index_path.resolve()}")
+    print(f"  Books: {Path('books').resolve()}")
+    print(f"  Sitemap: {Path('sitemap.xml').resolve()}")
+
+
 def main() -> None:
     args = parse_args()
     if not 1 <= args.month <= 12:
@@ -123,6 +217,24 @@ def main() -> None:
         windows = iter_month_offsets(args.year, args.month, before=3, after=3)
         active_period = (args.year, args.month)
     live_windows = list(windows)
+
+    if args.html_only:
+        catalog_json = args.out_dir / "catalog_by_month.json"
+        if not catalog_json.exists():
+            raise SystemExit(f"書誌JSONがありません: {catalog_json}")
+        print("保存済み書誌・特典からHTMLだけ書き出します（書店取得なし）。")
+        comics_by_month = load_catalog_json(catalog_json, refresh_covers=False)
+        windows = catalog_display_months(live_windows, comics_by_month)
+        write_published_site(
+            args,
+            comics_by_month,
+            windows,
+            active_period,
+            fetch=False,
+            rematch_ok=False,
+        )
+        return
+
     labels = "、".join(format_year_month(year, month) for year, month in live_windows)
     print(f"書誌を走査します… {labels}（各月は初日〜末日。保存済みの過去月は走査窓から外れても残します）")
     if args.fetch:
@@ -187,90 +299,21 @@ def main() -> None:
         comics=all_comics,
         only=only_listings or None,
     )
-
-    checks_cache_path = args.out_dir / "store_checks.json"
-    checks_cache = load_checks_cache(checks_cache_path)
+    checks_cache = load_checks_cache(args.out_dir / "store_checks.json")
     if checks_cache:
-        print(f"判定キャッシュを読みました: {checks_cache_path.resolve()}（特典あり／なしのみ再利用。未確認は再取得します）")
-
-    month_panels: list[tuple[int, int, list[ComicReport]]] = []
-    all_reports: list[ComicReport] = []
-    for year, month in windows:
-        print()
-        print(f"===== {format_year_month(year, month)} =====")
-        comics = list(comics_by_month.get((year, month), []))
-        comics.sort(
-            key=lambda c: publisher_sort_key(c.publisher, c.pubdate, c.display_title)
-        )
-        if args.limit and args.limit > 0:
-            comics = comics[: args.limit]
-            print(
-                f"--limit {args.limit} により {format_year_month(year, month)}の出力を "
-                f"{len(comics)} 件に絞りました。"
-            )
-        rematch = is_privilege_rematch_month(year, month)
-        if rematch:
-            print(f"{format_year_month(year, month)}の第1巻を特典再照合します: {len(comics)} 件")
-        else:
-            print(
-                f"{format_year_month(year, month)}は過去月のため特典は保存結果を維持します: "
-                f"{len(comics)} 件"
-            )
-
-        reports: list[ComicReport] = []
-        for i, comic in enumerate(comics, start=1):
-            print(f"[{i}/{len(comics)}] {comic.display_title}")
-            reports.append(
-                ComicReport(
-                    comic=comic,
-                    checks=check_stores(
-                        comic,
-                        fetch=args.fetch and rematch,
-                        delay_sec=1.5 if args.fetch and rematch else 0,
-                        session=session,
-                        catalog=catalog,
-                        cache=checks_cache,
-                        listings=listings if rematch else None,
-                        rematch=rematch,
-                    ),
-                    period_year=year,
-                    period_month=month,
-                )
-            )
-            if args.fetch:
-                save_checks_cache(checks_cache_path, checks_cache)
-        month_panels.append((year, month, reports))
-        all_reports.extend(reports)
-
-    save_checks_cache(checks_cache_path, checks_cache)
-
-    args.out_dir.mkdir(parents=True, exist_ok=True)
-    heading = SITE_TITLE
-    csv_path = args.out_dir / "volume1_privileges.csv"
-    html_path = args.out_dir / "volume1_privileges.html"
-    index_path = Path("index.html")
-    write_csv(all_reports, csv_path)
-    write_html(
-        all_reports,
-        html_path,
-        heading,
-        month_panels=month_panels,
-        active_period=active_period,
-        book_dir=Path("books"),
-        sitemap_path=Path("sitemap.xml"),
-        preview_cache_path=args.out_dir / "preview_urls.json",
-        fetch_preview=args.fetch_preview,
-        preview_limit=args.preview_limit,
+        print(f"判定キャッシュを読みました: {args.out_dir / 'store_checks.json'}（特典あり／なしのみ再利用。未確認は再取得します）")
+    write_published_site(
+        args,
+        comics_by_month,
+        windows,
+        active_period,
+        fetch=bool(args.fetch),
+        rematch_ok=True,
+        session=session,
+        catalog=catalog,
+        listings=listings,
+        checks_cache=checks_cache,
     )
-    if not args.no_index and html_path.resolve() != index_path.resolve():
-        index_path.write_bytes(html_path.read_bytes())
-    print()
-    print("完了しました。")
-    print(f"  CSV : {csv_path.resolve()}")
-    print(f"  HTML: {html_path.resolve()}")
-    print(f"  Pages: {index_path.resolve()}")
-    print(f"  Books: {Path('books').resolve()}")
-    print(f"  Sitemap: {Path('sitemap.xml').resolve()}")
     print("HTMLをブラウザで開くと、月タブと各書店の検索リンクから特典を確認できます。")
 
 
