@@ -32,7 +32,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand27"
+ASSET_VER = "brand28"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -497,6 +497,189 @@ def _site_legal_html() -> str:
 """
 
 
+def _site_legal_css() -> str:
+    return """
+    .site-legal {
+      width: 100%;
+      max-width: 720px;
+      margin: 8px auto 32px;
+      padding: 0 16px;
+    }
+    .site-legal-nav {
+      display: flex;
+      width: 100%;
+      border: 1px solid #d8d0c8;
+      background: #fff;
+    }
+    .site-legal-nav button {
+      flex: 1 1 0;
+      margin: 0;
+      padding: 14px 8px;
+      border: 0;
+      border-right: 1px solid #d8d0c8;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-align: center;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    .site-legal-nav button:last-child {
+      border-right: 0;
+    }
+    .site-legal-nav button:hover {
+      background: #f7f4f0;
+      color: var(--accent);
+    }
+    .site-legal-copy {
+      margin: 14px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+    }
+    .legal-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 5100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: rgba(42, 33, 28, 0.42);
+    }
+    .legal-modal[hidden] { display: none !important; }
+    .legal-dialog {
+      position: relative;
+      width: min(640px, 100%);
+      max-height: min(82vh, 720px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 18px 48px rgba(42, 33, 28, 0.22);
+      padding: 28px 28px 24px;
+      color: var(--ink);
+    }
+    .legal-dialog h2 {
+      margin: 0 36px 16px 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #ece6df;
+    }
+    .legal-dialog h3 {
+      margin: 18px 0 8px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .legal-dialog p {
+      margin: 0 0 10px;
+      font-size: 0.84rem;
+      line-height: 1.75;
+      color: #4a433e;
+    }
+    .legal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 8px;
+      background: #f3eee8;
+      color: var(--ink);
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .legal-close:hover {
+      background: #eadfd4;
+    }
+    .legal-actions {
+      margin: 16px 0 14px !important;
+      text-align: center;
+    }
+    .legal-form-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff !important;
+      font-weight: 800;
+      font-size: 0.86rem;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .legal-form-btn:hover {
+      background: #a84c1e;
+    }
+    .legal-dialog a {
+      color: var(--accent);
+      word-break: break-all;
+    }
+    @media (max-width: 768px) {
+      .site-legal {
+        padding: 0 10px;
+        margin-bottom: 24px;
+      }
+      .site-legal-nav button {
+        padding: 12px 4px;
+        font-size: 0.72rem;
+        letter-spacing: 0.01em;
+      }
+      .legal-dialog {
+        padding: 22px 16px 18px;
+        max-height: 86vh;
+      }
+      .legal-dialog h2 { font-size: 1rem; }
+      .legal-dialog p { font-size: 0.8rem; }
+      .legal-form-btn {
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 10px 12px;
+      }
+    }
+"""
+
+
+def _site_legal_script() -> str:
+    return """
+      function closeLegalModals() {
+        document.querySelectorAll(".legal-modal").forEach(function (el) {
+          el.hidden = true;
+        });
+      }
+      document.querySelectorAll("[data-legal-open]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-legal-open") || "";
+          var modal = document.getElementById(id);
+          if (!modal) return;
+          closeLegalModals();
+          modal.hidden = false;
+        });
+      });
+      document.querySelectorAll("[data-legal-close]").forEach(function (btn) {
+        btn.addEventListener("click", closeLegalModals);
+      });
+      document.querySelectorAll(".legal-modal").forEach(function (modal) {
+        modal.addEventListener("click", function (ev) {
+          if (ev.target === modal) closeLegalModals();
+        });
+      });
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape") closeLegalModals();
+      });
+"""
+
+
 def _badge_html(check: StoreCheck) -> str:
     css, label = _badge_view(check.status)
     title = html.escape(check.detail)
@@ -605,7 +788,7 @@ def _html_document(
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 4px 24px;
+      padding: 2px 16px;
       box-sizing: border-box;
     }}
     .header-actions {{
@@ -626,19 +809,19 @@ def _html_document(
     }}
     .logo-link {{
       display: block;
-      flex: 0 0 220px;
-      width: 220px;
+      flex: 0 0 280px;
+      width: 280px;
       max-width: 100%;
       margin: 0;
       line-height: 0;
     }}
     .site-logo {{
       display: block;
-      width: 220px;
+      width: 280px;
       max-width: 100%;
-      height: 56px;
+      height: 72px;
       object-fit: contain;
-      object-position: center;
+      object-position: left center;
     }}
     .kicker {{
       color: var(--accent);
@@ -1726,10 +1909,10 @@ def _html_document(
       header {{ padding: 0; }}
       .site-top-inner {{
         display: grid;
-        grid-template-columns: 92px minmax(0, 1fr) auto;
+        grid-template-columns: 132px minmax(0, 1fr) auto;
         align-items: center;
-        padding: 6px 8px;
-        gap: 6px 8px;
+        padding: 2px 8px;
+        gap: 4px 8px;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
@@ -1833,11 +2016,11 @@ def _html_document(
       .logo-link,
       .site-logo {{
         flex: none;
-        width: 92px;
-        max-width: 92px;
+        width: 132px;
+        max-width: 132px;
       }}
       .site-logo {{
-        height: 28px;
+        height: 42px;
       }}
     }}
   </style>

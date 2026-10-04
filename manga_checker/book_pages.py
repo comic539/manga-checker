@@ -28,6 +28,9 @@ from manga_checker.report import (
     _credit_html,
     _fav_button_html,
     _rakuten_cover_url,
+    _site_legal_css,
+    _site_legal_html,
+    _site_legal_script,
 )
 
 _ISBN_CHARS = re.compile(r"[^0-9Xx]")
@@ -178,6 +181,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     slug = isbn_slug(comic.isbn)
     og_image = _rakuten_cover_url(comic) or f"{SITE_BASE}/logo.png"
     og_url = f"{SITE_BASE}/books/{slug}.html" if slug else f"{SITE_BASE}/"
+    legal_html = _site_legal_html()
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -227,7 +231,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 8px 24px;
+      padding: 2px 16px;
       box-sizing: border-box;
     }}
     .header-actions {{
@@ -239,19 +243,19 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     .logo-link {{
       display: block;
-      flex: 0 0 220px;
-      width: 220px;
+      flex: 0 0 280px;
+      width: 280px;
       max-width: 100%;
       margin: 0;
       line-height: 0;
     }}
     .site-logo {{
       display: block;
-      width: 220px;
+      width: 280px;
       max-width: 100%;
-      height: 56px;
+      height: 72px;
       object-fit: contain;
-      object-position: center;
+      object-position: left center;
     }}
     .cal-btn {{
       flex: 0 0 auto;
@@ -580,27 +584,23 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       height: 1px;
       border: 0;
     }}
-    .affiliate-notice {{
-      margin: 28px 0 0;
-      color: var(--muted);
-      font-size: 0.8rem;
-    }}
+    {_site_legal_css()}
     @media (max-width: 768px) {{
       .site-top-inner {{
         display: grid;
-        grid-template-columns: minmax(0, 108px) auto;
+        grid-template-columns: minmax(0, 132px) auto;
         align-items: center;
-        padding: 6px 10px;
-        gap: 6px 8px;
+        padding: 2px 8px;
+        gap: 4px 8px;
       }}
       .logo-link,
       .site-logo {{
         flex: none;
-        width: 108px;
-        max-width: 108px;
+        width: 132px;
+        max-width: 132px;
       }}
       .site-logo {{
-        height: 32px;
+        height: 42px;
       }}
       .header-actions {{
         flex-direction: column;
@@ -721,8 +721,8 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     </section>
     <h2>各書店の特典</h2>
     <div class="store-confirm">{store_confirm}</div>
-    <p class="affiliate-notice">※{html.escape(SITE_NAME)}はアフィリエイト広告を利用しています</p>
   </div>
+  {legal_html}
   <script>
     (function () {{
       var KEY = "ichikomi-favorites-v1";
@@ -791,6 +791,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         try {{ document.execCommand("copy"); }} catch (e) {{}}
         document.body.removeChild(ta);
       }}
+      {_site_legal_script()}
     }})();
   </script>
 </body>

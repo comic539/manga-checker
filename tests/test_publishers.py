@@ -250,7 +250,7 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertNotIn("<span class='status'>未確認</span>", text)
         self.assertIn("📋 コピー", text)
         self.assertIn("</a><button type=\"button\" class=\"copy-title\"", text)
-        self.assertIn("grid-template-columns: 92px minmax(0, 1fr) auto", text)
+        self.assertIn("grid-template-columns: 132px minmax(0, 1fr) auto", text)
         self.assertIn("grid-template-columns: 1fr;", text)
 
     def test_rakuten_credit_and_lazy_cover(self) -> None:
