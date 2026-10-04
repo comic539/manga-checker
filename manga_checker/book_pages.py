@@ -305,8 +305,8 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     .cal-btn:hover,
     .pub-btn:hover,
     .fav-list-btn:hover {{
-      background: #1a1a1a;
-      color: #fff;
+      background: #fffaf3;
+      color: var(--ink);
     }}
     .wrap {{
       max-width: 760px;

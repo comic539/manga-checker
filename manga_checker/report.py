@@ -654,8 +654,8 @@ def _site_legal_css() -> str:
       color: #4a433e;
     }
     .legal-updated {
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-weight: 400;
+      letter-spacing: 0;
     }
     .legal-close {
       position: absolute;
@@ -1244,13 +1244,18 @@ def _html_document(
     .cal-btn:hover,
     .pub-btn:hover,
     .fav-list-btn:hover {{
-      background: #1a1a1a;
-      color: #fff;
+      background: #fffaf3;
+      color: var(--ink);
     }}
     .pub-btn.is-on,
     .fav-list-btn.is-on {{
       background: #1a1a1a;
       color: #fff;
+    }}
+    .pub-btn.is-on:hover,
+    .fav-list-btn.is-on:hover {{
+      background: #fffaf3;
+      color: var(--ink);
     }}
     .cal-modal {{
       position: fixed;
@@ -1836,8 +1841,8 @@ def _html_document(
       color: #4a433e;
     }}
     .legal-updated {{
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-weight: 400;
+      letter-spacing: 0;
     }}
     .legal-close {{
       position: absolute;

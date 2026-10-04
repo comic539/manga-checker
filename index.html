@@ -444,13 +444,18 @@
     .cal-btn:hover,
     .pub-btn:hover,
     .fav-list-btn:hover {
-      background: #1a1a1a;
-      color: #fff;
+      background: #fffaf3;
+      color: var(--ink);
     }
     .pub-btn.is-on,
     .fav-list-btn.is-on {
       background: #1a1a1a;
       color: #fff;
+    }
+    .pub-btn.is-on:hover,
+    .fav-list-btn.is-on:hover {
+      background: #fffaf3;
+      color: var(--ink);
     }
     .cal-modal {
       position: fixed;
@@ -1036,8 +1041,8 @@
       color: #4a433e;
     }
     .legal-updated {
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-weight: 400;
+      letter-spacing: 0;
     }
     .legal-close {
       position: absolute;
@@ -1821,7 +1826,7 @@
       <p>掲載されている書影、特典名、作品名等の権利は、各出版社、著者、書店等の各権利所有者に帰属します。権利を侵害することを目的としたものではありません。</p>
       <p>掲載内容や画像等に問題がある場合は、確認のうえ速やかに修正・削除等の対応をいたします。お問い合わせよりご連絡ください。</p>
       <h3>最終更新日時</h3>
-      <p class="legal-updated"><time datetime="2026-10-04T23:04+09:00">2026年10月4日 23:04</time>（日本時間）</p>
+      <p class="legal-updated"><time datetime="2026-10-04T23:10+09:00">2026年10月4日 23:10</time>（日本時間）</p>
     </div>
   </div>
   <div class="legal-modal" id="legal-ad" hidden>
