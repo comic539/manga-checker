@@ -85,7 +85,7 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("芳文社", body)
             self.assertIn("まんがタイムKRコミックス", body)
             self.assertNotIn("芳文社（まんがタイムKRコミックス）", body)
-            self.assertIn("税込み770円", body)
+            self.assertIn("税込770円", body)
             self.assertLess(body.find("<span>作品名</span>"), body.find("<span>出版社</span>"))
             self.assertLess(body.find("<span>出版社</span>"), body.find("<span>レーベル</span>"))
             self.assertLess(body.find("<span>レーベル</span>"), body.find("<span>著者</span>"))

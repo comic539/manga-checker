@@ -42,7 +42,7 @@ class Comic:
 
     def price_line(self) -> str:
         if self.item_price > 0:
-            return f"税込み{self.item_price:,}円"
+            return f"税込{self.item_price:,}円"
         return "価格未登録"
 
 

@@ -49,7 +49,7 @@ class RakutenParseTests(unittest.TestCase):
         self.assertEqual(comic.series, "まんがタイムKR")
         self.assertEqual(comic.item_price, 770)
         self.assertEqual(comic.publisher_label_line(), "芳文社（まんがタイムKR）")
-        self.assertEqual(comic.price_line(), "税込み770円")
+        self.assertEqual(comic.price_line(), "税込770円")
 
     def test_refresh_prices_fills_item_price(self) -> None:
         from manga_checker.rakuten_books import refresh_prices_from_rakuten
@@ -76,7 +76,7 @@ class RakutenParseTests(unittest.TestCase):
         self.assertEqual(comic.item_price, 572)
         self.assertEqual(comic.series, "ジャンプコミックス")
         self.assertEqual(comic.publisher_label_line(), "集英社（ジャンプコミックス）")
-        self.assertEqual(comic.price_line(), "税込み572円")
+        self.assertEqual(comic.price_line(), "税込572円")
 
     def test_skips_noimage_url(self) -> None:
         comic = parse_rakuten_item(

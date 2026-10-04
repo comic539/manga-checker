@@ -236,7 +236,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px 0;
+      padding: 2px 16px;
       box-sizing: border-box;
     }}
     .site-top-row {{
@@ -247,12 +247,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     .smart-header {{
       display: flex;
+      flex: 0 0 auto;
       align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
       gap: 8px;
-      padding: 8px 0 10px;
-      border-top: 1px solid #f0eeee;
+      margin-left: auto;
+      padding: 0;
+      border: 0;
     }}
     .logo-link {{
       display: block;
@@ -640,14 +642,20 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     {_site_legal_css()}
     @media (max-width: 768px) {{
       .site-top-inner {{
-        padding: 6px 8px 0;
+        padding: 6px 8px 8px;
       }}
       .site-top-row {{
+        flex-wrap: wrap;
         gap: 8px;
       }}
       .smart-header {{
+        flex: 1 0 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-left: 0;
         gap: 6px;
-        padding: 8px 0 10px;
+        padding: 8px 0 0;
+        border-top: 1px solid #f0eeee;
       }}
       .logo-link,
       .site-logo {{
@@ -722,12 +730,12 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         <a class="logo-link" href="../index.html">
           <img class="site-logo" src="../logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
         </a>
+        <nav class="smart-header" aria-label="主要メニュー">
+          <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
+          <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
+          <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
+        </nav>
       </div>
-      <nav class="smart-header" aria-label="主要メニュー">
-        <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
-        <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
-        <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
-      </nav>
     </div>
   </div>
   <div class="wrap">

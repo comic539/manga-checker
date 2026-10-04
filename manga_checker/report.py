@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand33"
+ASSET_VER = "brand34"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -819,7 +819,7 @@ def _html_document(
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px 0;
+      padding: 2px 16px;
       box-sizing: border-box;
     }}
     .site-top-row {{
@@ -830,12 +830,14 @@ def _html_document(
     }}
     .smart-header {{
       display: flex;
+      flex: 0 0 auto;
       align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
       gap: 8px;
-      padding: 8px 0 10px;
-      border-top: 1px solid #f0eeee;
+      margin-left: auto;
+      padding: 0;
+      border: 0;
     }}
     .site-intro {{
       width: 100%;
@@ -2062,20 +2064,26 @@ def _html_document(
     @media (max-width: 768px) {{
       header {{ padding: 0; }}
       .site-top-inner {{
-        padding: 6px 8px 0;
+        padding: 6px 8px 8px;
       }}
       .site-top-row {{
+        flex-wrap: wrap;
         gap: 8px;
       }}
       .search-bar {{
-        width: 100%;
+        width: auto;
         max-width: none;
-        flex: 1 1 auto;
+        flex: 1 1 160px;
         margin: 0;
       }}
       .smart-header {{
+        flex: 1 0 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-left: 0;
         gap: 6px;
-        padding: 8px 0 10px;
+        padding: 8px 0 0;
+        border-top: 1px solid #f0eeee;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
@@ -2216,12 +2224,12 @@ def _html_document(
           <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
         </div>
       </div>
-      </div>
       <nav class="smart-header" aria-label="主要メニュー">
         <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">📅 カレンダー</button>
         <button type="button" class="pub-btn" id="pub-btn" aria-haspopup="dialog" aria-controls="pub-modal">出版社一覧</button>
         <button type="button" class="fav-list-btn" id="fav-list-btn">お気に入り一覧</button>
       </nav>
+      </div>
     </div>
   </div>
   <header>
