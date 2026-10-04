@@ -1203,7 +1203,7 @@ def _html_document(
     .search-hit {{
       font-weight: 700;
       margin: 0 auto 12px;
-      padding: 0 16px;
+      padding: 2px 16px 4px;
       text-align: center;
       white-space: nowrap;
     }}
@@ -1612,7 +1612,7 @@ def _html_document(
       justify-content: center;
       min-height: 22px;
       padding: 3px 10px;
-      border: 1.5px solid var(--accent);
+      border: 1.5px solid #1a1a1a;
       border-radius: 999px;
       background: #fff;
       color: var(--ink);
@@ -1637,7 +1637,7 @@ def _html_document(
       border-right: 6px solid transparent;
     }}
     .preview-bubble::before {{
-      border-top: 7px solid var(--accent);
+      border-top: 7px solid #1a1a1a;
     }}
     .preview-bubble::after {{
       margin-top: -1.5px;
@@ -1654,15 +1654,9 @@ def _html_document(
         transform: translate(-50%, 0);
       }}
     }}
-    .book-card:active {{
-      transform: translateY(3px) scale(0.95);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
-      transition: transform 0.05s ease, box-shadow 0.05s ease;
-    }}
     @media (prefers-reduced-motion: reduce) {{
       .book-card,
-      .book-card:hover,
-      .book-card:active {{
+      .book-card:hover {{
         transition: none;
         transform: none;
         box-shadow: none;
@@ -2110,8 +2104,8 @@ def _html_document(
       padding: 4px 16px 8px;
     }}
     .pager-top {{
-      margin: 8px auto 16px;
-      padding-bottom: 4px;
+      margin: 8px auto 6px;
+      padding-bottom: 0;
     }}
     .pager-bottom {{
       margin-bottom: 16px;
@@ -2431,12 +2425,12 @@ def _html_document(
     <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
+  <p class="search-hit" id="search-hit">{initial_hit}</p>
   <div class="ad-container ad-header" id="ad-header">
     <div class="ad-row">
       <div class="ad-slot" id="ad-slot-top"></div>
     </div>
   </div>
-  <p class="search-hit" id="search-hit">{initial_hit}</p>
   <main>
     {body}
     <p class="empty" id="search-empty" hidden>一致する作品がありません。</p>
