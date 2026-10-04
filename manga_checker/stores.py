@@ -208,7 +208,7 @@ def check_stores(
                 StoreCheck(
                     store.store_id,
                     store.name,
-                    STATUS_NO,
+                    STATUS_UNKNOWN,
                     "入荷・特典一覧を取得できていません。",
                     url,
                 )

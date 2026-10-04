@@ -16,9 +16,12 @@ from manga_checker.volume import normalize_text
 
 LIST_URL = "https://shop.comiczin.jp/products/list.php"
 DETAIL_URL = "https://shop.comiczin.jp/products/detail.php"
+ZIN_REFERER = "https://shop.comiczin.jp/products/list.php"
 _DAY_QUERY = re.compile(r"(\d{4})/(\d{1,2})/(\d{1,2})")
 _PRODUCT_ID = re.compile(r"product_id=(\d+)", re.I)
 _ISBN = re.compile(r"(97[89]\d{10})")
+_NAV_PAGE = re.compile(r"fnNaviPage\('(\d+)'\)")
+_HEADERS = {"Referer": ZIN_REFERER}
 
 
 @dataclass
@@ -33,10 +36,18 @@ def zin_day_url(year: int, month: int, day: int) -> str:
     return f"{LIST_URL}?name={year:04d}/{month:02d}/{day:02d}"
 
 
+def listing_max_page(html: str) -> int:
+    numbers = [int(match.group(1)) for match in _NAV_PAGE.finditer(html or "")]
+    return max(numbers) if numbers else 1
+
+
 def parse_zin_listing(html: str, page_url: str = LIST_URL) -> list[ZinItem]:
     soup = BeautifulSoup(html or "", "html.parser")
+    scope = _listing_scope(soup)
+    if scope is None:
+        return []
     by_id: dict[str, ZinItem] = {}
-    for tag in soup.find_all("a", href=True):
+    for tag in scope.find_all("a", href=True):
         href = str(tag.get("href") or "")
         product_id = _product_id(href)
         if not product_id:
@@ -47,8 +58,6 @@ def parse_zin_listing(html: str, page_url: str = LIST_URL) -> list[ZinItem]:
         img_alt = _usable_alt(img)
         if img_alt:
             title = img_alt
-        elif "title_area" in classes:
-            title = normalize_text(tag.get_text(" ", strip=True))
         else:
             title = normalize_text(tag.get_text(" ", strip=True))
         parent = tag.find_parent(["li", "div", "td", "article", "tr"]) or tag
@@ -89,34 +98,73 @@ def calendar_days_from_html(html: str, year: int, month: int) -> list[tuple[int,
 def load_comiczin_items(
     session: requests.Session,
     months: list[tuple[int, int]],
-    delay_sec: float = 0.2,
+    delay_sec: float = 0.25,
 ) -> list[ZinItem]:
     items: list[ZinItem] = []
     seen_urls: set[str] = set()
     for year, month in months:
-        seed = zin_day_url(year, month, 1)
-        html = _get(session, seed)
         last = monthrange(year, month)[1]
-        days = [(year, month, day) for day in range(1, last + 1)]
-        if html:
-            for item in parse_zin_listing(html, seed):
-                if item.url not in seen_urls:
-                    seen_urls.add(item.url)
-                    items.append(item)
-        for y, m, d in days:
-            if d == 1 and html:
-                continue
-            url = zin_day_url(y, m, d)
-            page = _get(session, url)
-            time.sleep(delay_sec)
-            if not page:
-                continue
-            for item in parse_zin_listing(page, url):
-                if item.url not in seen_urls:
-                    seen_urls.add(item.url)
-                    items.append(item)
+        for day in range(1, last + 1):
+            url = zin_day_url(year, month, day)
+            page_items = _load_day_pages(session, url, delay_sec)
+            for item in page_items:
+                if item.url in seen_urls:
+                    continue
+                seen_urls.add(item.url)
+                items.append(item)
         print(f"COMIC ZIN: {year}年{month}月の入荷一覧 {len(items)} 件（累計）")
     return items
+
+
+def _listing_scope(soup: BeautifulSoup):
+    main = soup.select_one("ul.ul_block_main_item_list")
+    if main is not None:
+        return main
+    if soup.select_one(".div_block_main_item_list_pagenavi") is not None:
+        return None
+    return soup
+
+
+def _load_day_pages(
+    session: requests.Session, url: str, delay_sec: float
+) -> list[ZinItem]:
+    html = _get(session, url)
+    time.sleep(delay_sec)
+    if not html:
+        return []
+    collected: list[ZinItem] = []
+    seen: set[str] = set()
+    max_page = listing_max_page(html)
+    pages = [(1, html)]
+    for pageno in range(2, min(max_page, 20) + 1):
+        page_html = _post_page(session, url, pageno)
+        time.sleep(delay_sec)
+        if not page_html:
+            break
+        pages.append((pageno, page_html))
+    for _, page_html in pages:
+        for item in parse_zin_listing(page_html, url):
+            if item.url in seen:
+                continue
+            seen.add(item.url)
+            collected.append(item)
+    return collected
+
+
+def _post_page(session: requests.Session, url: str, pageno: int) -> str:
+    try:
+        response = session.post(
+            url,
+            data={"pageno": str(pageno), "mode": "", "orderby": "", "product_id": ""},
+            timeout=20,
+            headers=_HEADERS,
+        )
+        if response.status_code >= 400:
+            print(f"  [HTTP] {response.status_code} COMIC ZIN pageno={pageno}")
+            return ""
+        return response.text or ""
+    except requests.RequestException:
+        return ""
 
 
 def _product_id(href: str) -> str:
@@ -148,6 +196,8 @@ def _usable_alt(img) -> str:
 
 def _clean_title(blob: str) -> str:
     text = normalize_text(blob)
+    text = re.sub(r"^【予約】", "", text)
+    text = text.lstrip("・ ")
     text = re.sub(r"\d+\s*円.*$", "", text)
     text = re.sub(r"(購入する|税込|円 \( 税込 \)|全年齢|購入不可)", " ", text)
     return normalize_text(text)[:180]
@@ -155,7 +205,9 @@ def _clean_title(blob: str) -> str:
 
 def _get(session: requests.Session, url: str) -> str:
     try:
-        response = get_with_retry(session, url, timeout=20, retries=2, label="COMIC ZIN")
+        response = get_with_retry(
+            session, url, timeout=20, retries=2, headers=_HEADERS, label="COMIC ZIN"
+        )
         if response.status_code >= 400:
             return ""
         return response.text or ""

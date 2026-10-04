@@ -1,7 +1,7 @@
 import unittest
 
 from manga_checker.bulk_listings import BulkListingIndex, ListingItem
-from manga_checker.comiczin import calendar_days_from_html, parse_zin_listing
+from manga_checker.comiczin import calendar_days_from_html, listing_max_page, parse_zin_listing
 from manga_checker.comirano import parse_comirano_listing
 from manga_checker.models import Comic
 from manga_checker.privilege import STATUS_NO, STATUS_YES
@@ -37,6 +37,21 @@ class ComiczinParseTests(unittest.TestCase):
         self.assertTrue(any("短編集 Parade" in item.title for item in items))
         days = calendar_days_from_html(html, 2026, 10)
         self.assertEqual(days, [(2026, 10, 2), (2026, 10, 5)])
+
+    def test_ignores_sidebar_when_main_list_is_empty(self) -> None:
+        html = """
+        <div class="div_block_main_item_list_pagenavi">&nbsp;</div>
+        <ul class="ul_block_main_item_list"></ul>
+        <a href="/products/detail.php?product_id=41537">ネコ太とニャン太</a>
+        """
+        self.assertEqual(parse_zin_listing(html), [])
+
+    def test_reads_eccube_page_nav(self) -> None:
+        html = """
+        <a href="/products/list.php" onclick="fnNaviPage('2'); return false;">2</a>
+        <a href="/products/list.php" onclick="fnNaviPage('3'); return false;">3</a>
+        """
+        self.assertEqual(listing_max_page(html), 3)
 
 
 class ComiranoParseTests(unittest.TestCase):
