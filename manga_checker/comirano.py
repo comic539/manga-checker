@@ -48,10 +48,24 @@ def parse_comirano_listing(html: str, page_url: str = COMIC_LIST_URL) -> list[Co
         if not title or url in seen:
             continue
         article = link.find_parent("article")
-        extra = normalize_text(article.get_text(" ", strip=True))[:400] if article else title
+        extra = _comirano_extra(article, title)
         seen.add(url)
         items.append(ComiranoItem(title=title, url=url, extra=extra))
     return items
+
+
+def _comirano_extra(article, title: str) -> str:
+    if article is None:
+        return title
+    for node in article.select("li, p, span"):
+        text = normalize_text(node.get_text(" ", strip=True))
+        if text.startswith("特典"):
+            return text[:120]
+    blob = normalize_text(article.get_text(" ", strip=True))
+    match = re.search(r"特典[：:]\s*\S+", blob)
+    if match:
+        return match.group(0)[:120]
+    return title
 
 
 def _is_comirano_post(url: str) -> bool:

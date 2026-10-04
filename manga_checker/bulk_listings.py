@@ -12,7 +12,6 @@ from manga_checker.dates import privilege_months
 from manga_checker.models import Comic, StoreCheck
 from manga_checker.privilege import STATUS_NO, STATUS_YES
 from manga_checker.privilege_index import (
-    catalog_issue_dates,
     load_animate_privileges,
     load_gamers_privileges,
     load_melon_privileges,
@@ -94,11 +93,10 @@ class BulkListingIndex:
             ]
             self.items["gamers"] = gamers
         if "toranoana" in wanted:
-            issue_dates = catalog_issue_dates(comics or [], priv_months)
             tora = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra)
                 for item in load_toranoana_privileges(
-                    session, priv_months, issue_dates=issue_dates
+                    session, months, comics=comics or []
                 )
             ]
             self.items["toranoana"] = tora

@@ -56,6 +56,7 @@ class ComiranoParseTests(unittest.TestCase):
         items = parse_comirano_listing(html)
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].title, "アンデッドさんの不器用な青春(1)")
+        self.assertIn("特典", items[0].extra)
         self.assertIn("comirano.info", items[0].url)
         self.assertNotIn("/category/", items[0].url)
         self.assertNotIn("?cat=", items[0].url)
@@ -172,6 +173,28 @@ class PrivilegeListParseTests(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertIn("アンデッドさん", items[0].title)
         self.assertIn("/tora/ec/item/200012826267/", items[0].url)
+
+    def test_toranoana_benefit_json(self) -> None:
+        from manga_checker.privilege_index import parse_toranoana_benefit_json
+
+        raw = """toraBenefitScheduleCallback({
+          "info": {"prev": true, "next": false},
+          "list": [
+            {
+              "benefitId": "1",
+              "titleId": "200012823053",
+              "date": 8,
+              "title": "解除師カンナの魔術録 1",
+              "publisher": "講談社",
+              "benefit": "【特典】共通描き下ろしイラストカード"
+            }
+          ]
+        });"""
+        items = parse_toranoana_benefit_json(raw)
+        self.assertEqual(len(items), 1)
+        self.assertIn("解除師カンナ", items[0].title)
+        self.assertIn("/tora/ec/item/200012823053/", items[0].url)
+        self.assertIn("イラストカード", items[0].extra)
 
     def test_catalog_issue_dates_are_unique_yyyymmdd(self) -> None:
         from manga_checker.privilege_index import catalog_issue_dates
