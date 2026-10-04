@@ -1243,19 +1243,13 @@ def _html_document(
     }}
     .cal-btn:hover,
     .pub-btn:hover,
-    .fav-list-btn:hover {{
-      background: #fffaf3;
-      color: var(--ink);
-    }}
+    .fav-list-btn:hover,
+    .cal-btn:active,
+    .pub-btn:active,
+    .fav-list-btn:active,
+    .cal-btn.is-on,
     .pub-btn.is-on,
-    .fav-list-btn.is-on,
-    .cal-btn.is-on {{
-      background: var(--accent);
-      color: #fff;
-    }}
-    .cal-btn.is-on:hover,
-    .pub-btn.is-on:hover,
-    .fav-list-btn.is-on:hover {{
+    .fav-list-btn.is-on {{
       background: var(--accent);
       color: #fff;
     }}

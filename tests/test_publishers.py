@@ -256,6 +256,9 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn("font-weight: 400", html)
         self.assertIn(".cal-btn:hover", html)
         self.assertIn(".cal-btn.is-on", html)
+        hover = html[html.find(".cal-btn:hover") : html.find(".cal-modal")]
+        self.assertIn("var(--accent)", hover)
+        self.assertNotIn("background: #fffaf3", hover)
         self.assertIn("8px auto 80px", html)
         self.assertIn("お問い合わせフォームを開く（Googleフォーム）", html)
         self.assertIn("data-legal-open", html)
