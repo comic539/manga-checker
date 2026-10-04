@@ -651,6 +651,54 @@ def refresh_covers_from_rakuten(
     return comics
 
 
+def refresh_prices_from_rakuten(
+    comics: list[Comic],
+    session: requests.Session | None = None,
+    delay_sec: float = 0.4,
+) -> list[Comic]:
+    """ISBN検索で楽天の税込価格（と未設定のレーベル）を補う。"""
+    if not rakuten_configured():
+        return comics
+    targets = [
+        comic
+        for comic in comics
+        if re.sub(r"\D", "", comic.isbn or "")
+        and (comic.item_price <= 0 or not (comic.series or "").strip())
+    ]
+    if not targets:
+        return comics
+    session = session or make_session()
+    print(f"楽天ブックス: 価格・レーベル未設定の {len(targets)} 件をISBNで取得します。")
+    updated = 0
+    for index, comic in enumerate(targets, start=1):
+        isbn = re.sub(r"\D", "", comic.isbn or "")
+        try:
+            payload = _request(session, {"isbn": isbn, "hits": "1"})
+        except Exception as exc:
+            print(f"  価格取得失敗 {isbn}: {exc}")
+            continue
+        items = _items(payload)
+        parsed = parse_rakuten_item(items[0]) if items else None
+        changed = False
+        if parsed:
+            if comic.item_price <= 0 and parsed.item_price:
+                comic.item_price = parsed.item_price
+                changed = True
+            if not (comic.series or "").strip() and parsed.series:
+                comic.series = parsed.series
+                changed = True
+        if changed:
+            updated += 1
+            print(
+                f"  [{index}/{len(targets)}] {comic.display_title}: "
+                f"{comic.price_line()} / {comic.series or 'レーベルなし'}"
+            )
+        if index < len(targets) and delay_sec:
+            time.sleep(delay_sec)
+    print(f"楽天ブックス: 価格・レーベルを {updated} 件更新しました。")
+    return comics
+
+
 def _cabinet_cover_url(session: requests.Session, isbn: str) -> str:
     """APIがgifのままでも、楽天CDNの実書影(_1_9.jpg)があれば使う。"""
     last4 = isbn[-4:]

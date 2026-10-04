@@ -75,7 +75,7 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("#4ba7ee", body)
             self.assertIn("min-height: 22px", body)
             self.assertIn("min-height: 44px", body)
-            self.assertIn("芳文社：まんがタイムKRコミックス", body)
+            self.assertIn("芳文社（まんがタイムKRコミックス）", body)
             self.assertIn("770円（税込）", body)
             self.assertLess(body.find("作品名"), body.find("出版社"))
             self.assertLess(body.find(">出版社<"), body.find(">著者<"))

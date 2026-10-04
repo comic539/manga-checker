@@ -48,8 +48,35 @@ class RakutenParseTests(unittest.TestCase):
         self.assertTrue(is_volume_one(comic.title, comic.volume))
         self.assertEqual(comic.series, "まんがタイムKR")
         self.assertEqual(comic.item_price, 770)
-        self.assertEqual(comic.publisher_label_line(), "芳文社：まんがタイムKR")
+        self.assertEqual(comic.publisher_label_line(), "芳文社（まんがタイムKR）")
         self.assertEqual(comic.price_line(), "770円（税込）")
+
+    def test_refresh_prices_fills_item_price(self) -> None:
+        from manga_checker.rakuten_books import refresh_prices_from_rakuten
+
+        comic = Comic(title="HAL FORMULA 1", isbn="9784088852652", publisher="集英社")
+        payload = {
+            "Items": [
+                {
+                    "title": "HAL FORMULA 1",
+                    "isbn": "9784088852652",
+                    "publisherName": "集英社",
+                    "seriesName": "ジャンプコミックス",
+                    "itemPrice": 572,
+                    "itemUrl": "https://books.rakuten.co.jp/rb/example/",
+                }
+            ]
+        }
+        with (
+            patch("manga_checker.rakuten_books.rakuten_configured", return_value=True),
+            patch("manga_checker.rakuten_books._request", return_value=payload),
+            patch("manga_checker.rakuten_books.time.sleep"),
+        ):
+            refresh_prices_from_rakuten([comic], delay_sec=0)
+        self.assertEqual(comic.item_price, 572)
+        self.assertEqual(comic.series, "ジャンプコミックス")
+        self.assertEqual(comic.publisher_label_line(), "集英社（ジャンプコミックス）")
+        self.assertEqual(comic.price_line(), "572円（税込）")
 
     def test_skips_noimage_url(self) -> None:
         comic = parse_rakuten_item(

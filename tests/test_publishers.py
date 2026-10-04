@@ -115,7 +115,7 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertNotIn("buy-mercari.png", html)
         self.assertIn("min-height: 22px", html)
         self.assertIn("min-height: 44px", html)
-        self.assertIn("芳文社：まんがタイムKRコミックス", html)
+        self.assertIn("芳文社（まんがタイムKRコミックス）", html)
         self.assertIn("770円（税込）", html)
         self.assertIn("#1877f2", html)
         self.assertIn("#c41e3a", html)

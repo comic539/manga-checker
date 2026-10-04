@@ -28,7 +28,7 @@ from manga_checker.http import configure_ssl, make_session
 from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
 from manga_checker.publishers import publisher_sort_key
-from manga_checker.report import SITE_TITLE, write_csv, write_html
+from manga_checker.rakuten_books import refresh_prices_from_rakuten
 from manga_checker.store_cache import load_checks_cache, save_checks_cache
 from manga_checker.stores import check_stores
 
@@ -177,6 +177,8 @@ def main() -> None:
 
     listings = BulkListingIndex()
     all_comics = [comic for comics in comics_by_month.values() for comic in comics]
+    refresh_prices_from_rakuten(all_comics, session=session)
+    write_catalog_json(catalog_json, comics_by_month)
     only_listings = {part.strip() for part in (args.listings or "").split(",") if part.strip()}
     listings.load(
         session,

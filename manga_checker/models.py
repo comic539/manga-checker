@@ -37,7 +37,7 @@ class Comic:
         publisher = (self.publisher or "").strip() or "出版社未登録"
         series = (self.series or "").strip()
         if series and series != publisher:
-            return f"{publisher}：{series}"
+            return f"{publisher}（{series}）"
         return publisher
 
     def price_line(self) -> str:
