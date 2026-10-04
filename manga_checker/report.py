@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand32"
+ASSET_VER = "brand33"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -139,9 +139,9 @@ def write_html(
     path.parent.mkdir(parents=True, exist_ok=True)
     if not month_panels:
         month_panels = [(0, 0, reports)]
-    tabs: list[str] = []
     panels: list[str] = []
     card_id = 0
+    active_label = "一覧"
     named_indexes = [
         index
         for index, (year, month, _) in enumerate(month_panels)
@@ -167,7 +167,7 @@ def write_html(
             active_total = len(month_items)
         month_id = f"{year:04d}-{month:02d}" if year and month else f"panel-{index}"
         if year and month:
-            label = f"{year}/{month}"
+            label = f"{year}年{month}月"
         else:
             label = "一覧"
         grouped = _group_by_publisher(month_items)
@@ -188,7 +188,8 @@ def write_html(
         is_active = index == active_index
         active = " is-active" if is_active else ""
         hidden = "" if is_active else " hidden"
-        selected = "true" if is_active else "false"
+        if is_active:
+            active_label = label
         panels.append(
             f'<div class="month-panel{active}" id="month-{html.escape(month_id, quote=True)}" '
             f'data-month="{html.escape(month_id, quote=True)}" data-total="{len(month_items)}" '
@@ -198,21 +199,13 @@ def write_html(
             f"{inner}"
             "</div>"
         )
-        tabs.append(
-            f'<button type="button" class="month-tab{active}" role="tab" '
-            f'data-month="{html.escape(month_id, quote=True)}" '
-            f'aria-selected="{selected}" aria-controls="month-{html.escape(month_id, quote=True)}">'
-            f"{html.escape(label)}</button>"
-        )
     tabs_html = (
         '<nav class="month-nav" aria-label="発売月">'
         '<button type="button" class="month-shift" id="month-prev" aria-label="前の月">‹</button>'
-        '<div class="month-tabs-scroll" id="month-tabs-scroll">'
-        f'<div class="month-tabs" role="tablist">{"".join(tabs)}</div>'
-        "</div>"
+        f'<p class="month-title" id="month-title">{html.escape(active_label)}</p>'
         '<button type="button" class="month-shift" id="month-next" aria-label="次の月">›</button>'
         "</nav>"
-        if tabs
+        if panels
         else ""
     )
     body = "\n".join(panels)
@@ -820,17 +813,29 @@ def _html_document(
     }}
     .site-top-inner {{
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px;
+      padding: 2px 16px 0;
       box-sizing: border-box;
     }}
-    .header-actions {{
-      align-self: center;
-      margin-top: 0;
+    .site-top-row {{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }}
+    .smart-header {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 0 10px;
+      border-top: 1px solid #f0eeee;
     }}
     .site-intro {{
       width: 100%;
@@ -890,78 +895,50 @@ def _html_document(
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      width: fit-content;
+      gap: 18px;
+      width: 100%;
       max-width: 100%;
-      margin: 16px auto 4px;
+      margin: 8px auto 10px;
       min-width: 0;
+    }}
+    .month-title {{
+      margin: 0;
+      min-width: 7.5em;
+      text-align: center;
+      color: #111;
+      font-size: clamp(1.85rem, 5.2vw, 2.7rem);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      line-height: 1.15;
+      font-feature-settings: "palt";
     }}
     .month-shift {{
       flex: 0 0 auto;
-      width: 36px;
-      min-width: 36px;
-      height: 36px;
+      width: 44px;
+      min-width: 44px;
+      height: 44px;
       padding: 0;
       border: 0;
       border-radius: 999px;
-      background: #fffaf3;
-      color: var(--ink);
+      background: #f4f4f4;
+      color: #111;
       font: inherit;
-      font-size: 1.35rem;
-      font-weight: 800;
+      font-size: 1.6rem;
+      font-weight: 700;
       line-height: 1;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      box-shadow: none;
       cursor: pointer;
       white-space: nowrap;
     }}
     .month-shift:hover:not(:disabled) {{
-      background: #f3e6d6;
+      background: #e8e8e8;
     }}
     .month-shift:disabled {{
-      opacity: 0.35;
+      opacity: 0.28;
       cursor: default;
     }}
-    .month-tabs-scroll {{
-      flex: 0 1 auto;
-      width: max-content;
-      max-width: min(22.8em, calc(100vw - 6.2em));
-      min-width: 0;
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scroll-snap-type: x proximity;
-      touch-action: pan-x;
-    }}
-    .month-tabs {{
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 8px;
-      width: max-content;
-      margin: 0;
-    }}
-    .month-tab {{
-      flex: 0 0 auto;
-      min-width: 6.4em;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
-      background: #fffaf3;
-      color: var(--ink);
-      font: inherit;
-      font-size: 0.84rem;
-      font-weight: 800;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      cursor: pointer;
-      white-space: nowrap;
-      scroll-snap-align: start;
-    }}
-    .month-tab:hover {{
-      background: #f3e6d6;
-    }}
-    .month-tab.is-active {{
-      background: var(--accent);
-      color: #fff;
+    body.fav-mode .month-nav {{
+      display: none;
     }}
     .index-tabs {{
       display: flex;
@@ -1028,14 +1005,14 @@ def _html_document(
     }}
     .search-bar {{
       display: flex;
-      flex: 0 0 260px;
+      flex: 1 1 auto;
       flex-wrap: nowrap;
       align-items: center;
       gap: 8px;
       margin: 0;
       min-width: 0;
-      max-width: 260px;
-      width: 260px;
+      max-width: 360px;
+      width: auto;
     }}
     .search-wrap {{
       position: relative;
@@ -1221,13 +1198,6 @@ def _html_document(
     .fav-list-btn.is-on {{
       background: #ff2eb8;
       color: #fff;
-    }}
-    .header-actions {{
-      display: flex;
-      flex: 0 0 auto;
-      align-items: center;
-      gap: 8px;
-      margin-left: auto;
     }}
     .cal-btn {{
       flex: 0 0 auto;
@@ -2092,33 +2062,20 @@ def _html_document(
     @media (max-width: 768px) {{
       header {{ padding: 0; }}
       .site-top-inner {{
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas:
-          "logo actions"
-          "search search";
-        align-items: center;
-        padding: 6px 8px 8px;
-        gap: 6px 8px;
+        padding: 6px 8px 0;
       }}
-      .logo-link {{
-        grid-area: logo;
-      }}
-      .header-actions {{
-        grid-area: actions;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 4px;
-        margin: 0;
+      .site-top-row {{
+        gap: 8px;
       }}
       .search-bar {{
-        grid-area: search;
         width: 100%;
         max-width: none;
         flex: 1 1 auto;
         margin: 0;
+      }}
+      .smart-header {{
+        gap: 6px;
+        padding: 8px 0 10px;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
@@ -2155,11 +2112,16 @@ def _html_document(
         padding: 4px 6px;
         line-height: 1.2;
       }}
+      .month-title {{
+        font-size: 1.55rem;
+        letter-spacing: 0.04em;
+        min-width: 6.4em;
+      }}
       .month-shift {{
-        width: 32px;
-        min-width: 32px;
-        height: 32px;
-        font-size: 1.2rem;
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        font-size: 1.35rem;
       }}
       .card-grid {{
         grid-template-columns: 1fr;
@@ -2235,6 +2197,7 @@ def _html_document(
 <body>
   <div class="site-top">
     <div class="site-top-inner">
+      <div class="site-top-row">
       <a class="logo-link" href="./index.html">
         <img class="site-logo" src="logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
       </a>
@@ -2253,11 +2216,12 @@ def _html_document(
           <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
         </div>
       </div>
-      <div class="header-actions">
+      </div>
+      <nav class="smart-header" aria-label="主要メニュー">
         <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">📅 カレンダー</button>
         <button type="button" class="pub-btn" id="pub-btn" aria-haspopup="dialog" aria-controls="pub-modal">出版社一覧</button>
         <button type="button" class="fav-list-btn" id="fav-list-btn">お気に入り一覧</button>
-      </div>
+      </nav>
     </div>
   </div>
   <header>
@@ -2312,7 +2276,6 @@ def _html_document(
           <p class="cal-month-total" id="cal-month-total"></p>
         </div>
         <button type="button" class="cal-nav" id="cal-next" aria-label="次の月">›</button>
-        <button type="button" class="cal-close" id="cal-close" aria-label="閉じる">×</button>
       </div>
       <div class="cal-week" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
       <div class="cal-grid" id="cal-grid"></div>
@@ -2462,6 +2425,7 @@ def _html_document(
         }}
         currentPage = 1;
         renderList();
+        updateMonthChrome();
       }}
       favs = loadFavs();
       function fold(s) {{
@@ -2541,11 +2505,7 @@ def _html_document(
             panel.classList.toggle("is-active", on);
             panel.hidden = !on;
           }});
-          document.querySelectorAll(".month-tab").forEach(function (tab) {{
-            var on = tab.getAttribute("data-month") === st.month;
-            tab.classList.toggle("is-active", on);
-            tab.setAttribute("aria-selected", on ? "true" : "false");
-          }});
+          updateMonthChrome();
         }}
         if (input && typeof st.query === "string") input.value = st.query;
         if (typeof st.day === "string") dayFilter = st.day;
@@ -2615,11 +2575,7 @@ def _html_document(
           panel.classList.toggle("is-active", on);
           panel.hidden = !on;
         }});
-        document.querySelectorAll(".month-tab").forEach(function (tab) {{
-          var on = tab.getAttribute("data-month") === id;
-          tab.classList.toggle("is-active", on);
-          tab.setAttribute("aria-selected", on ? "true" : "false");
-        }});
+        updateMonthChrome();
         var st = monthState[id] || {{ page: 1, query: "" }};
         currentPage = keepQuery ? 1 : (st.page || 1);
         if (input) input.value = keepQuery ? q : (st.query || "");
@@ -2630,7 +2586,7 @@ def _html_document(
         if (!keepQuery) closeSuggest();
         shuffleAds();
         scrollToPagerAndAds();
-        syncMonthWindow();
+        updateMonthChrome();
       }}
       function closeSuggest() {{
         if (!suggest) return;
@@ -2832,65 +2788,40 @@ def _html_document(
           goToPage(parseInt(btn.getAttribute("data-page"), 10) || 1);
         }});
       }});
-      document.querySelectorAll(".month-tab").forEach(function (tab) {{
-        tab.addEventListener("click", function () {{
-          var id = tab.getAttribute("data-month") || "";
-          if (!id) return;
-          if (favMode) setFavMode(false);
-          if (id === monthKey()) return;
-          switchMonth(id);
-        }});
-      }});
-      function monthTabs() {{
-        return Array.prototype.slice.call(document.querySelectorAll(".month-tab[data-month]"));
+      function formatMonthTitle(id) {{
+        var parts = String(id || "").split("-");
+        var year = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10);
+        if (!year || !month) return "一覧";
+        return year + "年" + month + "月";
       }}
-      function monthScrollEl() {{
-        return document.getElementById("month-tabs-scroll");
+      function availableMonths() {{
+        return Array.prototype.slice.call(document.querySelectorAll(".month-panel[data-month]")).map(function (panel) {{
+          return panel.getAttribute("data-month") || "";
+        }}).filter(Boolean);
       }}
-      function updateMonthShift() {{
-        var sc = monthScrollEl();
+      function updateMonthChrome() {{
+        var title = document.getElementById("month-title");
+        var ids = availableMonths();
+        var key = monthKey();
+        if (title) title.textContent = formatMonthTitle(key);
+        var idx = ids.indexOf(key);
         var prev = document.getElementById("month-prev");
         var next = document.getElementById("month-next");
-        if (!sc) return;
-        if (prev) prev.disabled = sc.scrollLeft <= 2;
-        if (next) next.disabled = sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 2;
+        if (prev) prev.disabled = idx <= 0;
+        if (next) next.disabled = idx < 0 || idx >= ids.length - 1;
       }}
-      function syncMonthWindow() {{
-        var sc = monthScrollEl();
-        var tabs = monthTabs();
-        if (!sc || !tabs.length) return;
-        var active = null;
-        tabs.forEach(function (tab) {{
-          tab.hidden = false;
-          if (tab.classList.contains("is-active")) active = tab;
-        }});
-        if (active) {{
-          var left = active.offsetLeft - (sc.clientWidth - active.offsetWidth) / 2;
-          sc.scrollLeft = Math.max(0, left);
-        }}
-        updateMonthShift();
-      }}
-      function shiftMonthWindow(delta) {{
-        var sc = monthScrollEl();
-        if (!sc) return;
-        var tab = document.querySelector(".month-tab");
-        var step = (tab ? tab.getBoundingClientRect().width : 100) + 8;
-        sc.scrollBy({{ left: delta * step, behavior: "smooth" }});
+      function shiftMonth(delta) {{
+        var ids = availableMonths();
+        var idx = ids.indexOf(monthKey()) + delta;
+        if (idx < 0 || idx >= ids.length) return;
+        if (favMode) setFavMode(false);
+        switchMonth(ids[idx]);
       }}
       var monthPrev = document.getElementById("month-prev");
       var monthNext = document.getElementById("month-next");
-      if (monthPrev) monthPrev.addEventListener("click", function () {{ shiftMonthWindow(-1); }});
-      if (monthNext) monthNext.addEventListener("click", function () {{ shiftMonthWindow(1); }});
-      var monthScroll = monthScrollEl();
-      if (monthScroll) {{
-        monthScroll.addEventListener("scroll", updateMonthShift, {{ passive: true }});
-        monthScroll.addEventListener("wheel", function (ev) {{
-          if (monthScroll.scrollWidth <= monthScroll.clientWidth) return;
-          monthScroll.scrollLeft += ev.deltaX || ev.deltaY;
-          ev.preventDefault();
-          updateMonthShift();
-        }}, {{ passive: false }});
-      }}
+      if (monthPrev) monthPrev.addEventListener("click", function () {{ shiftMonth(-1); }});
+      if (monthNext) monthNext.addEventListener("click", function () {{ shiftMonth(1); }});
       var PUB_TONES = [
         {{bg:"#fdecea", fg:"#b71c1c"}},
         {{bg:"#e8f1fb", fg:"#0d47a1"}},
@@ -3000,7 +2931,7 @@ def _html_document(
       if (!input) {{
         paintFavs();
         renderList();
-        syncMonthWindow();
+        updateMonthChrome();
         return;
       }}
       input.addEventListener("input", function () {{
@@ -3068,11 +2999,6 @@ def _html_document(
           map[d].push(card);
         }});
         return map;
-      }}
-      function availableMonths() {{
-        return Array.prototype.slice.call(document.querySelectorAll(".month-tab[data-month]")).map(function (tab) {{
-          return tab.getAttribute("data-month") || "";
-        }}).filter(Boolean);
       }}
       var calYear = 0;
       var calMonth = 0;
@@ -3221,8 +3147,6 @@ def _html_document(
       if (pubModal) pubModal.addEventListener("click", function (ev) {{
         if (ev.target === pubModal) closePubModal();
       }});
-      var calClose = document.getElementById("cal-close");
-      if (calClose) calClose.addEventListener("click", closeCalendar);
       var calPrev = document.getElementById("cal-prev");
       if (calPrev) calPrev.addEventListener("click", function () {{ shiftCalMonth(-1); }});
       var calNext = document.getElementById("cal-next");
@@ -3236,6 +3160,10 @@ def _html_document(
       var calModal = document.getElementById("cal-modal");
       if (calModal) calModal.addEventListener("click", function (ev) {{
         if (ev.target === calModal) closeCalendar();
+      }});
+      document.addEventListener("keydown", function (ev) {{
+        if (ev.key !== "Escape") return;
+        closeCalendar();
       }});
       function closeLegalModals() {{
         document.querySelectorAll(".legal-modal").forEach(function (el) {{
@@ -3321,7 +3249,7 @@ def _html_document(
         var pubParam = params.get("pub");
         if (pubParam === "1") openPubModal();
         else if (pubParam) setPublisherFilter(pubParam);
-        syncMonthWindow();
+        updateMonthChrome();
         syncSearchClear();
       }} catch (e) {{
         renderList();

@@ -164,7 +164,10 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     release = format_release_date(comic.pubdate) or "未登録"
     isbn = comic.isbn or "未登録"
     author = comic.author or "著者未登録"
-    publisher = comic.publisher_label_line()
+    publisher = (comic.publisher or "").strip() or "出版社未登録"
+    series = (comic.series or "").strip()
+    if not series or series == publisher:
+        series = "未登録"
     price = comic.price_line()
     amazon = amazon_url(comic.isbn, comic.search_query)
     rakuten = rakuten_url(comic.isbn, comic.search_query)
@@ -227,20 +230,29 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     .site-top-inner {{
       display: flex;
-      align-items: center;
-      gap: 16px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px;
+      padding: 2px 16px 0;
       box-sizing: border-box;
     }}
-    .header-actions {{
+    .site-top-row {{
       display: flex;
-      flex: 0 0 auto;
       align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }}
+    .smart-header {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
       gap: 8px;
-      margin-left: auto;
+      padding: 8px 0 10px;
+      border-top: 1px solid #f0eeee;
     }}
     .logo-link {{
       display: block;
@@ -628,11 +640,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     {_site_legal_css()}
     @media (max-width: 768px) {{
       .site-top-inner {{
-        display: grid;
-        grid-template-columns: minmax(0, 132px) auto;
-        align-items: center;
-        padding: 2px 8px;
-        gap: 4px 8px;
+        padding: 6px 8px 0;
+      }}
+      .site-top-row {{
+        gap: 8px;
+      }}
+      .smart-header {{
+        gap: 6px;
+        padding: 8px 0 10px;
       }}
       .logo-link,
       .site-logo {{
@@ -642,13 +657,6 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       }}
       .site-logo {{
         height: 42px;
-      }}
-      .header-actions {{
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 4px;
-        margin: 0 0 0 auto;
       }}
       .fav-list-btn,
       .cal-btn,
@@ -710,14 +718,16 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
 <body>
   <div class="site-top">
     <div class="site-top-inner">
-      <a class="logo-link" href="../index.html">
-        <img class="site-logo" src="../logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
-      </a>
-      <div class="header-actions">
+      <div class="site-top-row">
+        <a class="logo-link" href="../index.html">
+          <img class="site-logo" src="../logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
+        </a>
+      </div>
+      <nav class="smart-header" aria-label="主要メニュー">
         <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
         <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
         <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
-      </div>
+      </nav>
     </div>
   </div>
   <div class="wrap">
@@ -732,6 +742,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       <div class="hero-meta">
         <p class="meta-line"><span>作品名</span>{html.escape(title)}</p>
         <p class="meta-line"><span>出版社</span>{html.escape(publisher)}</p>
+        <p class="meta-line"><span>レーベル</span>{html.escape(series)}</p>
         <p class="meta-line"><span>著者</span>{html.escape(author)}</p>
         <p class="meta-line"><span>ISBN</span>{html.escape(isbn)}</p>
         <p class="meta-line"><span>価格</span>{html.escape(price)}</p>

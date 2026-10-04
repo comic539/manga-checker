@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="初恋の終焉 〜憂える悪役令嬢は、腹黒貴公子の愛に絡めとられる〜(1)
 各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand32">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand33">
   <style>
     :root {
       --bg: #ffffff;
@@ -45,20 +45,29 @@
     }
     .site-top-inner {
       display: flex;
-      align-items: center;
-      gap: 16px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px;
+      padding: 2px 16px 0;
       box-sizing: border-box;
     }
-    .header-actions {
+    .site-top-row {
       display: flex;
-      flex: 0 0 auto;
       align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .smart-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
       gap: 8px;
-      margin-left: auto;
+      padding: 8px 0 10px;
+      border-top: 1px solid #f0eeee;
     }
     .logo-link {
       display: block;
@@ -603,11 +612,14 @@
 
     @media (max-width: 768px) {
       .site-top-inner {
-        display: grid;
-        grid-template-columns: minmax(0, 132px) auto;
-        align-items: center;
-        padding: 2px 8px;
-        gap: 4px 8px;
+        padding: 6px 8px 0;
+      }
+      .site-top-row {
+        gap: 8px;
+      }
+      .smart-header {
+        gap: 6px;
+        padding: 8px 0 10px;
       }
       .logo-link,
       .site-logo {
@@ -617,13 +629,6 @@
       }
       .site-logo {
         height: 42px;
-      }
-      .header-actions {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 4px;
-        margin: 0 0 0 auto;
       }
       .fav-list-btn,
       .cal-btn,
@@ -685,14 +690,16 @@
 <body>
   <div class="site-top">
     <div class="site-top-inner">
-      <a class="logo-link" href="../index.html">
-        <img class="site-logo" src="../logo.png?v=brand32" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
-      </a>
-      <div class="header-actions">
+      <div class="site-top-row">
+        <a class="logo-link" href="../index.html">
+          <img class="site-logo" src="../logo.png?v=brand33" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+        </a>
+      </div>
+      <nav class="smart-header" aria-label="主要メニュー">
         <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
         <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
         <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
-      </div>
+      </nav>
     </div>
   </div>
   <div class="wrap">
@@ -706,7 +713,8 @@
       </div>
       <div class="hero-meta">
         <p class="meta-line"><span>作品名</span>初恋の終焉 〜憂える悪役令嬢は、腹黒貴公子の愛に絡めとられる〜(1)</p>
-        <p class="meta-line"><span>出版社</span>ぶんか社（BKコミックスf）</p>
+        <p class="meta-line"><span>出版社</span>ぶんか社</p>
+        <p class="meta-line"><span>レーベル</span>BKコミックスf</p>
         <p class="meta-line"><span>著者</span>コウゼロ/湊未来</p>
         <p class="meta-line"><span>ISBN</span>9784821112340</p>
         <p class="meta-line"><span>価格</span>税込み880円</p>
@@ -761,7 +769,7 @@
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
-      <img class="legal-about-logo" src="../logo.png?v=brand32" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+      <img class="legal-about-logo" src="../logo.png?v=brand33" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>
