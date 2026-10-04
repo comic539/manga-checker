@@ -8,10 +8,8 @@ from manga_checker.stores import (
     STORES,
     _fetch_animate,
     _fetch_gamers,
-    _fetch_kinokuniya,
     _fetch_melonbooks,
     _fetch_toranoana,
-    _kinokuniya_url,
 )
 
 
@@ -23,11 +21,13 @@ class StoreListTests(unittest.TestCase):
             "メロンブックス",
             "ゲーマーズ",
             "とらのあな",
+            "COMIC ZIN",
+            "こみらの！",
             "喜久屋書店",
-            "紀伊國屋書店",
-            "くまざわ書店",
         ):
             self.assertIn(required, names)
+        self.assertNotIn("紀伊國屋書店", names)
+        self.assertNotIn("くまざわ書店", names)
         self.assertNotIn("TSUTAYA", names)
         self.assertNotIn("tsutaya", [store.store_id for store in STORES])
 
@@ -42,12 +42,11 @@ class StoreListTests(unittest.TestCase):
         gamers = urlparse(by_id["gamers"])
         self.assertEqual(gamers.path, "/products/list.php")
         self.assertEqual(parse_qs(gamers.query).get("smt"), ["9784000000000"])
-        kumazawa = urlparse(by_id["kumazawa"])
-        self.assertEqual(kumazawa.netloc, "www.search.kumabook.com")
-        self.assertEqual(kumazawa.path, "/kumazawa/html/products/list")
-        self.assertEqual(parse_qs(kumazawa.query).get("mode"), ["books"])
-        self.assertEqual(parse_qs(kumazawa.query).get("name"), ["9784000000000"])
-        self.assertNotIn("comic_tokuten", by_id["kumazawa"])
+        zin = urlparse(by_id["comiczin"])
+        self.assertEqual(zin.netloc, "shop.comiczin.jp")
+        self.assertEqual(zin.path, "/products/list.php")
+        self.assertNotIn("9784000000000", by_id["comiczin"])
+        self.assertEqual(by_id["comirano"], "https://comirano.info/category/comic/")
         animate = urlparse(by_id["animate"])
         self.assertEqual(parse_qs(animate.query).get("smt"), ["9784000000000"])
         melon = urlparse(by_id["melonbooks"])
@@ -432,7 +431,6 @@ class DetailFetchTests(unittest.TestCase):
         self.assertIn("product_id=333", by_id["melonbooks"].url)
         self.assertEqual(by_id["melonbooks"].status, STATUS_YES)
         self.assertEqual(by_id["gamers"].status, STATUS_UNKNOWN)
-        self.assertEqual(by_id["kinokuniya"].status, STATUS_UNKNOWN)
 
     def test_official_melon_yes_survives_without_fetch(self) -> None:
         from manga_checker.official import OfficialHit, OfficialIndex
@@ -477,7 +475,6 @@ class DetailFetchTests(unittest.TestCase):
         by_id = {c.store_id: c for c in checks}
         self.assertEqual(by_id["kikuya"].status, STATUS_UNKNOWN)
         self.assertNotEqual(by_id["kikuya"].status, STATUS_NO)
-        self.assertEqual(by_id["kumazawa"].status, STATUS_UNKNOWN)
 
     def test_toranoana_uses_item_url_and_privilege(self) -> None:
         comic = Comic(title="ヒトナー 1", isbn="9784088852317")
@@ -849,58 +846,6 @@ class DetailFetchTests(unittest.TestCase):
         </body></html>
         """
         self.assertFalse(_detail_page_matches(comic, html))
-
-    def test_kinokuniya_badge_uses_search_not_hanging_permalink(self) -> None:
-        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
-        url = _kinokuniya_url(comic)
-        self.assertIn("CSfDispListPage_001.jsp", url)
-        self.assertIn("9784098640782", url)
-        self.assertNotIn("/f/dsg-01-", url)
-
-    def test_kinokuniya_isbn_zero_is_no(self) -> None:
-        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
-
-        def fake_get(url, timeout=25, **kwargs):
-            resp = MagicMock()
-            resp.status_code = 200
-            resp.text = "<p>該当する商品はございません</p>"
-            return resp
-
-        session = MagicMock()
-        session.get.side_effect = fake_get
-        with patch("manga_checker.stores.time.sleep"):
-            check = _fetch_kinokuniya(
-                comic,
-                "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp?q=x",
-                session,
-            )
-        self.assertEqual(check.status, STATUS_NO)
-        fetched = [call.args[0] for call in session.get.call_args_list]
-        self.assertTrue(all("/f/dsg-01-" not in url for url in fetched))
-
-    def test_kinokuniya_follows_list_to_product_page(self) -> None:
-        comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")
-        list_html = (
-            '<ul><li><a href="/f/dsg-01-9784098640782">佐武と市捕物控</a></li></ul>'
-        )
-        detail_html = "<h1>佐武と市捕物控</h1><p>在庫あり</p>"
-
-        def fake_get(url, timeout=25, **kwargs):
-            resp = MagicMock()
-            resp.status_code = 200
-            resp.text = detail_html if "/f/dsg-01-" in url else list_html
-            return resp
-
-        session = MagicMock()
-        session.get.side_effect = fake_get
-        with patch("manga_checker.stores.time.sleep"):
-            check = _fetch_kinokuniya(
-                comic,
-                "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp?q=x",
-                session,
-            )
-        self.assertEqual(check.status, STATUS_NO)
-        self.assertEqual(check.url, "https://www.kinokuniya.co.jp/f/dsg-01-9784098640782")
 
     def test_isbn_zero_does_not_fall_back_to_title_for_animate(self) -> None:
         comic = Comic(title="佐武と市捕物控 完全版 1", isbn="9784098640782")

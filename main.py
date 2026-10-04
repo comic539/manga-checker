@@ -8,6 +8,7 @@ from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
 
+from manga_checker.bulk_listings import BulkListingIndex
 from manga_checker.catalog import (
     catalog_display_months,
     fetch_months_volume_ones,
@@ -162,6 +163,9 @@ def main() -> None:
         + "、".join(format_year_month(year, month) for year, month in windows)
     )
 
+    listings = BulkListingIndex()
+    listings.load(session, windows)
+
     checks_cache_path = args.out_dir / "store_checks.json"
     checks_cache = load_checks_cache(checks_cache_path)
     if checks_cache:
@@ -198,6 +202,7 @@ def main() -> None:
                         session=session,
                         catalog=catalog,
                         cache=checks_cache,
+                        listings=listings,
                     ),
                     period_year=year,
                     period_month=month,

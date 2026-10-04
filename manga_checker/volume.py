@@ -9,14 +9,37 @@ import unicodedata
 _VOLUME_FIELD_ONE = re.compile(r"^(第)?0*1(巻|冊)?$")
 _OTHER_VOLUME_FIELD = re.compile(r"^(第)?\d+(巻|冊)?$")
 
-# 11巻・21巻を除外しつつ、スペース混じり・末尾の 1 / （1） / 1巻 / 第1巻 を拾う
+# 1 / 01 / １ / ０１。11巻・10巻は前後の数字で除外する
+_PADDED_ONE = r"[0０]*[1１]"
 _VOLUME_ONE_PATTERN = re.compile(
-    r"(?<![0-9０-９])(?:第\s*[1１]\s*巻|[1１]\s*巻|[(（]\s*[1１]\s*[)）]|[ \u3000][1１](?=[ \u3000:：\(\)（）~〜-]|$))(?![0-9０-９])"
+    rf"(?<![0-9０-９])(?:第\s*{_PADDED_ONE}\s*巻|{_PADDED_ONE}\s*巻|"
+    rf"[(（]\s*{_PADDED_ONE}\s*[)）]|"
+    rf"[ \u3000]{_PADDED_ONE}(?=[ \u3000:：\(\)（）~〜-]|$))(?![0-9０-９])"
 )
 _VOLUME_ONE_EXTRA = [
     re.compile(r"(?<!\d)vol\.?\s*0*1(?!\d)", re.IGNORECASE),
     re.compile(r"(?<!\d)volume\s*0*1(?!\d)", re.IGNORECASE),
 ]
+
+_INCLUDE_WORDS = (
+    "短編集",
+    "傑作選",
+    "アンソロジー",
+    "上巻",
+    "前編",
+    "公式ファンブック",
+)
+_EXCLUDE_WORDS = ("下巻", "後編", "中巻")
+
+_VOLUME_NUMBERS = re.compile(
+    r"(?:第\s*([0-9０-９]+)\s*巻|"
+    r"vol\.?\s*([0-9０-９]+)|"
+    r"volume\s*([0-9０-９]+)|"
+    r"[(（]\s*([0-9０-９]+)\s*[)）]|"
+    r"[ \u3000]([0-9０-９]+)(?=[ \u3000:：\(\)（）~〜-]|$)|"
+    r"(?<![0-9０-９])([0-9０-９]+)\s*巻)",
+    re.IGNORECASE,
+)
 
 
 def normalize_text(value: str | None) -> str:
@@ -25,13 +48,17 @@ def normalize_text(value: str | None) -> str:
 
 
 def is_volume_one(title: str, volume: str = "") -> bool:
-    """第1巻らしい書誌なら True。
+    """第1巻・単巻・短編集などを対象にする。
 
-    単なる数字の『1』（例: 『1日10分で〜』）は対象外。
-    『(1)』『第1巻』『1巻』および半角・全角スペースで区切られた末尾の『 1』を拾う。
+    単なる数字の『1』（例: 『1日10分で〜』）は巻数とは見ない。
+    『下巻』『後編』や2巻以降の巻数がある作品は除外する。
     """
     title_n = normalize_text(title)
     volume_n = normalize_text(volume)
+    combined = normalize_text(f"{title} {volume}")
+
+    if any(word in combined for word in _EXCLUDE_WORDS):
+        return False
 
     if volume_n:
         if _VOLUME_FIELD_ONE.fullmatch(volume_n):
@@ -39,12 +66,36 @@ def is_volume_one(title: str, volume: str = "") -> bool:
         if _OTHER_VOLUME_FIELD.fullmatch(volume_n):
             return False
 
+    numbers = _volume_numbers(title, volume)
+    if any(n >= 2 for n in numbers):
+        return False
+
     for haystack in _search_texts(title, volume):
         if _VOLUME_ONE_PATTERN.search(haystack):
             return True
         if any(pattern.search(haystack) for pattern in _VOLUME_ONE_EXTRA):
             return True
-    return False
+
+    if any(word in combined for word in _INCLUDE_WORDS):
+        return True
+    if not numbers:
+        return True
+    return 1 in numbers
+
+
+def _volume_numbers(title: str, volume: str) -> list[int]:
+    found: list[int] = []
+    for haystack in _search_texts(title, volume):
+        nfkc = unicodedata.normalize("NFKC", haystack)
+        for match in _VOLUME_NUMBERS.finditer(nfkc):
+            raw = next((g for g in match.groups() if g), "")
+            digits = re.sub(r"\D", "", unicodedata.normalize("NFKC", raw))
+            if not digits:
+                continue
+            value = int(digits)
+            if 1 <= value <= 99:
+                found.append(value)
+    return found
 
 
 def _search_texts(title: str, volume: str) -> list[str]:

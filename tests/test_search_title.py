@@ -16,6 +16,9 @@ class BareSearchTitleTests(unittest.TestCase):
         self.assertEqual(bare_search_title("Example Vol.1"), "Example")
         self.assertEqual(bare_search_title("タイトル 1"), "タイトル")
         self.assertEqual(bare_search_title("ヒトナー 1"), "ヒトナー")
+        self.assertEqual(bare_search_title("夜は猫といっしょ(01)"), "夜は猫といっしょ")
+        self.assertEqual(bare_search_title("タイトル 01"), "タイトル")
+        self.assertEqual(bare_search_title("タイトル ０１"), "タイトル")
 
     def test_strips_decoration(self) -> None:
         self.assertEqual(bare_search_title("作品名 @COMIC (1)"), "作品名")

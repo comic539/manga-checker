@@ -14,7 +14,6 @@ from manga_checker.privilege import STATUS_NO, STATUS_YES
 from manga_checker.title_match import titles_match
 from manga_checker.volume import normalize_text
 
-KUMA_URL = "https://www.kumabook.com/comic_tokuten/"
 KIKUYA_PRODUCTS = "https://kikuyashoten.myshopify.com/products.json"
 KIKUYA_SHOP = "https://kikuyashoten.myshopify.com"
 MELON_PRIVILEGE = "https://www.melonbooks.co.jp/privilege/privilege.php"
@@ -34,8 +33,8 @@ STORE_HINTS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("gamers", ("ゲーマーズ",)),
     ("toranoana", ("とらのあな",)),
     ("kikuya", ("喜久屋",)),
-    ("kinokuniya", ("紀伊國屋", "紀伊国屋")),
-    ("kumazawa", ("くまざわ",)),
+    ("comiczin", ("COMIC ZIN", "コミックジン", "コミックＺＩＮ")),
+    ("comirano", ("こみらの",)),
 )
 
 _KIKUYA_BONUS = re.compile(
@@ -58,13 +57,13 @@ class OfficialHit:
 class OfficialIndex:
     def __init__(self) -> None:
         self.entries: dict[str, list[OfficialHit]] = {
-            "kumazawa": [],
             "kikuya": [],
             "melonbooks": [],
             "gamers": [],
             "animate": [],
             "toranoana": [],
-            "kinokuniya": [],
+            "comiczin": [],
+            "comirano": [],
         }
         self.loaded = False
 
@@ -72,7 +71,6 @@ class OfficialIndex:
         if self.loaded:
             return
         print("公式特典ページを照合用に取得しています…")
-        self.entries["kumazawa"] = _load_kumazawa(session)
         self.entries["kikuya"] = _load_kikuya(session)
         self.entries["melonbooks"].extend(_load_link_list(session, MELON_PRIVILEGE, "melonbooks"))
         self.entries["gamers"].extend(_load_link_list(session, GAMERS_PRIVILEGE, "gamers"))
@@ -115,30 +113,6 @@ def lookup_status(
         link = fallback_url
         return STATUS_YES, detail, link
     return STATUS_NO, "公式特典ページに該当タイトルはありません。", fallback_url
-
-
-def _load_kumazawa(session: requests.Session) -> list[OfficialHit]:
-    hits: list[OfficialHit] = []
-    for page in range(1, 12):
-        url = KUMA_URL if page == 1 else f"{KUMA_URL}page/{page}/"
-        html = _get(session, url)
-        if not html:
-            break
-        soup = BeautifulSoup(html, "html.parser")
-        articles = soup.select("article, .post, .entry, h2, h3")
-        page_hits = 0
-        for el in articles:
-            text = el.get_text(" ", strip=True)
-            if "特典" not in text and "タイトル" not in text:
-                continue
-            if len(text) < 8:
-                continue
-            hits.append(OfficialHit("kumazawa", text, url, ["くまざわ限定特典"]))
-            page_hits += 1
-        if page_hits == 0:
-            break
-        time.sleep(0.35)
-    return _dedupe_hits(hits)
 
 
 def _load_kikuya(session: requests.Session) -> list[OfficialHit]:

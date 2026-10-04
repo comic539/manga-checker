@@ -63,9 +63,9 @@ _INDEX_TAB_CLASS = {
     "animate": "index-tab-animate",
     "melonbooks": "index-tab-melon",
     "gamers": "index-tab-gamers",
-    "kinokuniya": "index-tab-kinokuniya",
+    "comiczin": "index-tab-comiczin",
+    "comirano": "index-tab-comirano",
     "kikuya": "index-tab-kikuya",
-    "kumazawa": "index-tab-kumazawa",
 }
 
 
@@ -695,21 +695,21 @@ def _html_document(
       background: #ff8a1a;
       color: #3d1a00;
     }}
-    /* 紀伊國屋書店: 藍色・白文字 */
-    .index-tab-kinokuniya,
-    .index-tab[data-store="kinokuniya"] {{
-      background: #123a6e;
+    .index-tab-comiczin,
+    .index-tab[data-store="comiczin"] {{
+      background: #c4122f;
       color: #fff;
+    }}
+    .index-tab-comirano,
+    .index-tab[data-store="comirano"] {{
+      background: #4ba7ee;
+      color: #07324d;
     }}
     /* 喜久屋書店: 薄い紫 */
     .index-tab-kikuya,
     .index-tab[data-store="kikuya"] {{
       background: #e4c7f5;
       color: #3a1a55;
-    }}
-    .index-tab-kumazawa {{
-      background: #cbb089;
-      color: #3d2c16;
     }}
     .month-panel[hidden] {{
       display: none !important;

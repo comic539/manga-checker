@@ -18,12 +18,12 @@ from manga_checker.links import isbn_search_query
 from manga_checker.models import Comic, StoreCheck
 from manga_checker.search_title import toranoana_search_word
 from manga_checker.melon import evaluate_melon_detail, first_melon_detail_url
+from manga_checker.bulk_listings import BulkListingIndex
 from manga_checker.official import OfficialIndex, lookup_status
 from manga_checker.privilege import (
     STATUS_NO,
     STATUS_UNKNOWN,
     STATUS_YES,
-    evaluate_detail_privilege,
     evaluate_gamers_detail,
     evaluate_privilege,
     listing_has_products,
@@ -35,12 +35,14 @@ from manga_checker.title_match import listing_matches_work
 from manga_checker.toranoana import evaluate_toranoana_detail, first_toranoana_detail_url
 
 # 公式一覧を正とし、未掲載なら「特典なし」にする店
-STRICT_OFFICIAL_STORES = frozenset({"kumazawa", "kikuya"})
+STRICT_OFFICIAL_STORES = frozenset({"kikuya"})
 DETAIL_PAGE_STORES = frozenset({"animate", "melonbooks", "toranoana"})
 # 検索結果ページを常に取得し、ヒット済みなら特典語なしを「特典なし」にする店
-LISTING_FETCH_STORES = frozenset({"gamers", "kinokuniya"})
+LISTING_FETCH_STORES = frozenset({"gamers"})
 # ISBN検索が0件なら取り扱いなし（タイトル検索に落とさない）
-ISBN_NO_HIT_IS_ABSENT = frozenset({"animate", "melonbooks", "gamers", "kinokuniya"})
+ISBN_NO_HIT_IS_ABSENT = frozenset({"animate", "melonbooks", "gamers"})
+# 入荷カレンダー／特典一覧を一括取得する店
+BULK_LISTING_STORES = frozenset({"comiczin", "comirano"})
 
 
 @dataclass
@@ -57,18 +59,6 @@ def _q(comic: Comic) -> str:
 
 def _search_term(comic: Comic) -> str:
     return isbn_search_query(comic.isbn) or _q(comic)
-
-
-def _kinokuniya_list_url(query: str) -> str:
-    return (
-        "https://www.kinokuniya.co.jp/disp/CSfDispListPage_001.jsp"
-        f"?qsd=true&ptk=01&q={quote(query)}"
-    )
-
-
-def _kinokuniya_url(comic: Comic) -> str:
-    isbn = isbn_search_query(comic.isbn)
-    return _kinokuniya_list_url(isbn or _q(comic))
 
 
 def _gamers_url(comic: Comic) -> str:
@@ -111,13 +101,6 @@ def _melon_url(comic: Comic) -> str:
     return _melon_isbn_url(comic) or _melon_title_url(comic)
 
 
-def _kumazawa_url(comic: Comic) -> str:
-    return (
-        "https://www.search.kumabook.com/kumazawa/html/products/list?"
-        + urlencode({"mode": "books", "name": _search_term(comic)})
-    )
-
-
 def _toranoana_list_url(word: str, *, books: bool = False) -> str:
     query = f"?searchWord={quote(word)}"
     if books:
@@ -128,6 +111,14 @@ def _toranoana_list_url(word: str, *, books: bool = False) -> str:
 def _toranoana_url(comic: Comic) -> str:
     word = toranoana_search_word(comic.title, comic.volume)
     return _toranoana_list_url(word, books=True)
+
+
+def _comiczin_url(comic: Comic) -> str:
+    return "https://shop.comiczin.jp/products/list.php"
+
+
+def _comirano_url(comic: Comic) -> str:
+    return "https://comirano.info/category/comic/"
 
 
 STORES: list[Store] = [
@@ -155,24 +146,24 @@ STORES: list[Store] = [
         search_url=_toranoana_url,
     ),
     Store(
+        store_id="comiczin",
+        name="COMIC ZIN",
+        search_url=_comiczin_url,
+        privilege_index_url="https://shop.comiczin.jp/products/list.php",
+    ),
+    Store(
+        store_id="comirano",
+        name="こみらの！",
+        search_url=_comirano_url,
+        privilege_index_url="https://comirano.info/category/comic/",
+    ),
+    Store(
         store_id="kikuya",
         name="喜久屋書店",
         search_url=lambda c: (
             "https://kikuyashoten.myshopify.com/search?q=" + quote(_q(c))
         ),
         privilege_index_url="https://kikuyashoten.myshopify.com",
-    ),
-    Store(
-        store_id="kinokuniya",
-        name="紀伊國屋書店",
-        search_url=_kinokuniya_url,
-        privilege_index_url="https://www.kinokuniya.co.jp/",
-    ),
-    Store(
-        store_id="kumazawa",
-        name="くまざわ書店",
-        search_url=_kumazawa_url,
-        privilege_index_url="https://www.search.kumabook.com/kumazawa/html/products/list",
     ),
 ]
 
@@ -184,6 +175,7 @@ def check_stores(
     session: requests.Session | None = None,
     catalog: OfficialIndex | None = None,
     cache: dict | None = None,
+    listings: BulkListingIndex | None = None,
 ) -> list[StoreCheck]:
     session = session or make_session(
         extra_headers={"Accept-Language": "ja,en;q=0.8"}
@@ -196,6 +188,28 @@ def check_stores(
     results: list[StoreCheck] = []
     for store in STORES:
         url = store.search_url(comic)
+        if store.store_id in BULK_LISTING_STORES:
+            if listings is not None:
+                check = listings.check(store.store_id, store.name, comic, url)
+                remember_check(cache, check, comic)
+                results.append(check)
+                continue
+            remembered = cached_check(
+                cache, comic, store.store_id, refresh_unreleased_no=fetch
+            )
+            if remembered is not None:
+                results.append(remembered)
+                continue
+            results.append(
+                StoreCheck(
+                    store.store_id,
+                    store.name,
+                    STATUS_NO,
+                    "入荷・特典一覧を取得できていません。",
+                    url,
+                )
+            )
+            continue
         official_yes, detail, official_url = lookup_status(
             catalog,
             store.store_id,
@@ -285,8 +299,10 @@ def _is_store_product_url(store_id: str, url: str) -> bool:
         return "/tora/ec/item/" in target
     if store_id == "gamers":
         return "/pd/" in target or "product_id=" in target
-    if store_id == "kinokuniya":
-        return "CSfGoodsPage" in target or "/dsgst/" in target
+    if store_id == "comiczin":
+        return "shop.comiczin.jp" in target and "product_id=" in target
+    if store_id == "comirano":
+        return "comirano.info" in target and "/category/" not in target
     return False
 
 
@@ -380,10 +396,6 @@ def _raw_first_product_url(store_id: str, html: str, page_url: str) -> str:
                 "https://www.gamers.co.jp/products/detail.php?product_id="
                 + match.group(1)
             )
-    if store_id == "kinokuniya":
-        match = re.search(r"/f/dsg-01-(\d+)", markup, re.I)
-        if match:
-            return f"https://www.kinokuniya.co.jp/f/dsg-01-{match.group(1)}"
     return ""
 
 
@@ -396,8 +408,6 @@ def _fetch_store(store: Store, comic: Comic, url: str, session: requests.Session
         return _fetch_toranoana(comic, url, session)
     if store.store_id == "gamers":
         return _fetch_gamers(comic, url, session)
-    if store.store_id == "kinokuniya":
-        return _fetch_kinokuniya(comic, url, session)
     try:
         response = get_with_retry(session, url, timeout=25, label=f"{store.name} {comic.display_title}")
         if response.status_code >= 400:
@@ -522,29 +532,6 @@ def _fetch_gamers(comic: Comic, search_url: str, session: requests.Session) -> S
         extract=first_gamers_detail_url,
         evaluate=evaluate_gamers_detail,
         missing="検索結果から商品詳細を特定できませんでした。",
-    )
-
-
-def _fetch_kinokuniya(comic: Comic, search_url: str, session: requests.Session) -> StoreCheck:
-    attempts: list[tuple[str, bool]] = []
-    isbn = isbn_search_query(comic.isbn)
-    if isbn:
-        attempts.append((_kinokuniya_list_url(isbn), True))
-    attempts.append((_kinokuniya_list_url(_q(comic)), False))
-    if search_url and all(search_url != url for url, _ in attempts):
-        attempts.append((search_url, bool(isbn)))
-    return _fetch_detail_attempts(
-        comic,
-        session,
-        store_id="kinokuniya",
-        name="紀伊國屋書店",
-        fallback_url=search_url,
-        attempts=attempts,
-        extract=first_kinokuniya_detail_url,
-        evaluate=evaluate_detail_privilege,
-        missing="検索結果から商品詳細を特定できませんでした。",
-        timeout=15,
-        retries=1,
     )
 
 
@@ -713,7 +700,6 @@ def _detail_page_matches(comic: Comic, html: str) -> bool:
 
 _GAMERS_PD = re.compile(r"/pd/(\d+)/?", re.I)
 _GAMERS_PID = re.compile(r"(?:[?&]product_id=)(\d+)", re.I)
-_KINO_DSG = re.compile(r"/f/dsg-01-(\d+)", re.I)
 _GAMERS_CHROME = re.compile(
     r"popular_keyword|swiper|bnr_|banner|fp_fair|global.?nav|gnav|"
     r"header_nav|footer_nav",
@@ -814,45 +800,3 @@ def _gamers_detail_url(href: str, base: str) -> str:
         return f"https://www.gamers.co.jp/products/detail.php?product_id={product_id}"
     return f"https://www.gamers.co.jp/products/detail.php?product_id={product_id}"
 
-
-def first_kinokuniya_detail_url(
-    html: str,
-    page_url: str,
-    title: str = "",
-    isbn: str = "",
-    author: str = "",
-    allow_first: bool = False,
-) -> str:
-    page = (page_url or "").split("?")[0]
-    if _KINO_DSG.search(page):
-        if "見つかりません" in (html or "") and not listing_matches_work(
-            title, html or "", isbn, author=author
-        ):
-            return ""
-        return page
-    soup = BeautifulSoup(html or "", "html.parser")
-    base = page_url or "https://www.kinokuniya.co.jp/"
-    ranked: list[tuple[int, str]] = []
-    seen: set[str] = set()
-    isbn_digits = re.sub(r"\D", "", isbn or "")
-    for tag in soup.find_all("a", href=True):
-        abs_url = urljoin(base, str(tag.get("href") or "")).split("#")[0]
-        match = _KINO_DSG.search(abs_url)
-        if not match:
-            continue
-        canon = f"https://www.kinokuniya.co.jp/f/dsg-01-{match.group(1)}"
-        if canon in seen:
-            continue
-        seen.add(canon)
-        parent = tag.find_parent(["li", "div", "article", "td", "section"]) or tag
-        blob = " ".join(
-            part for part in (tag.get_text(" ", strip=True), parent.get_text(" ", strip=True)) if part
-        )
-        blob_digits = re.sub(r"\D", "", blob)
-        score = 0
-        if isbn_digits and isbn_digits in blob_digits:
-            score += 5
-        if listing_matches_work(title, blob, isbn, author=author):
-            score += 2
-        ranked.append((score, canon))
-    return pick_ranked_detail_url(ranked, allow_first=True)
