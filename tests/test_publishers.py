@@ -213,6 +213,8 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertNotIn("凡例", html)
         self.assertNotIn("特典一覧", html)
         self.assertIn('id="cal-btn"', html)
+        self.assertNotIn("📅", html)
+        self.assertIn(">カレンダー<", html)
         self.assertIn('id="cal-modal"', html)
         self.assertIn("data-pubdate=", html)
         self.assertIn("ichikomi-list-pos-v1", html)

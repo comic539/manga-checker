@@ -113,6 +113,8 @@ class BookPageTests(unittest.TestCase):
             self.assertNotIn("cover meta actions", body)
             self.assertNotIn("max-width: 15.5rem", body)
             self.assertIn('id="cal-btn"', body)
+            self.assertNotIn("📅", body)
+            self.assertIn(">カレンダー<", body)
             self.assertIn("../index.html?cal=1", body)
             self.assertNotIn('id="comic-search"', body)
             self.assertNotIn("../search-icon.png", body)

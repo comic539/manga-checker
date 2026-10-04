@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand38"
+ASSET_VER = "brand39"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -1178,43 +1178,28 @@ def _html_document(
       padding: 0 14px;
       border: 0;
       border-radius: 999px;
+      background: transparent;
+      color: #1a1a1a;
       font: inherit;
       font-size: 0.8rem;
       font-weight: 700;
+      letter-spacing: 0.04em;
       line-height: 1;
       cursor: pointer;
       white-space: nowrap;
       text-decoration: none;
       box-shadow: none;
     }}
-    .pub-btn {{
-      background: #e9f7ef;
-      color: #1b6b40;
-    }}
-    .pub-btn:hover {{
-      background: #d4eedf;
-    }}
-    .pub-btn.is-on {{
-      background: #c5e8d3;
-      color: #14532d;
-    }}
-    .fav-list-btn {{
-      background: #fff0f6;
-      color: #c2185b;
-    }}
+    .cal-btn:hover,
+    .pub-btn:hover,
     .fav-list-btn:hover {{
-      background: #ffd6ea;
-    }}
-    .fav-list-btn.is-on {{
-      background: #ff2eb8;
+      background: #1a1a1a;
       color: #fff;
     }}
-    .cal-btn {{
-      background: #eef6ff;
-      color: #1565c0;
-    }}
-    .cal-btn:hover {{
-      background: #d6ebff;
+    .pub-btn.is-on,
+    .fav-list-btn.is-on {{
+      background: #1a1a1a;
+      color: #fff;
     }}
     .cal-modal {{
       position: fixed;
@@ -2278,7 +2263,7 @@ def _html_document(
         </div>
       </div>
       <nav class="smart-header" aria-label="主要メニュー">
-        <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">📅 カレンダー</button>
+        <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">カレンダー</button>
         <button type="button" class="pub-btn" id="pub-btn" aria-haspopup="dialog" aria-controls="pub-modal">出版社一覧</button>
         <button type="button" class="fav-list-btn" id="fav-list-btn">お気に入り一覧</button>
       </nav>

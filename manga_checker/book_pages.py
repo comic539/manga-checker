@@ -287,31 +287,23 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       padding: 0 14px;
       border: 0;
       border-radius: 999px;
+      background: transparent;
+      color: #1a1a1a;
       font: inherit;
       font-size: 0.8rem;
       font-weight: 700;
+      letter-spacing: 0.04em;
       line-height: 1;
       text-decoration: none;
       cursor: pointer;
       white-space: nowrap;
       box-shadow: none;
     }}
-    .cal-btn {{
-      background: #eef6ff;
-      color: #1565c0;
-    }}
-    .cal-btn:hover {{ background: #d6ebff; }}
-    .pub-btn {{
-      background: #e9f7ef;
-      color: #1b6b40;
-    }}
-    .pub-btn:hover {{ background: #d4eedf; }}
-    .fav-list-btn {{
-      background: #fff0f6;
-      color: #c2185b;
-    }}
+    .cal-btn:hover,
+    .pub-btn:hover,
     .fav-list-btn:hover {{
-      background: #ffd6ea;
+      background: #1a1a1a;
+      color: #fff;
     }}
     .wrap {{
       max-width: 760px;
@@ -740,7 +732,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
           <img class="site-logo" src="../logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
         </a>
         <nav class="smart-header" aria-label="主要メニュー">
-          <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
+          <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">カレンダー</a>
           <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
           <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
         </nav>
