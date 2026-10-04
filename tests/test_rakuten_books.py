@@ -32,6 +32,7 @@ class RakutenParseTests(unittest.TestCase):
                 "salesDate": "2026年09月27日",
                 "isbn": "978-4-8322-9748-7",
                 "seriesName": "まんがタイムKR",
+                "itemPrice": 770,
                 "titleKana": "ハツナギヒメリウム",
                 "largeImageUrl": "https://thumbnail.image.rakuten.co.jp/cover.jpg",
                 "itemUrl": "https://books.rakuten.co.jp/rb/example/",
@@ -45,6 +46,10 @@ class RakutenParseTests(unittest.TestCase):
         self.assertEqual(comic.title_kana, "ハツナギヒメリウム")
         self.assertTrue(comic.cover_url.startswith("https://thumbnail.image.rakuten.co.jp"))
         self.assertTrue(is_volume_one(comic.title, comic.volume))
+        self.assertEqual(comic.series, "まんがタイムKR")
+        self.assertEqual(comic.item_price, 770)
+        self.assertEqual(comic.publisher_label_line(), "芳文社：まんがタイムKR")
+        self.assertEqual(comic.price_line(), "770円（税込）")
 
     def test_skips_noimage_url(self) -> None:
         comic = parse_rakuten_item(

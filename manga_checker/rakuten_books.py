@@ -196,7 +196,17 @@ def parse_rakuten_item(item: dict) -> Comic | None:
         rakuten_item_url=str(item.get("affiliateUrl") or item.get("itemUrl") or ""),
         title_kana=normalize_text(str(item.get("titleKana") or "")),
         author_kana=normalize_text(str(item.get("authorKana") or "")),
+        item_price=_item_price(item),
     )
+
+
+def _item_price(item: dict) -> int:
+    raw = item.get("itemPrice")
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return 0
+    return value if value > 0 else 0
 
 
 def sales_in_month(sales_date: str, year: int, month: int) -> bool:
@@ -620,6 +630,13 @@ def refresh_covers_from_rakuten(
             print(f"  書影再取得失敗 {isbn}: {exc}")
             continue
         items = _items(payload)
+        if items:
+            parsed = parse_rakuten_item(items[0])
+            if parsed:
+                if not comic.series and parsed.series:
+                    comic.series = parsed.series
+                if comic.item_price <= 0 and parsed.item_price:
+                    comic.item_price = parsed.item_price
         cover = _cover_url(items[0]) if items else ""
         if not cover:
             cover = _cabinet_cover_url(session, isbn)

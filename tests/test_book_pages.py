@@ -21,6 +21,8 @@ class BookPageTests(unittest.TestCase):
                     title="初凪ヒメリウム 1",
                     author="鹿冬",
                     publisher="芳文社",
+                    series="まんがタイムKRコミックス",
+                    item_price=770,
                     pubdate="2026-08-27",
                     isbn="978-4-8322-0000-1",
                 ),
@@ -71,7 +73,14 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("#1877f2", body)
             self.assertIn("#c41e3a", body)
             self.assertIn("#4ba7ee", body)
+            self.assertIn("min-height: 22px", body)
             self.assertIn("min-height: 44px", body)
+            self.assertIn("芳文社：まんがタイムKRコミックス", body)
+            self.assertIn("770円（税込）", body)
+            self.assertLess(body.find("作品名"), body.find("出版社"))
+            self.assertLess(body.find(">出版社<"), body.find(">著者<"))
+            self.assertLess(body.find(">著者<"), body.find(">ISBN<"))
+            self.assertLess(body.find(">ISBN<"), body.find(">価格<"))
             self.assertNotIn("buy-amazon.png", body)
             self.assertIn("各書店の特典", body)
             self.assertNotIn("ad-book-leader", body)

@@ -77,6 +77,8 @@ class HtmlSearchTests(unittest.TestCase):
                     title="初凪ヒメリウム 1",
                     author="鹿冬",
                     publisher="芳文社",
+                    series="まんがタイムKRコミックス",
+                    item_price=770,
                     pubdate="2026-08-27",
                     isbn="978-4-8322-0000-1",
                 )
@@ -111,7 +113,10 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertNotIn("buy-amazon.png", html)
         self.assertNotIn("buy-rakuten.png", html)
         self.assertNotIn("buy-mercari.png", html)
+        self.assertIn("min-height: 22px", html)
         self.assertIn("min-height: 44px", html)
+        self.assertIn("芳文社：まんがタイムKRコミックス", html)
+        self.assertIn("770円（税込）", html)
         self.assertIn("#1877f2", html)
         self.assertIn("#c41e3a", html)
         self.assertIn("#4ba7ee", html)

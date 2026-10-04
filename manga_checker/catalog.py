@@ -292,6 +292,7 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
                 "rakuten_item_url": comic.rakuten_item_url,
                 "title_kana": comic.title_kana,
                 "author_kana": comic.author_kana,
+                "item_price": comic.item_price,
             }
             for comic in comics
         ]
@@ -354,6 +355,7 @@ def load_catalog_json(
                 rakuten_item_url=str(row.get("rakuten_item_url") or ""),
                 title_kana=str(row.get("title_kana") or ""),
                 author_kana=str(row.get("author_kana") or ""),
+                item_price=_row_item_price(row),
             )
             for row in rows
             if row.get("title")
@@ -369,6 +371,15 @@ def load_catalog_json(
             [comic for comics in result.values() for comic in comics]
         )
     return result
+
+
+def _row_item_price(row: dict) -> int:
+    raw = row.get("item_price")
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return 0
+    return value if value > 0 else 0
 
 
 def _keep_rakuten_cover_only(comic: Comic) -> None:

@@ -68,6 +68,8 @@ class CatalogParseTests(unittest.TestCase):
             pubdate="2026-08-28",
             isbn="9784000000000",
             source="rakuten",
+            series="サンデーうぇぶり",
+            item_price=880,
             cover_url="https://thumbnail.image.rakuten.co.jp/cover.jpg",
             cover_source="openbd",
         )
@@ -79,6 +81,8 @@ class CatalogParseTests(unittest.TestCase):
         self.assertEqual(loaded[(2026, 8)][0].isbn, "9784000000000")
         self.assertEqual(loaded[(2026, 8)][0].cover_url, "https://thumbnail.image.rakuten.co.jp/cover.jpg")
         self.assertEqual(loaded[(2026, 8)][0].cover_source, "rakuten")
+        self.assertEqual(loaded[(2026, 8)][0].series, "サンデーうぇぶり")
+        self.assertEqual(loaded[(2026, 8)][0].item_price, 880)
         self.assertEqual(loaded[(2026, 9)], [])
 
     def test_display_months_keep_saved_past_when_live_window_moves(self) -> None:

@@ -472,8 +472,9 @@ def search_index_text(
     publisher: str = "",
     title_kana: str = "",
     author_kana: str = "",
+    series: str = "",
 ) -> str:
-    parts = [title, author, publisher, title_kana, author_kana]
+    parts = [title, author, publisher, title_kana, author_kana, series]
     hira_kana = to_hiragana(title_kana)
     if hira_kana:
         parts.append(hira_kana)

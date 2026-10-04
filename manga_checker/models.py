@@ -21,6 +21,7 @@ class Comic:
     rakuten_item_url: str = ""
     title_kana: str = ""
     author_kana: str = ""
+    item_price: int = 0
 
     @property
     def display_title(self) -> str:
@@ -31,6 +32,18 @@ class Comic:
     @property
     def search_query(self) -> str:
         return bare_search_title(self.title, self.volume)
+
+    def publisher_label_line(self) -> str:
+        publisher = (self.publisher or "").strip() or "出版社未登録"
+        series = (self.series or "").strip()
+        if series and series != publisher:
+            return f"{publisher}：{series}"
+        return publisher
+
+    def price_line(self) -> str:
+        if self.item_price > 0:
+            return f"{self.item_price:,}円（税込）"
+        return "価格未登録"
 
 
 @dataclass

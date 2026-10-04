@@ -163,7 +163,8 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     release = format_release_date(comic.pubdate) or "未登録"
     isbn = comic.isbn or "未登録"
     author = comic.author or "著者未登録"
-    publisher = comic.publisher or "出版社未登録"
+    publisher = comic.publisher_label_line()
+    price = comic.price_line()
     amazon = amazon_url(comic.isbn, comic.search_query)
     rakuten = rakuten_url(comic.isbn, comic.search_query)
     mercari = mercari_url(comic.search_query)
@@ -501,6 +502,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       text-decoration: none;
       color: #fff;
     }}
+    .buy .ext.amazon,
+    .buy .ext.rakuten,
+    .buy .ext.mercari {{
+      min-height: 22px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+    }}
     .ext .mark {{
       display: inline-flex;
       align-items: center;
@@ -654,6 +663,13 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         font-size: 0.78rem;
         box-sizing: border-box;
       }}
+      .buy .ext.amazon,
+      .buy .ext.rakuten,
+      .buy .ext.mercari {{
+        min-height: 22px;
+        padding: 4px 10px;
+        font-size: 0.72rem;
+      }}
     }}
   </style>
 </head>
@@ -671,7 +687,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
   </div>
   <div class="wrap">
     <a class="back" href="../index.html">← 一覧へ戻る</a>
-    <h1>{html.escape(page_title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button></h1>
+    <h1>{html.escape(title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button></h1>
     <section class="hero">
       <div class="hero-info">
       <div class="hero-cover">
@@ -680,10 +696,11 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       </div>
       <div class="hero-meta">
         <p class="meta-line"><span>作品名</span>{html.escape(title)}</p>
-        <p class="meta-line"><span>著者</span>{html.escape(author)}</p>
         <p class="meta-line"><span>出版社</span>{html.escape(publisher)}</p>
-        <p class="meta-line"><span>発売日</span>{html.escape(release)}</p>
+        <p class="meta-line"><span>著者</span>{html.escape(author)}</p>
         <p class="meta-line"><span>ISBN</span>{html.escape(isbn)}</p>
+        <p class="meta-line"><span>価格</span>{html.escape(price)}</p>
+        <p class="meta-line"><span>発売日</span>{html.escape(release)}</p>
         {ndl}
         <div class="summary-chips">
           <span class="chip yes">特典あり {yes}</span>

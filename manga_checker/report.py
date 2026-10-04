@@ -79,6 +79,8 @@ def write_csv(reports: list[ComicReport], path: Path) -> None:
         "巻",
         "著者",
         "出版社",
+        "レーベル",
+        "価格",
         "発売日",
         "対象月",
         "ISBN",
@@ -101,6 +103,8 @@ def write_csv(reports: list[ComicReport], path: Path) -> None:
                 "巻": report.comic.volume,
                 "著者": report.comic.author,
                 "出版社": report.comic.publisher,
+                "レーベル": report.comic.series,
+                "価格": report.comic.item_price or "",
                 "発売日": report.comic.pubdate,
                 "対象月": (
                     f"{report.period_year:04d}-{report.period_month:02d}"
@@ -293,8 +297,9 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
     badges = "".join(_badge_html(check) for check in report.checks)
     cover = _cover_html(comic)
     author = html.escape(comic.author or "著者未登録")
-    publisher = html.escape(comic.publisher or "出版社未登録")
+    publisher = html.escape(comic.publisher_label_line())
     isbn = html.escape(comic.isbn) if comic.isbn else ""
+    price = html.escape(comic.price_line())
     amazon = amazon_url(comic.isbn, comic.search_query)
     rakuten = rakuten_url(comic.isbn, comic.search_query)
     mercari = mercari_url(comic.search_query)
@@ -321,6 +326,7 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
             comic.publisher,
             comic.title_kana,
             comic.author_kana,
+            comic.series,
         ),
         quote=True,
     )
@@ -365,9 +371,10 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         "</h3>"
         "</div>"
         f"{ext}"
-        f'<p class="meta">{author}</p>'
         f'<p class="meta">{publisher}</p>'
+        f'<p class="meta">{author}</p>'
         f'<p class="isbn">{isbn}</p>'
+        f'<p class="meta">{price}</p>'
         f'<div class="badges">{badges}</div>'
         "</div>"
         f"{fav_btn}"
@@ -1619,11 +1626,11 @@ def _html_document(
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      min-height: 44px;
-      padding: 12px 6px;
-      border-radius: 10px;
-      font-size: 0.78rem;
+      gap: 4px;
+      min-height: 22px;
+      padding: 4px 6px;
+      border-radius: 8px;
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 0.01em;
       text-decoration: none;
@@ -1636,10 +1643,10 @@ def _html_document(
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 1.2em;
-      height: 1.2em;
+      width: 1em;
+      height: 1em;
       border-radius: 50%;
-      font-size: 0.72rem;
+      font-size: 0.62rem;
       font-weight: 900;
       flex: 0 0 auto;
     }}
@@ -1986,9 +1993,9 @@ def _html_document(
       }}
       .ext {{
         width: 100%;
-        min-height: 32px;
-        padding: 6px 12px;
-        font-size: 0.78rem;
+        min-height: 22px;
+        padding: 4px 10px;
+        font-size: 0.72rem;
         box-sizing: border-box;
       }}
       .ad-slot {{ min-height: 60px; }}
