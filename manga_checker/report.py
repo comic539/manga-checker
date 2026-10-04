@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand30"
+ASSET_VER = "brand31"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -516,7 +516,6 @@ def _site_legal_html(*, logo_src: str = "logo.png") -> str:
       <p class="legal-actions">
         <a class="legal-form-btn" href="{form}" target="_blank" rel="noopener noreferrer">お問い合わせフォームを開く（Googleフォーム）</a>
       </p>
-      <p>※掲載情報の修正依頼の場合は、対象となる「作品タイトル」や「該当URL」を記載いただけますとスムーズに対応可能です。</p>
       <h3>個人情報の取り扱いについて</h3>
       <p>お問い合わせの際にご入力いただいたお名前（ニックネーム）やメールアドレス等の個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどでご連絡する場合にのみ利用いたします。法令に基づく場合を除き、ご本人の同意なく第三者へ開示・提供することは一切ありません。</p>
     </div>
@@ -822,7 +821,7 @@ def _html_document(
     .site-top-inner {{
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 8px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
@@ -890,8 +889,11 @@ def _html_document(
     .month-nav {{
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      margin: 16px 0 4px;
+      width: fit-content;
+      max-width: 100%;
+      margin: 16px auto 4px;
       min-width: 0;
     }}
     .month-shift {{
@@ -918,12 +920,16 @@ def _html_document(
       cursor: default;
     }}
     .month-tabs-scroll {{
-      flex: 1 1 auto;
+      flex: 0 1 auto;
+      width: max-content;
+      max-width: min(22.8em, calc(100vw - 8.4em));
       min-width: 0;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
+      scroll-snap-type: x proximity;
+      touch-action: pan-x;
     }}
     .month-tabs {{
       display: flex;
@@ -933,6 +939,7 @@ def _html_document(
       margin: 0;
     }}
     .month-tab {{
+      flex: 0 0 auto;
       min-width: 6.4em;
       padding: 8px 12px;
       border: 0;
@@ -953,9 +960,6 @@ def _html_document(
     .month-tab.is-active {{
       background: var(--accent);
       color: #fff;
-    }}
-    .month-tab[hidden] {{
-      display: none !important;
     }}
     .index-tabs {{
       display: flex;
@@ -1022,14 +1026,14 @@ def _html_document(
     }}
     .search-bar {{
       display: flex;
-      flex: 0 1 280px;
+      flex: 0 0 260px;
       flex-wrap: nowrap;
       align-items: center;
       gap: 8px;
-      margin: 0 auto;
+      margin: 0;
       min-width: 0;
-      max-width: 280px;
-      width: min(280px, 42%);
+      max-width: 260px;
+      width: 260px;
     }}
     .search-wrap {{
       position: relative;
@@ -2016,12 +2020,12 @@ def _html_document(
       text-align: center;
     }}
     .month-count[hidden] {{ display: none !important; }}
-    .pager-status {{
-      min-width: 3.6em;
-      text-align: center;
-      font-size: 1.05rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
+    .pager-pages {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }}
     .pager-btn {{
       min-width: 40px;
@@ -2113,10 +2117,10 @@ def _html_document(
       main {{ padding: 0 10px 32px; }}
       h1 {{ font-size: 1.28rem; }}
       .search-bar {{
-        width: min(180px, 42vw);
-        max-width: 180px;
-        flex: 0 1 180px;
-        margin: 0 auto;
+        width: min(160px, 38vw);
+        max-width: 160px;
+        flex: 0 1 160px;
+        margin: 0;
       }}
       .search-wrap {{
         height: 34px;
@@ -2262,7 +2266,7 @@ def _html_document(
   </header>
   <nav class="pager pager-top" id="pager-top" aria-label="ページ送り（上部）" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
-    <span class="pager-status"></span>
+    <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
   <div class="ad-container ad-header" id="ad-header">
@@ -2282,7 +2286,7 @@ def _html_document(
   </div>
   <nav class="pager pager-bottom" id="pager" aria-label="ページ送り" hidden>
     <button type="button" class="pager-btn pager-prev">前へ</button>
-    <span class="pager-status"></span>
+    <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
   {legal_html}
@@ -2713,21 +2717,28 @@ def _html_document(
         renderPager(pages, matched.length);
         syncSearchClear();
       }}
-      function circled(n) {{
-        if (n >= 1 && n <= 20) return String.fromCharCode(0x245F + n);
-        return String(n);
-      }}
       function renderPager(pages, matchedCount) {{
         pagers.forEach(function (nav) {{
-          if (matchedCount === 0 || pages <= 1) {{
+          if (matchedCount === 0) {{
             nav.hidden = true;
             return;
           }}
           nav.hidden = false;
-          var status = nav.querySelector(".pager-status");
+          var pagesEl = nav.querySelector(".pager-pages");
           var prevBtn = nav.querySelector(".pager-prev");
           var nextBtn = nav.querySelector(".pager-next");
-          if (status) status.textContent = circled(currentPage) + "/" + circled(pages);
+          if (pagesEl) {{
+            pagesEl.innerHTML = "";
+            for (var p = 1; p <= pages; p++) {{
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "pager-btn" + (p === currentPage ? " is-current" : "");
+              btn.textContent = String(p);
+              if (p === currentPage) btn.setAttribute("aria-current", "page");
+              btn.setAttribute("data-page", String(p));
+              pagesEl.appendChild(btn);
+            }}
+          }}
           if (prevBtn) prevBtn.disabled = currentPage <= 1;
           if (nextBtn) nextBtn.disabled = currentPage >= pages;
         }});
@@ -2798,12 +2809,18 @@ def _html_document(
       pagers.forEach(function (nav) {{
         var prevBtn = nav.querySelector(".pager-prev");
         var nextBtn = nav.querySelector(".pager-next");
+        var pagesEl = nav.querySelector(".pager-pages");
         if (prevBtn) prevBtn.addEventListener("click", function () {{
           if (currentPage > 1) goToPage(currentPage - 1);
         }});
         if (nextBtn) nextBtn.addEventListener("click", function () {{
           var pages = Math.max(1, Math.ceil(matchingCards().length / PAGE_SIZE));
           if (currentPage < pages) goToPage(currentPage + 1);
+        }});
+        if (pagesEl) pagesEl.addEventListener("click", function (ev) {{
+          var btn = ev.target.closest("[data-page]");
+          if (!btn) return;
+          goToPage(parseInt(btn.getAttribute("data-page"), 10) || 1);
         }});
       }});
       document.querySelectorAll(".month-tab").forEach(function (tab) {{
@@ -2818,42 +2835,53 @@ def _html_document(
       function monthTabs() {{
         return Array.prototype.slice.call(document.querySelectorAll(".month-tab[data-month]"));
       }}
-      function syncMonthWindow() {{
-        var tabs = monthTabs();
-        if (!tabs.length) return;
-        var active = 0;
-        tabs.forEach(function (tab, i) {{
-          if (tab.classList.contains("is-active")) active = i;
-        }});
-        var start = Math.max(0, Math.min(active - 1, Math.max(0, tabs.length - 3)));
-        tabs.forEach(function (tab, i) {{
-          tab.hidden = tabs.length > 3 && (i < start || i >= start + 3);
-        }});
+      function monthScrollEl() {{
+        return document.getElementById("month-tabs-scroll");
+      }}
+      function updateMonthShift() {{
+        var sc = monthScrollEl();
         var prev = document.getElementById("month-prev");
         var next = document.getElementById("month-next");
-        if (prev) prev.disabled = start <= 0;
-        if (next) next.disabled = start + 3 >= tabs.length;
+        if (!sc) return;
+        if (prev) prev.disabled = sc.scrollLeft <= 2;
+        if (next) next.disabled = sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 2;
+      }}
+      function syncMonthWindow() {{
+        var sc = monthScrollEl();
+        var tabs = monthTabs();
+        if (!sc || !tabs.length) return;
+        var active = null;
+        tabs.forEach(function (tab) {{
+          tab.hidden = false;
+          if (tab.classList.contains("is-active")) active = tab;
+        }});
+        if (active) {{
+          var left = active.offsetLeft - (sc.clientWidth - active.offsetWidth) / 2;
+          sc.scrollLeft = Math.max(0, left);
+        }}
+        updateMonthShift();
       }}
       function shiftMonthWindow(delta) {{
-        var tabs = monthTabs();
-        if (!tabs.length) return;
-        var first = 0;
-        for (var i = 0; i < tabs.length; i++) {{
-          if (!tabs[i].hidden) {{ first = i; break; }}
-        }}
-        var start = Math.max(0, Math.min(first + delta, Math.max(0, tabs.length - 3)));
-        tabs.forEach(function (tab, i) {{
-          tab.hidden = tabs.length > 3 && (i < start || i >= start + 3);
-        }});
-        var prev = document.getElementById("month-prev");
-        var next = document.getElementById("month-next");
-        if (prev) prev.disabled = start <= 0;
-        if (next) next.disabled = start + 3 >= tabs.length;
+        var sc = monthScrollEl();
+        if (!sc) return;
+        var tab = document.querySelector(".month-tab");
+        var step = (tab ? tab.getBoundingClientRect().width : 100) + 8;
+        sc.scrollBy({{ left: delta * step, behavior: "smooth" }});
       }}
       var monthPrev = document.getElementById("month-prev");
       var monthNext = document.getElementById("month-next");
       if (monthPrev) monthPrev.addEventListener("click", function () {{ shiftMonthWindow(-1); }});
       if (monthNext) monthNext.addEventListener("click", function () {{ shiftMonthWindow(1); }});
+      var monthScroll = monthScrollEl();
+      if (monthScroll) {{
+        monthScroll.addEventListener("scroll", updateMonthShift, {{ passive: true }});
+        monthScroll.addEventListener("wheel", function (ev) {{
+          if (monthScroll.scrollWidth <= monthScroll.clientWidth) return;
+          monthScroll.scrollLeft += ev.deltaX || ev.deltaY;
+          ev.preventDefault();
+          updateMonthShift();
+        }}, {{ passive: false }});
+      }}
       var PUB_COLORS = ["#e53935","#1e88e5","#7b1fa2","#43a047","#fb8c00","#6d4c41","#00897b","#5c6bc0","#c2185b","#546e7a"];
       function updatePubBar() {{
         var bar = document.getElementById("pub-filter-bar");

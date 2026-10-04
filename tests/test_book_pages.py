@@ -128,6 +128,7 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("../logo.png", body)
             self.assertNotIn("1comi.tokuten.plus@gmail.com", body)
             self.assertNotIn("連絡先メールアドレス", body)
+            self.assertNotIn("掲載情報の修正依頼の場合は", body)
             self.assertIn("closeLegalModals", body)
             self.assertIn("height: 72px", body)
             self.assertIn("width: 280px", body)
