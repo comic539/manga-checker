@@ -17,7 +17,7 @@ from manga_checker.preview import (
     resolve_preview_cache,
     save_preview_cache,
 )
-from manga_checker.privilege import STATUS_YES, privilege_display_text
+from manga_checker.privilege import STATUS_YES, privilege_display_text, privilege_summary
 from manga_checker.report import (
     ASSET_VER,
     LOGO_ALT,
@@ -230,9 +230,9 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     .site-top-inner {{
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
@@ -241,6 +241,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     }}
     .site-top-row {{
       display: flex;
+      flex: 1 1 auto;
       align-items: center;
       gap: 16px;
       min-width: 0;
@@ -253,12 +254,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       flex-wrap: nowrap;
       gap: 3px;
       height: 42px;
-      margin-left: auto;
+      margin-left: 0;
       padding: 3px;
       border: 1px solid #ece8e3;
       border-radius: 999px;
       background: #f5f4f2;
       box-sizing: border-box;
+      overflow: hidden;
+      transition: opacity 0.22s ease, transform 0.22s ease, max-height 0.22s ease, padding 0.22s ease, border-width 0.22s ease;
     }}
     .logo-link {{
       display: block;
@@ -520,6 +523,13 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     .store-confirm-row .badge {{
       min-width: 0;
       width: 100%;
+      overflow: hidden;
+    }}
+    .badge .store,
+    .badge .status {{
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }}
     .store-detail {{
       margin: 0;
@@ -642,20 +652,35 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     {_site_legal_css()}
     @media (max-width: 768px) {{
       .site-top-inner {{
+        flex-direction: column;
+        align-items: stretch;
         padding: 8px 12px;
+        gap: 0;
       }}
       .site-top-row {{
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
       }}
       .smart-header {{
-        flex: 1 0 100%;
+        width: 100%;
         justify-content: stretch;
         flex-wrap: nowrap;
-        margin-left: 0;
-        height: 40px;
-        padding: 3px;
-        gap: 3px;
+        margin: 8px 0 0;
+        height: 32px;
+        max-height: 40px;
+        padding: 2px;
+        gap: 2px;
+      }}
+      .smart-header.is-away {{
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border-width: 0;
+        pointer-events: none;
       }}
       .logo-link,
       .site-logo {{
@@ -670,9 +695,10 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       .pub-btn,
       .fav-list-btn {{
         flex: 1 1 0;
-        height: 34px;
-        font-size: 0.72rem;
-        padding: 0 8px;
+        height: 28px;
+        font-size: 0.62rem;
+        padding: 0 6px;
+        letter-spacing: 0.02em;
       }}
     }}
     @media (max-width: 640px) {{
@@ -728,15 +754,15 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
   <div class="site-top">
     <div class="site-top-inner">
       <div class="site-top-row">
-        <a class="logo-link" href="../index.html">
+        <a class="logo-link" href="../index.html?home=1">
           <img class="site-logo" src="../logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
         </a>
-        <nav class="smart-header" aria-label="主要メニュー">
-          <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">カレンダー</a>
-          <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
-          <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
-        </nav>
       </div>
+      <nav class="smart-header" id="smart-header" aria-label="主要メニュー">
+        <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">カレンダー</a>
+        <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
+        <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
+      </nav>
     </div>
   </div>
   <div class="wrap">
@@ -863,6 +889,22 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         document.body.removeChild(ta);
       }}
       {_site_legal_script()}
+      (function () {{
+        var bar = document.getElementById("smart-header");
+        if (!bar) return;
+        var last = window.scrollY || 0;
+        window.addEventListener("scroll", function () {{
+          if (window.matchMedia("(min-width: 769px)").matches) {{
+            bar.classList.remove("is-away");
+            return;
+          }}
+          var y = window.scrollY || 0;
+          if (y < 8) bar.classList.remove("is-away");
+          else if (y > last + 6) bar.classList.add("is-away");
+          else if (y < last - 6) bar.classList.remove("is-away");
+          last = y;
+        }}, {{ passive: true }});
+      }})();
     }})();
   </script>
 </body>
@@ -871,7 +913,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
 
 
 def _store_privilege_text(check) -> str:
-    return privilege_display_text(check.status, check.detail)
+    return privilege_summary(check.status, check.detail)
 
 
 def _store_confirm_row(check) -> str:
@@ -881,7 +923,7 @@ def _store_confirm_row(check) -> str:
     )
     return (
         '<div class="store-confirm-row">'
-        f"{_badge_html(check, press=False)}"
+        f"{_badge_html(check, press=False, note=detail)}"
         f"{detail_html}"
         "</div>"
     )

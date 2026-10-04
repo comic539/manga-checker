@@ -116,6 +116,9 @@ class BookPageTests(unittest.TestCase):
             self.assertNotIn("📅", body)
             self.assertIn(">カレンダー<", body)
             self.assertIn("../index.html?cal=1", body)
+            self.assertIn("../index.html?home=1", body)
+            self.assertIn('id="smart-header"', body)
+            self.assertIn(".smart-header.is-away", body)
             self.assertNotIn('id="comic-search"', body)
             self.assertNotIn("../search-icon.png", body)
             self.assertNotIn('id="book-search"', body)
@@ -156,3 +159,30 @@ class BookPageTests(unittest.TestCase):
             text = html_path.read_text(encoding="utf-8")
             self.assertNotIn("class=\"title-link\"", text)
             self.assertEqual(list((Path(tmp) / "books").glob("*.html")), [])
+
+    def test_book_privilege_detail_is_item_line(self) -> None:
+        reports = [
+            ComicReport(
+                Comic(title="サンプル 1", isbn="9784088852690"),
+                checks=[
+                    StoreCheck(
+                        "animate",
+                        "アニメイト",
+                        STATUS_YES,
+                        "アニメイト特典 特典について アニメイト特典は無くなり次第終了します。"
+                        "特典：イラストカード ※特典は無くなり次第終了します。",
+                        "https://example.com/a",
+                    )
+                ],
+            )
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            write_html(
+                reports,
+                Path(tmp) / "index.html",
+                "test",
+                book_dir=Path(tmp) / "books",
+            )
+            body = (Path(tmp) / "books" / "9784088852690.html").read_text(encoding="utf-8")
+        self.assertIn("特典：イラストカード ※特典は無くなり次第終了します。", body)
+        self.assertNotIn("特典について", body)

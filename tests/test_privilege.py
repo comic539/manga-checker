@@ -1,6 +1,12 @@
 import unittest
 
-from manga_checker.privilege import STATUS_NO, STATUS_UNKNOWN, STATUS_YES, evaluate_privilege
+from manga_checker.privilege import (
+    STATUS_NO,
+    STATUS_UNKNOWN,
+    STATUS_YES,
+    evaluate_privilege,
+    privilege_summary,
+)
 
 
 class PrivilegeEvalTests(unittest.TestCase):
@@ -635,3 +641,15 @@ class GamersFairTests(unittest.TestCase):
         status, detail = evaluate_gamers_detail(html)
         self.assertEqual(status, STATUS_YES, detail)
         self.assertIn("ゲーマーズ特典", detail)
+
+    def test_privilege_summary_keeps_item_line_only(self) -> None:
+        detail = (
+            "アニメイト特典 特典について アニメイト特典は無くなり次第終了します。"
+            "特典：イラストカード ※特典は無くなり次第終了します。"
+        )
+        text = privilege_summary(STATUS_YES, detail)
+        self.assertEqual(
+            text, "特典：イラストカード ※特典は無くなり次第終了します。"
+        )
+        self.assertNotIn("特典について", text)
+        self.assertEqual(privilege_summary(STATUS_NO, "詳細ページに特典情報はありません"), "詳細ページに特典情報はありません")

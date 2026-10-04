@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="ビション絵日記(1)
 各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand39">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand40">
   <style>
     :root {
       --bg: #ffffff;
@@ -45,9 +45,9 @@
     }
     .site-top-inner {
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
@@ -56,6 +56,7 @@
     }
     .site-top-row {
       display: flex;
+      flex: 1 1 auto;
       align-items: center;
       gap: 16px;
       min-width: 0;
@@ -68,12 +69,14 @@
       flex-wrap: nowrap;
       gap: 3px;
       height: 42px;
-      margin-left: auto;
+      margin-left: 0;
       padding: 3px;
       border: 1px solid #ece8e3;
       border-radius: 999px;
       background: #f5f4f2;
       box-sizing: border-box;
+      overflow: hidden;
+      transition: opacity 0.22s ease, transform 0.22s ease, max-height 0.22s ease, padding 0.22s ease, border-width 0.22s ease;
     }
     .logo-link {
       display: block;
@@ -335,6 +338,13 @@
     .store-confirm-row .badge {
       min-width: 0;
       width: 100%;
+      overflow: hidden;
+    }
+    .badge .store,
+    .badge .status {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .store-detail {
       margin: 0;
@@ -614,20 +624,35 @@
 
     @media (max-width: 768px) {
       .site-top-inner {
+        flex-direction: column;
+        align-items: stretch;
         padding: 8px 12px;
+        gap: 0;
       }
       .site-top-row {
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
       }
       .smart-header {
-        flex: 1 0 100%;
+        width: 100%;
         justify-content: stretch;
         flex-wrap: nowrap;
-        margin-left: 0;
-        height: 40px;
-        padding: 3px;
-        gap: 3px;
+        margin: 8px 0 0;
+        height: 32px;
+        max-height: 40px;
+        padding: 2px;
+        gap: 2px;
+      }
+      .smart-header.is-away {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border-width: 0;
+        pointer-events: none;
       }
       .logo-link,
       .site-logo {
@@ -642,9 +667,10 @@
       .pub-btn,
       .fav-list-btn {
         flex: 1 1 0;
-        height: 34px;
-        font-size: 0.72rem;
-        padding: 0 8px;
+        height: 28px;
+        font-size: 0.62rem;
+        padding: 0 6px;
+        letter-spacing: 0.02em;
       }
     }
     @media (max-width: 640px) {
@@ -700,15 +726,15 @@
   <div class="site-top">
     <div class="site-top-inner">
       <div class="site-top-row">
-        <a class="logo-link" href="../index.html">
-          <img class="site-logo" src="../logo.png?v=brand39" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+        <a class="logo-link" href="../index.html?home=1">
+          <img class="site-logo" src="../logo.png?v=brand40" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
         </a>
-        <nav class="smart-header" aria-label="主要メニュー">
-          <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">カレンダー</a>
-          <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
-          <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
-        </nav>
       </div>
+      <nav class="smart-header" id="smart-header" aria-label="主要メニュー">
+        <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">カレンダー</a>
+        <a class="pub-btn" id="pub-btn" href="../index.html?pub=1">出版社一覧</a>
+        <a class="fav-list-btn" id="fav-list-btn" href="../index.html?fav=1">お気に入り一覧</a>
+      </nav>
     </div>
   </div>
   <div class="wrap">
@@ -778,7 +804,7 @@
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
-      <img class="legal-about-logo" src="../logo.png?v=brand39" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+      <img class="legal-about-logo" src="../logo.png?v=brand40" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>
@@ -912,6 +938,22 @@
         if (ev.key === "Escape") closeLegalModals();
       });
 
+      (function () {
+        var bar = document.getElementById("smart-header");
+        if (!bar) return;
+        var last = window.scrollY || 0;
+        window.addEventListener("scroll", function () {
+          if (window.matchMedia("(min-width: 769px)").matches) {
+            bar.classList.remove("is-away");
+            return;
+          }
+          var y = window.scrollY || 0;
+          if (y < 8) bar.classList.remove("is-away");
+          else if (y > last + 6) bar.classList.add("is-away");
+          else if (y < last - 6) bar.classList.remove("is-away");
+          last = y;
+        }, { passive: true });
+      })();
     })();
   </script>
 </body>

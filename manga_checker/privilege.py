@@ -118,6 +118,28 @@ def privilege_display_text(status: str, detail: str) -> str:
         return text
     return _YES_DETAIL_PREFIX.sub("", text).strip()
 
+
+_ITEM_COLON = re.compile(r"特典[：:][^\s].+")
+
+
+def privilege_summary(status: str, detail: str) -> str:
+    """個別ページ向け。『特典：○○』があればその一文だけ残す。"""
+    text = privilege_display_text(status, detail)
+    if status != STATUS_YES:
+        return text
+    match = _ITEM_COLON.search(text)
+    if match:
+        line = match.group(0).strip()
+        cut = re.search(r"。", line)
+        if cut and "※" not in line[: cut.end()]:
+            rest = line[cut.end() :].strip()
+            if rest.startswith("※"):
+                line = line[: cut.end()] + rest
+            else:
+                line = line[: cut.end()]
+        return line
+    return text
+
 _DETAIL_BLOCK_WORDS = (
     "有償特典",
     "購入特典",

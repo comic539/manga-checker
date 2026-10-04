@@ -376,6 +376,13 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertIn('class="month-panel is-active"', html)
         self.assertNotIn("月タブで切り替えられます", html)
         self.assertNotIn("初期表示は", html)
+        self.assertIn('href="./index.html?home=1"', html)
+        self.assertIn('var HOME_MONTH = "2026-09"', html)
+        self.assertIn("function goHome", html)
+        self.assertIn('id="smart-header"', html)
+        self.assertIn(".smart-header.is-away", html)
+        self.assertLess(html.find('id="comic-search"'), html.find('id="smart-header"'))
+        self.assertLess(html.find('</div>\n      </div>\n      <nav class="smart-header"'), html.find('id="smart-header"'))
 
     def test_wrong_month_pubdate_is_not_rendered_in_tab(self) -> None:
         reports = [

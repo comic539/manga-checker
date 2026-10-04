@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand39"
+ASSET_VER = "brand40"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -142,6 +142,7 @@ def write_html(
     panels: list[str] = []
     card_id = 0
     active_label = "一覧"
+    home_month = ""
     named_indexes = [
         index
         for index, (year, month, _) in enumerate(month_panels)
@@ -190,6 +191,7 @@ def write_html(
         hidden = "" if is_active else " hidden"
         if is_active:
             active_label = label
+            home_month = month_id
         panels.append(
             f'<div class="month-panel{active}" id="month-{html.escape(month_id, quote=True)}" '
             f'data-month="{html.escape(month_id, quote=True)}" data-total="{len(month_items)}" '
@@ -228,6 +230,7 @@ def write_html(
             tabs_html=tabs_html,
             summary=summary,
             publishers=_publisher_catalog(all_reports),
+            home_month=home_month,
         ),
         encoding="utf-8",
     )
@@ -709,9 +712,11 @@ def _site_legal_script() -> str:
 """
 
 
-def _badge_html(check: StoreCheck, *, press: bool = True) -> str:
+def _badge_html(check: StoreCheck, *, press: bool = True, note: str | None = None) -> str:
     css, label = _badge_view(check.status)
-    title = html.escape(privilege_display_text(check.status, check.detail))
+    title = html.escape(
+        note if note is not None else privilege_display_text(check.status, check.detail)
+    )
     press_cls = " btn-press" if press else ""
     return (
         f'<a class="badge {css}{press_cls}" href="{html.escape(check.url)}" '
@@ -737,6 +742,7 @@ def _html_document(
     tabs_html: str = "",
     summary: str = "",
     publishers: list[dict[str, object]] | None = None,
+    home_month: str = "",
 ) -> str:
     page_size = 50
     if total <= 0:
@@ -816,9 +822,9 @@ def _html_document(
     }}
     .site-top-inner {{
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
@@ -827,6 +833,7 @@ def _html_document(
     }}
     .site-top-row {{
       display: flex;
+      flex: 1 1 auto;
       align-items: center;
       gap: 16px;
       min-width: 0;
@@ -845,6 +852,8 @@ def _html_document(
       border-radius: 999px;
       background: #f5f4f2;
       box-sizing: border-box;
+      overflow: hidden;
+      transition: opacity 0.22s ease, transform 0.22s ease, max-height 0.22s ease, padding 0.22s ease, border-width 0.22s ease;
     }}
     .site-intro {{
       width: 100%;
@@ -2101,34 +2110,50 @@ def _html_document(
     @media (max-width: 768px) {{
       header {{ padding: 0; }}
       .site-top-inner {{
+        flex-direction: column;
+        align-items: stretch;
         padding: 8px 12px;
+        gap: 0;
       }}
       .site-top-row {{
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
       }}
       .search-bar {{
         width: auto;
         max-width: none;
-        flex: 1 1 160px;
+        flex: 1 1 auto;
         margin: 0;
       }}
       .smart-header {{
-        flex: 1 0 100%;
+        width: 100%;
         justify-content: stretch;
         flex-wrap: nowrap;
-        margin-left: 0;
-        height: 40px;
-        padding: 3px;
-        gap: 3px;
+        margin: 8px 0 0;
+        height: 32px;
+        max-height: 40px;
+        padding: 2px;
+        gap: 2px;
+      }}
+      .smart-header.is-away {{
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border-width: 0;
+        pointer-events: none;
       }}
       .cal-btn,
       .pub-btn,
       .fav-list-btn {{
         flex: 1 1 0;
-        height: 34px;
-        font-size: 0.72rem;
-        padding: 0 8px;
+        height: 28px;
+        font-size: 0.62rem;
+        padding: 0 6px;
+        letter-spacing: 0.02em;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
@@ -2244,7 +2269,7 @@ def _html_document(
   <div class="site-top">
     <div class="site-top-inner">
       <div class="site-top-row">
-      <a class="logo-link" href="./index.html">
+      <a class="logo-link" href="./index.html?home=1">
         <img class="site-logo" src="logo.png?v={ASSET_VER}" alt="{html.escape(LOGO_ALT, quote=True)}">
       </a>
       <div class="search-bar">
@@ -2262,12 +2287,12 @@ def _html_document(
           <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
         </div>
       </div>
-      <nav class="smart-header" aria-label="主要メニュー">
+      </div>
+      <nav class="smart-header" id="smart-header" aria-label="主要メニュー">
         <button type="button" class="cal-btn" id="cal-btn" aria-haspopup="dialog" aria-controls="cal-modal">カレンダー</button>
         <button type="button" class="pub-btn" id="pub-btn" aria-haspopup="dialog" aria-controls="pub-modal">出版社一覧</button>
         <button type="button" class="fav-list-btn" id="fav-list-btn">お気に入り一覧</button>
       </nav>
-      </div>
     </div>
   </div>
   <header>
@@ -2381,6 +2406,7 @@ def _html_document(
       var pagers = document.querySelectorAll(".pager");
       var cluster = input ? input.closest(".search-wrap") : null;
       var PAGE_SIZE = 50;
+      var HOME_MONTH = {json.dumps(home_month, ensure_ascii=False)};
       var currentPage = 1;
       var dayFilter = "";
       var publisherFilter = "";
@@ -2612,7 +2638,7 @@ def _html_document(
         var panel = card.closest(".month-panel");
         return (panel && panel.getAttribute("data-month")) || card.getAttribute("data-release-month") || "";
       }}
-      function switchMonth(id, keepQuery, keepDay) {{
+      function switchMonth(id, keepQuery, keepDay, toTop) {{
         var q = input ? input.value : "";
         saveMonthState();
         if (!keepDay) dayFilter = "";
@@ -2631,8 +2657,26 @@ def _html_document(
         renderList();
         if (!keepQuery) closeSuggest();
         shuffleAds();
-        scrollToPagerAndAds();
+        if (toTop) window.scrollTo(0, 0);
+        else scrollToPagerAndAds();
         updateMonthChrome();
+      }}
+      function goHome(ev) {{
+        if (ev) ev.preventDefault();
+        try {{ sessionStorage.removeItem(LIST_POS_KEY); }} catch (e) {{}}
+        if (favMode) setFavMode(false);
+        publisherFilter = "";
+        dayFilter = "";
+        if (input) input.value = "";
+        closeSuggest();
+        syncSearchClear();
+        currentPage = 1;
+        if (HOME_MONTH) switchMonth(HOME_MONTH, false, false, true);
+        else {{
+          renderList();
+          window.scrollTo(0, 0);
+        }}
+        if (history.replaceState) history.replaceState(null, "", "./index.html");
       }}
       function closeSuggest() {{
         if (!suggest) return;
@@ -3279,9 +3323,34 @@ def _html_document(
         closeSuggest();
       }});
       paintFavs();
+      var logoLink = document.querySelector(".logo-link");
+      if (logoLink) {{
+        logoLink.addEventListener("click", function (ev) {{
+          if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+          goHome(ev);
+        }});
+      }}
+      (function () {{
+        var bar = document.getElementById("smart-header");
+        if (!bar) return;
+        var last = window.scrollY || 0;
+        window.addEventListener("scroll", function () {{
+          if (window.matchMedia("(min-width: 769px)").matches) {{
+            bar.classList.remove("is-away");
+            return;
+          }}
+          var y = window.scrollY || 0;
+          if (y < 8) bar.classList.remove("is-away");
+          else if (y > last + 6) bar.classList.add("is-away");
+          else if (y < last - 6) bar.classList.remove("is-away");
+          last = y;
+        }}, {{ passive: true }});
+      }})();
       try {{
         var params = new URLSearchParams(location.search);
-        if (params.get("fav") === "1") {{
+        if (params.get("home") === "1") {{
+          goHome();
+        }} else if (params.get("fav") === "1") {{
           setFavMode(true);
         }} else if (!applyListPos(loadListPos())) {{
           renderList();
