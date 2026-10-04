@@ -355,6 +355,8 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertNotIn("pub-mark", html)
         self.assertIn("PUB_TONES", html)
         self.assertIn('class="smart-header"', html)
+        self.assertIn("height: 42px", html)
+        self.assertIn("#f5f4f2", html)
         self.assertIn('id="pub-btn"', html)
         self.assertIn('id="pub-modal"', html)
         self.assertIn("cal-month-total", html)

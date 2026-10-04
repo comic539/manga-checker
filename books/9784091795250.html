@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="電撃デイジー 新装版(1)
 各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand36">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand37">
   <style>
     :root {
       --bg: #ffffff;
@@ -51,13 +51,13 @@
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px;
+      padding: 8px 20px;
       box-sizing: border-box;
     }
     .site-top-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       min-width: 0;
     }
     .smart-header {
@@ -66,10 +66,14 @@
       align-items: center;
       justify-content: flex-end;
       flex-wrap: nowrap;
-      gap: 8px;
+      gap: 3px;
+      height: 42px;
       margin-left: auto;
-      padding: 0;
-      border: 0;
+      padding: 3px;
+      border: 1px solid #ece8e3;
+      border-radius: 999px;
+      background: #f5f4f2;
+      box-sizing: border-box;
     }
     .logo-link {
       display: block;
@@ -87,55 +91,39 @@
       object-fit: contain;
       object-position: left center;
     }
-    .cal-btn {
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
-      background: #eef6ff;
-      color: #1565c0;
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-decoration: none;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .cal-btn:hover { background: #d6ebff; }
-    .pub-btn {
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
-      background: #e9f7ef;
-      color: #1b6b40;
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-decoration: none;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .pub-btn:hover { background: #d4eedf; }
+    .cal-btn,
+    .pub-btn,
     .fav-list-btn {
       flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 12px;
+      height: 34px;
+      padding: 0 14px;
       border: 0;
       border-radius: 999px;
-      background: #fff0f6;
-      color: #c2185b;
       font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1;
       text-decoration: none;
       cursor: pointer;
       white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      box-shadow: none;
+    }
+    .cal-btn {
+      background: #eef6ff;
+      color: #1565c0;
+    }
+    .cal-btn:hover { background: #d6ebff; }
+    .pub-btn {
+      background: #e9f7ef;
+      color: #1b6b40;
+    }
+    .pub-btn:hover { background: #d4eedf; }
+    .fav-list-btn {
+      background: #fff0f6;
+      color: #c2185b;
     }
     .fav-list-btn:hover {
       background: #ffd6ea;
@@ -652,20 +640,20 @@
 
     @media (max-width: 768px) {
       .site-top-inner {
-        padding: 6px 8px 8px;
+        padding: 8px 12px;
       }
       .site-top-row {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 10px;
       }
       .smart-header {
         flex: 1 0 100%;
-        justify-content: center;
-        flex-wrap: wrap;
+        justify-content: stretch;
+        flex-wrap: nowrap;
         margin-left: 0;
-        gap: 6px;
-        padding: 8px 0 0;
-        border-top: 1px solid #f0eeee;
+        height: 40px;
+        padding: 3px;
+        gap: 3px;
       }
       .logo-link,
       .site-logo {
@@ -676,12 +664,13 @@
       .site-logo {
         height: 42px;
       }
-      .fav-list-btn,
       .cal-btn,
-      .pub-btn {
-        font-size: 0.58rem;
-        padding: 4px 8px;
-        line-height: 1.2;
+      .pub-btn,
+      .fav-list-btn {
+        flex: 1 1 0;
+        height: 34px;
+        font-size: 0.72rem;
+        padding: 0 8px;
       }
     }
     @media (max-width: 640px) {
@@ -738,7 +727,7 @@
     <div class="site-top-inner">
       <div class="site-top-row">
         <a class="logo-link" href="../index.html">
-          <img class="site-logo" src="../logo.png?v=brand36" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+          <img class="site-logo" src="../logo.png?v=brand37" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
         </a>
         <nav class="smart-header" aria-label="主要メニュー">
           <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
@@ -815,7 +804,7 @@
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
-      <img class="legal-about-logo" src="../logo.png?v=brand36" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+      <img class="legal-about-logo" src="../logo.png?v=brand37" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>

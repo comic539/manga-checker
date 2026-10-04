@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand36"
+ASSET_VER = "brand37"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -819,13 +819,13 @@ def _html_document(
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px;
+      padding: 8px 20px;
       box-sizing: border-box;
     }}
     .site-top-row {{
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       min-width: 0;
     }}
     .smart-header {{
@@ -834,10 +834,14 @@ def _html_document(
       align-items: center;
       justify-content: flex-end;
       flex-wrap: nowrap;
-      gap: 8px;
-      margin-left: auto;
-      padding: 0;
-      border: 0;
+      gap: 3px;
+      height: 42px;
+      margin-left: 0;
+      padding: 3px;
+      border: 1px solid #ece8e3;
+      border-radius: 999px;
+      background: #f5f4f2;
+      box-sizing: border-box;
     }}
     .site-intro {{
       width: 100%;
@@ -1013,7 +1017,7 @@ def _html_document(
       gap: 8px;
       margin: 0;
       min-width: 0;
-      max-width: 360px;
+      max-width: none;
       width: auto;
     }}
     .search-wrap {{
@@ -1023,11 +1027,12 @@ def _html_document(
       width: 100%;
       min-width: 0;
       z-index: 50;
-      height: 40px;
-      padding: 0 6px 0 14px;
-      border: 1px solid #e5e5e5;
+      height: 42px;
+      padding: 0 6px 0 16px;
+      border: 1px solid #ece8e3;
       border-radius: 999px;
-      background: #f6f6f6;
+      background: #f5f4f2;
+      box-sizing: border-box;
     }}
     .search-wrap:focus-within {{
       background: #fff;
@@ -1159,19 +1164,29 @@ def _html_document(
       white-space: nowrap;
     }}
     .search-hit[hidden] {{ display: none !important; }}
-    .pub-btn {{
+    .cal-btn,
+    .pub-btn,
+    .fav-list-btn {{
       flex: 0 0 auto;
-      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 34px;
+      padding: 0 14px;
       border: 0;
       border-radius: 999px;
-      background: #e9f7ef;
-      color: #1b6b40;
       font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1;
       cursor: pointer;
       white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      text-decoration: none;
+      box-shadow: none;
+    }}
+    .pub-btn {{
+      background: #e9f7ef;
+      color: #1b6b40;
     }}
     .pub-btn:hover {{
       background: #d4eedf;
@@ -1181,18 +1196,8 @@ def _html_document(
       color: #14532d;
     }}
     .fav-list-btn {{
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
       background: #fff0f6;
       color: #c2185b;
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }}
     .fav-list-btn:hover {{
       background: #ffd6ea;
@@ -1202,18 +1207,8 @@ def _html_document(
       color: #fff;
     }}
     .cal-btn {{
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
       background: #eef6ff;
       color: #1565c0;
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }}
     .cal-btn:hover {{
       background: #d6ebff;
@@ -2099,11 +2094,11 @@ def _html_document(
     @media (max-width: 768px) {{
       header {{ padding: 0; }}
       .site-top-inner {{
-        padding: 6px 8px 8px;
+        padding: 8px 12px;
       }}
       .site-top-row {{
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 10px;
       }}
       .search-bar {{
         width: auto;
@@ -2113,12 +2108,20 @@ def _html_document(
       }}
       .smart-header {{
         flex: 1 0 100%;
-        justify-content: center;
-        flex-wrap: wrap;
+        justify-content: stretch;
+        flex-wrap: nowrap;
         margin-left: 0;
-        gap: 6px;
-        padding: 8px 0 0;
-        border-top: 1px solid #f0eeee;
+        height: 40px;
+        padding: 3px;
+        gap: 3px;
+      }}
+      .cal-btn,
+      .pub-btn,
+      .fav-list-btn {{
+        flex: 1 1 0;
+        height: 34px;
+        font-size: 0.72rem;
+        padding: 0 8px;
       }}
       .site-intro {{ padding: 10px 12px 8px; }}
       main {{ padding: 0 10px 32px; }}
@@ -2133,28 +2136,21 @@ def _html_document(
         height: 42px;
       }}
       .search-wrap {{
-        height: 34px;
-        padding: 0 4px 0 10px;
+        height: 40px;
+        padding: 0 4px 0 12px;
       }}
       .search-wrap input {{
-        height: 32px;
+        height: 36px;
         padding: 0 2px;
-        font-size: 0.72rem;
+        font-size: 0.78rem;
       }}
       .search-clear {{
         width: 18px;
         height: 18px;
         font-size: 0.75rem;
       }}
-      .search-go {{ width: 26px; height: 26px; }}
-      .search-go svg {{ width: 15px; height: 15px; }}
-      .fav-list-btn,
-      .cal-btn,
-      .pub-btn {{
-        font-size: 0.58rem;
-        padding: 4px 6px;
-        line-height: 1.2;
-      }}
+      .search-go {{ width: 28px; height: 28px; }}
+      .search-go svg {{ width: 16px; height: 16px; }}
       .month-title {{
         font-size: 1.55rem;
         letter-spacing: 0.04em;

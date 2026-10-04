@@ -236,13 +236,13 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 2px 16px;
+      padding: 8px 20px;
       box-sizing: border-box;
     }}
     .site-top-row {{
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       min-width: 0;
     }}
     .smart-header {{
@@ -251,10 +251,14 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       align-items: center;
       justify-content: flex-end;
       flex-wrap: nowrap;
-      gap: 8px;
+      gap: 3px;
+      height: 42px;
       margin-left: auto;
-      padding: 0;
-      border: 0;
+      padding: 3px;
+      border: 1px solid #ece8e3;
+      border-radius: 999px;
+      background: #f5f4f2;
+      box-sizing: border-box;
     }}
     .logo-link {{
       display: block;
@@ -272,55 +276,39 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       object-fit: contain;
       object-position: left center;
     }}
-    .cal-btn {{
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
-      background: #eef6ff;
-      color: #1565c0;
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-decoration: none;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }}
-    .cal-btn:hover {{ background: #d6ebff; }}
-    .pub-btn {{
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 999px;
-      background: #e9f7ef;
-      color: #1b6b40;
-      font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-decoration: none;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }}
-    .pub-btn:hover {{ background: #d4eedf; }}
+    .cal-btn,
+    .pub-btn,
     .fav-list-btn {{
       flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 12px;
+      height: 34px;
+      padding: 0 14px;
       border: 0;
       border-radius: 999px;
-      background: #fff0f6;
-      color: #c2185b;
       font: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1;
       text-decoration: none;
       cursor: pointer;
       white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      box-shadow: none;
+    }}
+    .cal-btn {{
+      background: #eef6ff;
+      color: #1565c0;
+    }}
+    .cal-btn:hover {{ background: #d6ebff; }}
+    .pub-btn {{
+      background: #e9f7ef;
+      color: #1b6b40;
+    }}
+    .pub-btn:hover {{ background: #d4eedf; }}
+    .fav-list-btn {{
+      background: #fff0f6;
+      color: #c2185b;
     }}
     .fav-list-btn:hover {{
       background: #ffd6ea;
@@ -680,20 +668,20 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     {_site_legal_css()}
     @media (max-width: 768px) {{
       .site-top-inner {{
-        padding: 6px 8px 8px;
+        padding: 8px 12px;
       }}
       .site-top-row {{
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 10px;
       }}
       .smart-header {{
         flex: 1 0 100%;
-        justify-content: center;
-        flex-wrap: wrap;
+        justify-content: stretch;
+        flex-wrap: nowrap;
         margin-left: 0;
-        gap: 6px;
-        padding: 8px 0 0;
-        border-top: 1px solid #f0eeee;
+        height: 40px;
+        padding: 3px;
+        gap: 3px;
       }}
       .logo-link,
       .site-logo {{
@@ -704,12 +692,13 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       .site-logo {{
         height: 42px;
       }}
-      .fav-list-btn,
       .cal-btn,
-      .pub-btn {{
-        font-size: 0.58rem;
-        padding: 4px 8px;
-        line-height: 1.2;
+      .pub-btn,
+      .fav-list-btn {{
+        flex: 1 1 0;
+        height: 34px;
+        font-size: 0.72rem;
+        padding: 0 8px;
       }}
     }}
     @media (max-width: 640px) {{
