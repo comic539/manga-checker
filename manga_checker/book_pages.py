@@ -182,7 +182,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     slug = isbn_slug(comic.isbn)
     og_image = _rakuten_cover_url(comic) or f"{SITE_BASE}/logo.png"
     og_url = f"{SITE_BASE}/books/{slug}.html" if slug else f"{SITE_BASE}/"
-    legal_html = _site_legal_html()
+    legal_html = _site_legal_html(logo_src="../logo.png")
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>

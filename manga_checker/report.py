@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand29"
+ASSET_VER = "brand30"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -465,10 +465,10 @@ def _fav_button_html(isbn_digits: str) -> str:
     )
 
 
-def _site_legal_html() -> str:
+def _site_legal_html(*, logo_src: str = "logo.png") -> str:
     form = html.escape(CONTACT_FORM_URL, quote=True)
-    mail = html.escape(CONTACT_EMAIL)
-    mail_href = html.escape(f"mailto:{CONTACT_EMAIL}", quote=True)
+    logo = html.escape(f"{logo_src}?v={ASSET_VER}", quote=True)
+    logo_alt = html.escape(LOGO_ALT, quote=True)
     return f"""
   <footer class="site-legal">
     <nav class="site-legal-nav" aria-label="サイト情報">
@@ -482,6 +482,7 @@ def _site_legal_html() -> str:
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
+      <img class="legal-about-logo" src="{logo}" alt="{logo_alt}">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>
@@ -515,7 +516,6 @@ def _site_legal_html() -> str:
       <p class="legal-actions">
         <a class="legal-form-btn" href="{form}" target="_blank" rel="noopener noreferrer">お問い合わせフォームを開く（Googleフォーム）</a>
       </p>
-      <p>連絡先メールアドレス: <a href="{mail_href}">{mail}</a></p>
       <p>※掲載情報の修正依頼の場合は、対象となる「作品タイトル」や「該当URL」を記載いただけますとスムーズに対応可能です。</p>
       <h3>個人情報の取り扱いについて</h3>
       <p>お問い合わせの際にご入力いただいたお名前（ニックネーム）やメールアドレス等の個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどでご連絡する場合にのみ利用いたします。法令に基づく場合を除き、ご本人の同意なく第三者へ開示・提供することは一切ありません。</p>
@@ -603,6 +603,14 @@ def _site_legal_css() -> str:
       font-size: 0.92rem;
       font-weight: 800;
       color: var(--accent);
+    }
+    .legal-about-logo {
+      display: block;
+      width: min(440px, 100%);
+      max-width: 100%;
+      height: auto;
+      margin: 8px auto 20px;
+      object-fit: contain;
     }
     .legal-dialog p {
       margin: 0 0 10px;
@@ -1732,6 +1740,14 @@ def _html_document(
       font-size: 0.92rem;
       font-weight: 800;
       color: var(--accent);
+    }}
+    .legal-about-logo {{
+      display: block;
+      width: min(440px, 100%);
+      max-width: 100%;
+      height: auto;
+      margin: 8px auto 20px;
+      object-fit: contain;
     }}
     .legal-dialog p {{
       margin: 0 0 10px;
