@@ -10,8 +10,9 @@ from urllib.parse import parse_qs, urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from manga_checker.dates import iter_month_days, month_bounds, privilege_months
+from manga_checker.dates import iter_month_days, month_bounds, parse_release_date, privilege_months
 from manga_checker.http import get_with_retry
+from manga_checker.models import Comic
 from manga_checker.volume import normalize_text
 
 ANIMATE_LIST = "https://www.animate-onlineshop.jp/products/privilege_list.php"
@@ -20,6 +21,19 @@ GAMERS_LIST = "https://www.gamers.co.jp/products/privilege_list.php"
 TORA_CALENDAR = (
     "https://ecs.toranoana.jp/tora/ec/bok/pages/all/item/standard/calendar/{page}/"
 )
+TORA_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/129.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;q=0.9,"
+        "image/avif,image/webp,*/*;q=0.8"
+    ),
+    "Accept-Language": "ja,en-US;q=0.7,en;q=0.3",
+    "Referer": "https://ecs.toranoana.jp/tora/ec/bok/pages/all/item/standard/calendar/",
+}
 _COMIC_PREFIX = re.compile(r"^【[^】]*】")
 _PAGEN = re.compile(r"[?&]pageno=(\d+)", re.I)
 
@@ -205,24 +219,49 @@ def parse_gamers_privilege_list(
     return items
 
 
+def catalog_issue_dates(
+    comics: list[Comic],
+    months: list[tuple[int, int]] | None = None,
+) -> list[str]:
+    """カタログの発売日から YYYYMMDD のユニーク一覧を作る。"""
+    allowed = set(months) if months else None
+    found: set[str] = set()
+    for comic in comics:
+        parsed = parse_release_date(comic.pubdate)
+        if parsed is None:
+            continue
+        if allowed is not None and (parsed.year, parsed.month) not in allowed:
+            continue
+        found.add(parsed.strftime("%Y%m%d"))
+    return sorted(found)
+
+
 def load_toranoana_privileges(
     session: requests.Session,
     months: list[tuple[int, int]] | None = None,
-    delay_sec: float = 1.2,
+    delay_sec: float = 1.5,
+    issue_dates: list[str] | None = None,
 ) -> list[PrivilegeItem]:
-    months = months or privilege_months()
+    if issue_dates is None:
+        dates = [
+            day.strftime("%Y%m%d")
+            for day in iter_month_days(months or privilege_months())
+        ]
+    else:
+        dates = [item for item in issue_dates if item]
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
-    for day in iter_month_days(months):
+    print(f"とらのあな特典: カタログ発売日 {len(dates)} 日を取得します")
+    for issue_date in dates:
         page = 1
         while page <= 20:
             url = (
                 TORA_CALENDAR.format(page=page)
-                + f"?withBenefitsFlg=1&issueDate={day:%Y%m%d}"
+                + f"?withBenefitsFlg=1&issueDate={issue_date}"
             )
-            html = _get(session, url, "とらのあな特典")
+            html = _get_tora(session, url, f"とらのあな特典 {issue_date}")
             time.sleep(delay_sec)
-            if not html:
+            if html is None:
                 break
             page_items = parse_toranoana_calendar(html, url)
             added = 0
@@ -346,3 +385,22 @@ def _get(session: requests.Session, url: str, label: str) -> str:
         return response.text or ""
     except requests.RequestException:
         return ""
+
+
+def _get_tora(session: requests.Session, url: str, label: str) -> str | None:
+    try:
+        response = get_with_retry(
+            session,
+            url,
+            timeout=25,
+            retries=2,
+            headers=TORA_HEADERS,
+            label=label,
+        )
+    except requests.RequestException as exc:
+        print(f"  とらのあな: 例外のためスキップ {label}: {exc}")
+        return None
+    if response.status_code >= 400:
+        print(f"  とらのあな: HTTP {response.status_code} のためスキップ {label}")
+        return None
+    return response.text or ""

@@ -193,7 +193,7 @@ def check_stores(
     for store in STORES:
         url = store.search_url(comic)
         if store.store_id in BULK_LISTING_STORES:
-            if listings is not None:
+            if listings is not None and store.store_id in listings.items:
                 check = listings.check(store.store_id, store.name, comic, url)
                 remember_check(cache, check, comic)
                 results.append(check)

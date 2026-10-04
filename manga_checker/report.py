@@ -32,7 +32,9 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand24"
+ASSET_VER = "brand25"
+CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
+CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
 # A8タグは配布HTMLのまま使う（属性・改行・計測用1pxを改変しない）。
 INDEX_AD_TAGS = [
@@ -438,6 +440,65 @@ def _fav_button_html(isbn_digits: str) -> str:
     )
 
 
+def _site_legal_html() -> str:
+    form = html.escape(CONTACT_FORM_URL, quote=True)
+    mail = html.escape(CONTACT_EMAIL)
+    mail_href = html.escape(f"mailto:{CONTACT_EMAIL}", quote=True)
+    return f"""
+  <footer class="site-legal">
+    <nav class="site-legal-nav" aria-label="サイト情報">
+      <button type="button" data-legal-open="legal-about">サイトについて</button>
+      <button type="button" data-legal-open="legal-ad">広告</button>
+      <button type="button" data-legal-open="legal-contact">お問い合わせ</button>
+    </nav>
+    <p class="site-legal-copy">© イッコミ特典＋</p>
+  </footer>
+  <div class="legal-modal" id="legal-about" hidden>
+    <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
+      <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
+      <h2 id="legal-about-title">サイトについて</h2>
+      <h3>イッコミ特典＋について</h3>
+      <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
+      <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>
+      <h3>免責事項・掲載情報について</h3>
+      <p>各書店の公開情報をもとに自動収集および確認を行っておりますが、システムの仕様上、実際には特典がある場合でも『特典なし』と表示される場合がございます。</p>
+      <p>特典の終了、配布条件、仕様変更等が発生する場合もありますので、特典の配布状況の最終確認は各書店の公式商品ページにてご確認ください。</p>
+      <p>当サイトの情報を利用したことで生じた損害等について、当サイトは一切の責任を負いかねます。</p>
+      <p>なお、当サイトは各出版社様、およびアニメイト様、メロンブックス様、ゲーマーズ様、とらのあな様、COMIC ZIN様、こみらの！様、喜久屋書店様とは一切関係ありません。</p>
+      <h3>著作権・商標権について</h3>
+      <p>掲載されている書影、特典名、作品名等の権利は、各出版社、著者、書店等の各権利所有者に帰属します。権利を侵害することを目的としたものではありません。</p>
+      <p>掲載内容や画像等に問題がある場合は、確認のうえ速やかに修正・削除等の対応をいたします。お問い合わせよりご連絡ください。</p>
+    </div>
+  </div>
+  <div class="legal-modal" id="legal-ad" hidden>
+    <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-ad-title">
+      <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
+      <h2 id="legal-ad-title">広告掲載について</h2>
+      <h3>アフィリエイト広告(PR)の利用</h3>
+      <p>当サイトはアフィリエイト広告(PR)を利用しています。</p>
+      <p>第三者配信の広告サービスおよびアフィリエイトプログラム（楽天アフィリエイト、A8.net等の各種ASP）に参加しています。</p>
+      <p>リンク先の商品は各販売店が販売・管理しているものであり、商品のご購入やお問い合わせにつきましては各ショップ・店舗へ直接ご確認いただきますようお願いいたします。</p>
+      <h3>Cookie（クッキー）の利用について</h3>
+      <p>当サイトでは、アクセス状況の把握や広告配信のためにCookieを使用することがあります。Cookieはお客様のブラウザを識別するものであり、個人を特定する情報は一切含まれません。ブラウザの設定によりCookieを無効化することも可能です。</p>
+    </div>
+  </div>
+  <div class="legal-modal" id="legal-contact" hidden>
+    <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-contact-title">
+      <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
+      <h2 id="legal-contact-title">お問い合わせ</h2>
+      <p>当サイトに関するご質問、ご要望、または掲載情報の訂正（発売日や特典情報の修正依頼）、権利関係のご連絡は以下のお問い合わせフォームよりお願いいたします。</p>
+      <p class="legal-actions">
+        <a class="legal-form-btn" href="{form}" target="_blank" rel="noopener noreferrer">お問い合わせフォームを開く（Googleフォーム）</a>
+      </p>
+      <p>連絡先メールアドレス: <a href="{mail_href}">{mail}</a></p>
+      <p>※掲載情報の修正依頼の場合は、対象となる「作品タイトル」や「該当URL」を記載いただけますとスムーズに対応可能です。</p>
+      <h3>個人情報の取り扱いについて</h3>
+      <p>お問い合わせの際にご入力いただいたお名前（ニックネーム）やメールアドレス等の個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどでご連絡する場合にのみ利用いたします。法令に基づく場合を除き、ご本人の同意なく第三者へ開示・提供することは一切ありません。</p>
+    </div>
+  </div>
+"""
+
+
 def _badge_html(check: StoreCheck) -> str:
     css, label = _badge_view(check.status)
     title = html.escape(check.detail)
@@ -476,6 +537,7 @@ def _html_document(
     if not summary:
         summary = INTRO_NOTES[0]
     intro_notes = "".join(f"<li>{html.escape(note)}</li>" for note in INTRO_NOTES)
+    legal_html = _site_legal_html()
     return f"""<!DOCTYPE html>
 <html lang="ja" data-build="{ASSET_VER}">
 <head>
@@ -1251,6 +1313,132 @@ def _html_document(
       line-height: 1.5;
       text-align: center;
     }}
+    .site-legal {{
+      width: 100%;
+      max-width: 720px;
+      margin: 8px auto 32px;
+      padding: 0 16px;
+    }}
+    .site-legal-nav {{
+      display: flex;
+      width: 100%;
+      border: 1px solid #d8d0c8;
+      background: #fff;
+    }}
+    .site-legal-nav button {{
+      flex: 1 1 0;
+      margin: 0;
+      padding: 14px 8px;
+      border: 0;
+      border-right: 1px solid #d8d0c8;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-align: center;
+      cursor: pointer;
+      line-height: 1.3;
+    }}
+    .site-legal-nav button:last-child {{
+      border-right: 0;
+    }}
+    .site-legal-nav button:hover {{
+      background: #f7f4f0;
+      color: var(--accent);
+    }}
+    .site-legal-copy {{
+      margin: 14px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+    }}
+    .legal-modal {{
+      position: fixed;
+      inset: 0;
+      z-index: 5100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: rgba(42, 33, 28, 0.42);
+    }}
+    .legal-modal[hidden] {{ display: none !important; }}
+    .legal-dialog {{
+      position: relative;
+      width: min(640px, 100%);
+      max-height: min(82vh, 720px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 18px 48px rgba(42, 33, 28, 0.22);
+      padding: 28px 28px 24px;
+      color: var(--ink);
+    }}
+    .legal-dialog h2 {{
+      margin: 0 36px 16px 0;
+      font-size: 1.12rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #ece6df;
+    }}
+    .legal-dialog h3 {{
+      margin: 18px 0 8px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--accent);
+    }}
+    .legal-dialog p {{
+      margin: 0 0 10px;
+      font-size: 0.84rem;
+      line-height: 1.75;
+      color: #4a433e;
+    }}
+    .legal-close {{
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 8px;
+      background: #f3eee8;
+      color: var(--ink);
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+    }}
+    .legal-close:hover {{
+      background: #eadfd4;
+    }}
+    .legal-actions {{
+      margin: 16px 0 14px !important;
+      text-align: center;
+    }}
+    .legal-form-btn {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff !important;
+      font-weight: 800;
+      font-size: 0.86rem;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }}
+    .legal-form-btn:hover {{
+      background: #a84c1e;
+    }}
+    .legal-dialog a {{
+      color: var(--accent);
+      word-break: break-all;
+    }}
     .meta, .isbn {{
       margin: 0;
       color: var(--muted);
@@ -1642,6 +1830,26 @@ def _html_document(
       }}
       .ad-slot {{ min-height: 60px; }}
       .ad-row {{ flex-direction: column; }}
+      .site-legal {{
+        padding: 0 10px;
+        margin-bottom: 24px;
+      }}
+      .site-legal-nav button {{
+        padding: 12px 4px;
+        font-size: 0.72rem;
+        letter-spacing: 0.01em;
+      }}
+      .legal-dialog {{
+        padding: 22px 16px 18px;
+        max-height: 86vh;
+      }}
+      .legal-dialog h2 {{ font-size: 1rem; }}
+      .legal-dialog p {{ font-size: 0.8rem; }}
+      .legal-form-btn {{
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 10px 12px;
+      }}
       .logo-link,
       .site-logo {{
         flex: none;
@@ -1715,6 +1923,7 @@ def _html_document(
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
   {"<footer class='api-credit'>Supported by Rakuten Developers</footer>" if rakuten_credit else ""}
+  {legal_html}
   <button type="button" class="back-to-top" id="back-to-top" aria-label="TOPに戻る">
     <span class="back-to-top-icon" aria-hidden="true">↑</span>
     <span class="back-to-top-label">TOPに戻る</span>
@@ -2457,6 +2666,29 @@ def _html_document(
       if (calModal) calModal.addEventListener("click", function (ev) {{
         if (ev.target === calModal) closeCalendar();
       }});
+      function closeLegalModals() {{
+        document.querySelectorAll(".legal-modal").forEach(function (el) {{
+          el.hidden = true;
+        }});
+      }}
+      document.querySelectorAll("[data-legal-open]").forEach(function (btn) {{
+        btn.addEventListener("click", function () {{
+          var id = btn.getAttribute("data-legal-open") || "";
+          var modal = document.getElementById(id);
+          if (!modal) return;
+          closeCalendar();
+          closeLegalModals();
+          modal.hidden = false;
+        }});
+      }});
+      document.querySelectorAll("[data-legal-close]").forEach(function (btn) {{
+        btn.addEventListener("click", closeLegalModals);
+      }});
+      document.querySelectorAll(".legal-modal").forEach(function (modal) {{
+        modal.addEventListener("click", function (ev) {{
+          if (ev.target === modal) closeLegalModals();
+        }});
+      }});
       var dayClear = document.getElementById("day-filter-clear");
       if (dayClear) dayClear.addEventListener("click", function () {{
         dayFilter = "";
@@ -2466,7 +2698,10 @@ def _html_document(
         saveListPos();
       }});
       document.addEventListener("keydown", function (ev) {{
-        if (ev.key === "Escape") closeCalendar();
+        if (ev.key === "Escape") {{
+          closeCalendar();
+          closeLegalModals();
+        }}
       }});
       var favListBtn = document.getElementById("fav-list-btn");
       if (favListBtn) {{

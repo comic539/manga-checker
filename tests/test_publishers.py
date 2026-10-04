@@ -213,6 +213,23 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertLess(html.find('id="month-count"'), html.find("<main"))
         self.assertGreater(html.find('id="pager"'), html.find('class="ad-container ad-footer"'))
         self.assertGreater(html.find('class="ad-container ad-footer"'), html.find("</main>"))
+        self.assertIn('class="site-legal"', html)
+        self.assertIn('class="site-legal-nav"', html)
+        self.assertIn("サイトについて", html)
+        self.assertIn(">広告<", html)
+        self.assertIn("お問い合わせ", html)
+        self.assertIn("© イッコミ特典＋", html)
+        self.assertIn('id="legal-about"', html)
+        self.assertIn('id="legal-ad"', html)
+        self.assertIn('id="legal-contact"', html)
+        self.assertIn("https://forms.gle/WF7cNtHZTpr4zGBu5", html)
+        self.assertIn('target="_blank"', html)
+        self.assertIn("1comi.tokuten.plus@gmail.com", html)
+        self.assertIn("data-legal-open", html)
+        self.assertIn("data-legal-close", html)
+        self.assertIn("closeLegalModals", html)
+        self.assertGreater(html.find('class="site-legal"'), html.find('id="pager"'))
+        self.assertLess(html.find('class="site-legal"'), html.find("</body>"))
 
     def test_unknown_store_status_shows_as_no_privilege(self) -> None:
         reports = [

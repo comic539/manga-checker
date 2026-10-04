@@ -172,3 +172,18 @@ class PrivilegeListParseTests(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertIn("アンデッドさん", items[0].title)
         self.assertIn("/tora/ec/item/200012826267/", items[0].url)
+
+    def test_catalog_issue_dates_are_unique_yyyymmdd(self) -> None:
+        from manga_checker.privilege_index import catalog_issue_dates
+
+        comics = [
+            Comic(title="A", pubdate="2026年10月15日"),
+            Comic(title="B", pubdate="2026/10/15"),
+            Comic(title="C", pubdate="20261016"),
+            Comic(title="D", pubdate=""),
+        ]
+        self.assertEqual(catalog_issue_dates(comics), ["20261015", "20261016"])
+        self.assertEqual(
+            catalog_issue_dates(comics, months=[(2026, 10)]),
+            ["20261015", "20261016"],
+        )

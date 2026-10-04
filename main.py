@@ -52,6 +52,11 @@ def parse_args() -> argparse.Namespace:
         help="各月の HTML/CSV に出力する件数。0（デフォルト）で全件。確認用に件数を絞るときだけ指定",
     )
     parser.add_argument(
+        "--listings",
+        default="",
+        help="一括取得する書店ID（カンマ区切り）。空なら対象店すべて。例: toranoana",
+    )
+    parser.add_argument(
         "--reuse-catalog",
         action="store_true",
         help="output/catalog_by_month.json があれば書誌取得を省略し、特典判定だけやり直す",
@@ -164,7 +169,15 @@ def main() -> None:
     )
 
     listings = BulkListingIndex()
-    listings.load(session, windows, privilege_months_window=privilege_months())
+    all_comics = [comic for comics in comics_by_month.values() for comic in comics]
+    only_listings = {part.strip() for part in (args.listings or "").split(",") if part.strip()}
+    listings.load(
+        session,
+        windows,
+        privilege_months_window=privilege_months(),
+        comics=all_comics,
+        only=only_listings or None,
+    )
 
     checks_cache_path = args.out_dir / "store_checks.json"
     checks_cache = load_checks_cache(checks_cache_path)
@@ -212,6 +225,8 @@ def main() -> None:
                 save_checks_cache(checks_cache_path, checks_cache)
         month_panels.append((year, month, reports))
         all_reports.extend(reports)
+
+    save_checks_cache(checks_cache_path, checks_cache)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     heading = SITE_TITLE
