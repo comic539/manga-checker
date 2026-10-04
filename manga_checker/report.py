@@ -32,7 +32,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand25"
+ASSET_VER = "brand26"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -47,7 +47,6 @@ INDEX_AD_TAGS = [
     '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+UD4MQ+37DC+60WN5" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www29.a8.net/svt/bgt?aid=260917620051&wid=001&eno=01&mid=s00000014952001012000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www12.a8.net/0.gif?a8mat=4BCDBO+UD4MQ+37DC+60WN5" alt="">',
     '<a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+5CB16A+41ZK+661TT" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260927714323&wid=001&eno=01&mid=s00000018920001036000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4BCL42+5CB16A+41ZK+661TT" alt="">',
 ]
-INTRO_HEADING = "【イッコミ特典＋の説明】"
 INTRO_NOTES = [
     "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
     "特典があるのに『特典なし』となる場合がございます。",
@@ -536,7 +535,6 @@ def _html_document(
         initial_hit = f"{total}件中 1〜{page_size}件表示"
     if not summary:
         summary = INTRO_NOTES[0]
-    intro_notes = "".join(f"<li>{html.escape(note)}</li>" for note in INTRO_NOTES)
     legal_html = _site_legal_html()
     return f"""<!DOCTYPE html>
 <html lang="ja" data-build="{ASSET_VER}">
@@ -648,24 +646,6 @@ def _html_document(
       font-size: 0.8rem;
       letter-spacing: 0.18em;
       margin: 0 0 6px;
-    }}
-    .intro-heading {{
-      margin: 0 0 6px;
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.7;
-      font-weight: 800;
-    }}
-    .intro-notes {{
-      margin: 0 0 12px;
-      padding: 0 0 0 1.25em;
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.7;
-      max-width: 46rem;
-    }}
-    .intro-notes li {{
-      margin: 0 0 4px;
     }}
     .summary, .legend, .indexes, .search-hit {{
       color: var(--muted);
@@ -1888,8 +1868,6 @@ def _html_document(
   </div>
   <header>
     <div class="site-intro">
-    <p class="intro-heading">{html.escape(INTRO_HEADING)}</p>
-    <ul class="intro-notes">{intro_notes}</ul>
     {tabs_html}
     <p class="day-filter-bar" id="day-filter-bar" hidden>
       <span id="day-filter-label"></span>
