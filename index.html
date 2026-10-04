@@ -448,14 +448,16 @@
       color: var(--ink);
     }
     .pub-btn.is-on,
-    .fav-list-btn.is-on {
-      background: #1a1a1a;
+    .fav-list-btn.is-on,
+    .cal-btn.is-on {
+      background: var(--accent);
       color: #fff;
     }
+    .cal-btn.is-on:hover,
     .pub-btn.is-on:hover,
     .fav-list-btn.is-on:hover {
-      background: #fffaf3;
-      color: var(--ink);
+      background: var(--accent);
+      color: #fff;
     }
     .cal-modal {
       position: fixed;
@@ -951,7 +953,7 @@
     .site-legal {
       width: 100%;
       max-width: 720px;
-      margin: 8px auto 32px;
+      margin: 8px auto 80px;
       padding: 0 16px;
     }
     .site-legal-nav {
@@ -1327,7 +1329,7 @@
       padding-bottom: 0;
     }
     .pager-bottom {
-      margin-bottom: 16px;
+      margin-bottom: 28px;
       padding-bottom: 8px;
     }
     .month-count {
@@ -1566,7 +1568,7 @@
       .ad-row { flex-direction: column; }
       .site-legal {
         padding: 0 10px;
-        margin-bottom: 24px;
+        margin-bottom: 64px;
       }
       .site-legal-nav button {
         padding: 12px 4px;
@@ -1826,7 +1828,7 @@
       <p>掲載されている書影、特典名、作品名等の権利は、各出版社、著者、書店等の各権利所有者に帰属します。権利を侵害することを目的としたものではありません。</p>
       <p>掲載内容や画像等に問題がある場合は、確認のうえ速やかに修正・削除等の対応をいたします。お問い合わせよりご連絡ください。</p>
       <h3>最終更新日時</h3>
-      <p class="legal-updated"><time datetime="2026-10-04T23:10+09:00">2026年10月4日 23:10</time>（日本時間）</p>
+      <p class="legal-updated"><time datetime="2026-10-04T23:15+09:00">2026年10月4日 23:15</time>（日本時間）</p>
     </div>
   </div>
   <div class="legal-modal" id="legal-ad" hidden>
@@ -2521,10 +2523,14 @@
         if (!modal) return;
         renderPubList();
         modal.hidden = false;
+        var pubBtn = document.getElementById("pub-btn");
+        if (pubBtn) pubBtn.classList.add("is-on");
       }
       function closePubModal() {
         var modal = document.getElementById("pub-modal");
         if (modal) modal.hidden = true;
+        var pubBtn = document.getElementById("pub-btn");
+        if (pubBtn) pubBtn.classList.toggle("is-on", !!publisherFilter);
       }
       var topBtn = document.getElementById("back-to-top");
       if (topBtn) {
@@ -2626,10 +2632,14 @@
           if (list) { list.hidden = true; list.innerHTML = ""; }
         }
         modal.hidden = false;
+        var calBtn = document.getElementById("cal-btn");
+        if (calBtn) calBtn.classList.add("is-on");
       }
       function closeCalendar() {
         var modal = document.getElementById("cal-modal");
         if (modal) modal.hidden = true;
+        var calBtn = document.getElementById("cal-btn");
+        if (calBtn) calBtn.classList.remove("is-on");
       }
       function pad2(n) {
         return (n < 10 ? "0" : "") + n;

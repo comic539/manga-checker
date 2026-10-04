@@ -308,10 +308,22 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       background: #fffaf3;
       color: var(--ink);
     }}
+    .cal-btn.is-on,
+    .pub-btn.is-on,
+    .fav-list-btn.is-on {{
+      background: var(--accent);
+      color: #fff;
+    }}
+    .cal-btn.is-on:hover,
+    .pub-btn.is-on:hover,
+    .fav-list-btn.is-on:hover {{
+      background: var(--accent);
+      color: #fff;
+    }}
     .wrap {{
       max-width: 760px;
       margin: 0 auto;
-      padding: 16px 16px 64px;
+      padding: 16px 16px 80px;
     }}
     .back {{
       display: inline-block;

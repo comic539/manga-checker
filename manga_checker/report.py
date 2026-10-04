@@ -564,7 +564,7 @@ def _site_legal_css() -> str:
     .site-legal {
       width: 100%;
       max-width: 720px;
-      margin: 8px auto 32px;
+      margin: 8px auto 80px;
       padding: 0 16px;
     }
     .site-legal-nav {
@@ -702,7 +702,7 @@ def _site_legal_css() -> str:
     @media (max-width: 768px) {
       .site-legal {
         padding: 0 10px;
-        margin-bottom: 24px;
+        margin-bottom: 64px;
       }
       .site-legal-nav button {
         padding: 12px 4px;
@@ -1248,14 +1248,16 @@ def _html_document(
       color: var(--ink);
     }}
     .pub-btn.is-on,
-    .fav-list-btn.is-on {{
-      background: #1a1a1a;
+    .fav-list-btn.is-on,
+    .cal-btn.is-on {{
+      background: var(--accent);
       color: #fff;
     }}
+    .cal-btn.is-on:hover,
     .pub-btn.is-on:hover,
     .fav-list-btn.is-on:hover {{
-      background: #fffaf3;
-      color: var(--ink);
+      background: var(--accent);
+      color: #fff;
     }}
     .cal-modal {{
       position: fixed;
@@ -1751,7 +1753,7 @@ def _html_document(
     .site-legal {{
       width: 100%;
       max-width: 720px;
-      margin: 8px auto 32px;
+      margin: 8px auto 80px;
       padding: 0 16px;
     }}
     .site-legal-nav {{
@@ -2127,7 +2129,7 @@ def _html_document(
       padding-bottom: 0;
     }}
     .pager-bottom {{
-      margin-bottom: 16px;
+      margin-bottom: 28px;
       padding-bottom: 8px;
     }}
     .month-count {{
@@ -2366,7 +2368,7 @@ def _html_document(
       .ad-row {{ flex-direction: column; }}
       .site-legal {{
         padding: 0 10px;
-        margin-bottom: 24px;
+        margin-bottom: 64px;
       }}
       .site-legal-nav button {{
         padding: 12px 4px;
@@ -3132,10 +3134,14 @@ def _html_document(
         if (!modal) return;
         renderPubList();
         modal.hidden = false;
+        var pubBtn = document.getElementById("pub-btn");
+        if (pubBtn) pubBtn.classList.add("is-on");
       }}
       function closePubModal() {{
         var modal = document.getElementById("pub-modal");
         if (modal) modal.hidden = true;
+        var pubBtn = document.getElementById("pub-btn");
+        if (pubBtn) pubBtn.classList.toggle("is-on", !!publisherFilter);
       }}
       var topBtn = document.getElementById("back-to-top");
       if (topBtn) {{
@@ -3237,10 +3243,14 @@ def _html_document(
           if (list) {{ list.hidden = true; list.innerHTML = ""; }}
         }}
         modal.hidden = false;
+        var calBtn = document.getElementById("cal-btn");
+        if (calBtn) calBtn.classList.add("is-on");
       }}
       function closeCalendar() {{
         var modal = document.getElementById("cal-modal");
         if (modal) modal.hidden = true;
+        var calBtn = document.getElementById("cal-btn");
+        if (calBtn) calBtn.classList.remove("is-on");
       }}
       function pad2(n) {{
         return (n < 10 ? "0" : "") + n;
