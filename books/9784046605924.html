@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="転生したらラスボス系悪女だった! 1
 各店舗特典・試し読み・発売日情報まとめ【イッコミ特典＋】">
-  <link rel="icon" type="image/png" href="../icon-3.png?v=brand34">
+  <link rel="icon" type="image/png" href="../icon-3.png?v=brand35">
   <style>
     :root {
       --bg: #ffffff;
@@ -315,7 +315,27 @@
     }
     .badge .store { font-size: 0.72rem; font-weight: 800; }
     .badge .status { font-size: 0.78rem; font-weight: 800; margin-top: 2px; }
-    .badge.yes { background: #16a34a; color: #fff; }
+    @keyframes jelly-wobble {
+      0% { transform: scale(1, 1) rotate(0deg); }
+      18% { transform: scale(1.14, 0.84) rotate(-4deg); }
+      34% { transform: scale(0.9, 1.14) rotate(4deg); }
+      50% { transform: scale(1.1, 0.92) rotate(-2.4deg); }
+      66% { transform: scale(0.96, 1.08) rotate(1.6deg); }
+      82% { transform: scale(1.04, 0.97) rotate(-0.7deg); }
+      100% { transform: scale(1, 1) rotate(0deg); }
+    }
+    .badge.yes {
+      background: #16a34a;
+      color: #fff;
+      transform-origin: 50% 85%;
+    }
+    .badge.yes:hover {
+      animation: jelly-wobble 0.7s cubic-bezier(0.22, 0.82, 0.32, 1);
+      z-index: 2;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .badge.yes:hover { animation: none; }
+    }
     .badge.yes .store, .badge.yes .status { color: #fff; }
     .badge.no { background: #eceae6; color: #3f3c39; }
     .badge.todo { background: #fff3cc; color: #8a6400; }
@@ -700,7 +720,7 @@
     <div class="site-top-inner">
       <div class="site-top-row">
         <a class="logo-link" href="../index.html">
-          <img class="site-logo" src="../logo.png?v=brand34" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+          <img class="site-logo" src="../logo.png?v=brand35" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
         </a>
         <nav class="smart-header" aria-label="主要メニュー">
           <a class="cal-btn" id="cal-btn" href="../index.html?cal=1">📅 カレンダー</a>
@@ -777,7 +797,7 @@
     <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-about-title">
       <button type="button" class="legal-close" data-legal-close aria-label="閉じる">×</button>
       <h2 id="legal-about-title">サイトについて</h2>
-      <img class="legal-about-logo" src="../logo.png?v=brand34" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+      <img class="legal-about-logo" src="../logo.png?v=brand35" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       <h3>イッコミ特典＋について</h3>
       <p>当サイト「イッコミ特典＋」は、コミック第1巻の各書店の特典情報をまとめたチェッカーサイトです。</p>
       <p>過去に掲載した月は残し、現在月から3カ月先まで掲載しております。</p>

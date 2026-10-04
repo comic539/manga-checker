@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand34"
+ASSET_VER = "brand35"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -1847,9 +1847,26 @@ def _html_document(
       white-space: nowrap;
       margin-top: 2px;
     }}
+    @keyframes jelly-wobble {{
+      0% {{ transform: scale(1, 1) rotate(0deg); }}
+      18% {{ transform: scale(1.14, 0.84) rotate(-4deg); }}
+      34% {{ transform: scale(0.9, 1.14) rotate(4deg); }}
+      50% {{ transform: scale(1.1, 0.92) rotate(-2.4deg); }}
+      66% {{ transform: scale(0.96, 1.08) rotate(1.6deg); }}
+      82% {{ transform: scale(1.04, 0.97) rotate(-0.7deg); }}
+      100% {{ transform: scale(1, 1) rotate(0deg); }}
+    }}
     .badge.yes {{
       background: #16a34a;
       color: #fff;
+      transform-origin: 50% 85%;
+    }}
+    .badge.yes:hover {{
+      animation: jelly-wobble 0.7s cubic-bezier(0.22, 0.82, 0.32, 1);
+      z-index: 2;
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+      .badge.yes:hover {{ animation: none; }}
     }}
     .badge.yes .store,
     .badge.yes .status {{ color: #fff; }}
