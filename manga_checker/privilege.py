@@ -120,25 +120,64 @@ def privilege_display_text(status: str, detail: str) -> str:
 
 
 _ITEM_COLON = re.compile(r"特典[：:][^\s].+")
+_ITEM_BRACKET = re.compile(r"【特典】[^\s].+")
+_ABOUT_BOILER = re.compile(
+    r"(?:特典について[^。]*。)|"
+    r"(?:(?:アニメイト|メロンブックス|ゲーマーズ|とらのあな|こみらの！)特典は無くなり次第[^。]*。)"
+)
+_RETURN_NOTE = re.compile(r"※?返品は[^。※]*。?")
+_END_NOTE = re.compile(r"※特典は無くなり次第[^。]*。?")
+_THANKS_NOTE = re.compile(r"ご了承ください。?|ご了承下さい。?")
+_STORE_TOKUTEN = re.compile(
+    r"(?:アニメイト|メロンブックス|ゲーマーズ|とらのあな|COMIC\s*ZIN|こみらの！|喜久屋書店)\s*特典[:：]?\s*"
+)
+
+
+def _trim_privilege_line(line: str) -> str:
+    line = (line or "").strip()
+    cut = re.search(r"。", line)
+    if cut and "※" not in line[: cut.end()]:
+        rest = line[cut.end() :].strip()
+        if rest.startswith("※"):
+            line = line[: cut.end()] + rest
+        else:
+            line = line[: cut.end()]
+    return line.strip()
+
+
+def _dedupe_tokens(text: str) -> str:
+    seen: list[str] = []
+    for token in text.split():
+        if token not in seen:
+            seen.append(token)
+    return " ".join(seen)
 
 
 def privilege_summary(status: str, detail: str) -> str:
-    """個別ページ向け。『特典：○○』があればその一文だけ残す。"""
+    """個別ページ向け。書店を問わず特典の実体だけ残す。"""
     text = privilege_display_text(status, detail)
     if status != STATUS_YES:
         return text
     match = _ITEM_COLON.search(text)
     if match:
-        line = match.group(0).strip()
-        cut = re.search(r"。", line)
-        if cut and "※" not in line[: cut.end()]:
-            rest = line[cut.end() :].strip()
-            if rest.startswith("※"):
-                line = line[: cut.end()] + rest
-            else:
-                line = line[: cut.end()]
-        return line
-    return text
+        return _trim_privilege_line(match.group(0))
+    bracket = _ITEM_BRACKET.search(text)
+    if bracket:
+        return _trim_privilege_line(bracket.group(0))
+    end = _END_NOTE.search(text)
+    note = f" {end.group(0).strip()}" if end else ""
+    body = _ABOUT_BOILER.sub("", text)
+    body = _RETURN_NOTE.sub("", body)
+    body = _THANKS_NOTE.sub("", body)
+    body = _END_NOTE.sub("", body)
+    body = _STORE_TOKUTEN.sub(" ", body)
+    body = re.sub(r"\s+", " ", body).strip(" ・、")
+    body = _dedupe_tokens(body).strip()
+    if not body:
+        return text
+    if note and note.strip() not in body:
+        return f"{body}{note}".strip()
+    return body
 
 _DETAIL_BLOCK_WORDS = (
     "有償特典",

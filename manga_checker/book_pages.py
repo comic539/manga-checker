@@ -326,7 +326,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       font-size: 1.35rem;
       line-height: 1.4;
     }}
-    h1 .copy-title {{
+    .meta-line .copy-title {{
       display: inline;
       vertical-align: middle;
       margin-left: 6px;
@@ -340,11 +340,11 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       border-radius: 6px;
       white-space: nowrap;
     }}
-    h1 .copy-title:hover {{
+    .meta-line .copy-title:hover {{
       background: #f3e6d6;
       color: var(--ink);
     }}
-    h1 .copy-title.done {{
+    .meta-line .copy-title.done {{
       color: #1f7a3a;
     }}
     .page-lead {{
@@ -766,7 +766,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
     </div>
   </div>
   <div class="wrap">
-    <h1>{html.escape(title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button><span class="page-lead">{html.escape(BOOK_PAGE_LEAD)}</span></h1>
+    <h1>{html.escape(title)}<span class="page-lead">{html.escape(BOOK_PAGE_LEAD)}</span></h1>
     <a class="back" href="../index.html">← 一覧へ戻る</a>
     <section class="hero">
       <div class="hero-info">
@@ -775,7 +775,7 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         {credit}
       </div>
       <div class="hero-meta">
-        <p class="meta-line"><span>作品名</span>{html.escape(title)}</p>
+        <p class="meta-line"><span>作品名</span>{html.escape(title)}<button type="button" class="copy-title" data-title="{html.escape(title, quote=True)}">📋 コピー</button></p>
         <p class="meta-line"><span>出版社</span>{html.escape(publisher)}</p>
         <p class="meta-line"><span>レーベル</span>{html.escape(series)}</p>
         <p class="meta-line"><span>著者</span>{html.escape(author)}</p>

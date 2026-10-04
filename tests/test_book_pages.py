@@ -49,6 +49,9 @@ class BookPageTests(unittest.TestCase):
             self.assertIn('href="books/9784832200001.html"', listing)
             self.assertIn('class="title-link"', listing)
             self.assertIn('class="cover-link book-card"', listing)
+            self.assertIn("試し読み！", listing)
+            self.assertIn('class="preview-bubble"', listing)
+            self.assertIn("google.com/search", listing)
             self.assertIn('class="fav-btn"', listing)
             self.assertIn("data-isbn=", listing)
             page = books / "9784832200001.html"
@@ -73,6 +76,8 @@ class BookPageTests(unittest.TestCase):
             self.assertIn("アニメイト", body)
             self.assertIn("試し読み", body)
             self.assertIn('class="copy-title"', body)
+            self.assertIn('<span>作品名</span>初凪ヒメリウム 1<button type="button" class="copy-title"', body)
+            self.assertNotIn("<h1>初凪ヒメリウム 1<button", body)
             self.assertIn("clipboard.writeText", body)
             self.assertIn('class="fav-btn"', body)
             self.assertIn("ichikomi-favorites-v1", body)
@@ -90,7 +95,7 @@ class BookPageTests(unittest.TestCase):
             self.assertNotIn("btn-press", body)
             self.assertNotIn(".btn-press:active", body)
             self.assertNotIn("book-card", body)
-            self.assertNotIn("translateY(-4px)", body)
+            self.assertNotIn("preview-bubble", body)
             self.assertLess(body.find("<span>作品名</span>"), body.find("<span>出版社</span>"))
             self.assertLess(body.find("<span>出版社</span>"), body.find("<span>レーベル</span>"))
             self.assertLess(body.find("<span>レーベル</span>"), body.find("<span>著者</span>"))
@@ -186,3 +191,36 @@ class BookPageTests(unittest.TestCase):
             body = (Path(tmp) / "books" / "9784088852690.html").read_text(encoding="utf-8")
         self.assertIn("特典：イラストカード ※特典は無くなり次第終了します。", body)
         self.assertNotIn("特典について", body)
+
+        extra = ComicReport(
+            Comic(title="全店特典 1", isbn="9784088852621"),
+            checks=[
+                StoreCheck(
+                    "melonbooks",
+                    "メロンブックス",
+                    STATUS_YES,
+                    "イラストカード メロンブックス特典 イラストカード ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。",
+                    "https://example.com/m",
+                ),
+                StoreCheck(
+                    "gamers",
+                    "ゲーマーズ",
+                    STATUS_YES,
+                    "ゲーマーズ特典 描き下ろしブロマイド ※返品は一般法人共通となります。",
+                    "https://example.com/g",
+                ),
+            ],
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            write_html(
+                [extra],
+                Path(tmp) / "index.html",
+                "test",
+                book_dir=Path(tmp) / "books",
+            )
+            body = (Path(tmp) / "books" / "9784088852621.html").read_text(encoding="utf-8")
+        self.assertIn("イラストカード", body)
+        self.assertNotIn("メロンブックス特典", body)
+        self.assertIn("描き下ろしブロマイド", body)
+        self.assertNotIn("ゲーマーズ特典", body)
+        self.assertNotIn("返品", body)

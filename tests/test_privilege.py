@@ -653,3 +653,24 @@ class GamersFairTests(unittest.TestCase):
         )
         self.assertNotIn("特典について", text)
         self.assertEqual(privilege_summary(STATUS_NO, "詳細ページに特典情報はありません"), "詳細ページに特典情報はありません")
+
+    def test_privilege_summary_strips_store_boilerplate(self) -> None:
+        melon = privilege_summary(
+            STATUS_YES,
+            "イラストカード メロンブックス特典 イラストカード ※特典は無くなり次第、終了とさせて頂きます。ご了承下さい。",
+        )
+        self.assertIn("イラストカード", melon)
+        self.assertNotIn("メロンブックス特典", melon)
+        self.assertLessEqual(melon.count("イラストカード"), 1)
+        gamers = privilege_summary(
+            STATUS_YES,
+            "ゲーマーズ特典 描き下ろしブロマイド ※返品は一般法人共通となります。※特典は無くなり次第、終了とさせて頂きます。",
+        )
+        self.assertIn("描き下ろしブロマイド", gamers)
+        self.assertNotIn("ゲーマーズ特典", gamers)
+        self.assertNotIn("返品", gamers)
+        tora = privilege_summary(
+            STATUS_YES,
+            "【特典】共通描き下ろしイラストカード（解除師カンナの魔術師1）",
+        )
+        self.assertEqual(tora, "【特典】共通描き下ろしイラストカード（解除師カンナの魔術師1）")

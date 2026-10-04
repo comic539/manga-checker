@@ -31,7 +31,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand40"
+ASSET_VER = "brand41"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -159,6 +159,11 @@ def write_html(
     active_counts: Counter = Counter()
     active_total = 0
     all_reports: list[ComicReport] = []
+    from manga_checker.preview import load_preview_cache
+
+    preview_cache = (
+        load_preview_cache(preview_cache_path) if preview_cache_path else {}
+    )
     for index, (year, month, items) in enumerate(month_panels):
         month_items = _reports_matching_month(items, year, month)
         all_reports.extend(month_items)
@@ -176,7 +181,7 @@ def write_html(
         for pub_label, pub_items in grouped:
             cards = []
             for report in pub_items:
-                cards.append(_card_html(report, card_id))
+                cards.append(_card_html(report, card_id, preview_cache=preview_cache))
                 card_id += 1
             sections.append(
                 f'<section class="day-block" data-publisher="{html.escape(pub_label, quote=True)}">'
@@ -307,12 +312,34 @@ def _publisher_catalog(reports: list[ComicReport]) -> list[dict[str, object]]:
     return items
 
 
-def _card_html(report: ComicReport, card_id: int = 0) -> str:
+def _cover_preview_href(
+    comic: Comic, preview_cache: dict[str, dict[str, str]] | None = None
+) -> str:
+    from manga_checker.preview import preview_cache_key, preview_links_for
+
+    row = None
+    if preview_cache:
+        row = preview_cache.get(preview_cache_key(comic))
+    links = preview_links_for(comic, row)
+    return (links.get("official_url") or links.get("fallback_url") or "").strip()
+
+
+def _card_html(
+    report: ComicReport,
+    card_id: int = 0,
+    *,
+    preview_cache: dict[str, dict[str, str]] | None = None,
+) -> str:
     comic = report.comic
     badges = "".join(_badge_html(check) for check in report.checks)
     cover = _cover_html(comic)
     author = html.escape(comic.author or "著者未登録")
-    publisher = html.escape(comic.publisher_label_line())
+    publisher_name = (comic.publisher or "").strip() or "出版社未登録"
+    publisher = html.escape(publisher_name)
+    series_name = (comic.series or "").strip()
+    series_html = ""
+    if series_name and series_name != publisher_name:
+        series_html = f'<p class="meta series">{html.escape(series_name)}</p>'
     isbn = html.escape(comic.isbn) if comic.isbn else ""
     price = html.escape(comic.price_line())
     amazon = amazon_url(comic.isbn, comic.search_query)
@@ -355,8 +382,12 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         title_html = (
             f'<a class="title-link" href="{html.escape(href, quote=True)}">{title_html}</a>'
         )
+    preview_href = _cover_preview_href(comic, preview_cache)
+    bubble = '<span class="preview-bubble" aria-hidden="true">試し読み！</span>'
+    if preview_href:
         cover = (
-            f'<a class="cover-link book-card" href="{html.escape(href, quote=True)}">{cover}</a>'
+            f'<a class="cover-link book-card" href="{html.escape(preview_href, quote=True)}" '
+            f'target="_blank" rel="noopener noreferrer">{cover}{bubble}</a>'
         )
     else:
         cover = f'<div class="book-card">{cover}</div>'
@@ -390,6 +421,7 @@ def _card_html(report: ComicReport, card_id: int = 0) -> str:
         "</div>"
         f"{ext}"
         f'<p class="meta">{publisher}</p>'
+        f"{series_html}"
         f'<p class="meta">{author}</p>'
         f'<p class="isbn">{isbn}</p>'
         f'<p class="meta">{price}</p>'
@@ -1505,6 +1537,8 @@ def _html_document(
       flex-direction: column;
       gap: 4px;
       min-width: 0;
+      overflow: visible;
+      padding-top: 22px;
     }}
     .cover {{
       width: 110px;
@@ -1557,22 +1591,92 @@ def _html_document(
     }}
     .book-card {{
       display: block;
+      position: relative;
       width: 110px;
       border-radius: 8px;
-      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+      overflow: visible;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease;
     }}
-    .book-card:hover {{
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.12);
-      z-index: 2;
+    .preview-bubble {{
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translate(-50%, 8px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22px;
+      padding: 3px 10px;
+      border: 1.5px solid var(--accent);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }}
+    .preview-bubble::before,
+    .preview-bubble::after {{
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+    }}
+    .preview-bubble::before {{
+      border-top: 7px solid var(--accent);
+    }}
+    .preview-bubble::after {{
+      margin-top: -1.5px;
+      border-top: 7px solid #fff;
+    }}
+    @media (hover: hover) {{
+      .book-card:hover {{
+        transform: translateY(-10px);
+        box-shadow: 0 22px 36px -8px rgba(0, 0, 0, 0.32);
+        z-index: 2;
+      }}
+      .book-card:hover .preview-bubble {{
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }}
+    }}
+    .book-card:active {{
+      transform: translateY(3px) scale(0.95);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
     }}
     @media (prefers-reduced-motion: reduce) {{
       .book-card,
-      .book-card:hover {{
+      .book-card:hover,
+      .book-card:active {{
         transition: none;
         transform: none;
         box-shadow: none;
       }}
+      .preview-bubble,
+      .book-card:hover .preview-bubble {{
+        transition: none;
+        transform: translate(-50%, 0);
+      }}
+    }}
+    .meta.series {{
+      margin-top: -2px;
+      color: var(--muted);
+      font-size: 0.78rem;
     }}
     .copy-title {{
       flex: 0 0 auto;
@@ -2209,6 +2313,20 @@ def _html_document(
         grid-template-columns: 84px 1fr;
       }}
       .cover {{ width: 84px; height: 120px; }}
+      .book-card {{ width: 84px; }}
+      .cover-col {{ padding-top: 18px; }}
+      .pager {{
+        gap: 5px;
+        margin: 8px auto 16px;
+        padding: 2px 8px 4px;
+      }}
+      .pager-pages {{ gap: 5px; }}
+      .pager-btn {{
+        min-width: 27px;
+        height: 27px;
+        padding: 0 8px;
+        font-size: 0.59rem;
+      }}
       .badges {{
         display: flex;
         flex-wrap: wrap;
@@ -3077,7 +3195,7 @@ def _html_document(
         bar.hidden = false;
       }}
       function bookHref(card) {{
-        var a = card.querySelector("a.title-link, a.cover-link");
+        var a = card.querySelector("a.title-link");
         return a ? a.getAttribute("href") || "" : "";
       }}
       function cardsByDate() {{
@@ -3301,7 +3419,7 @@ def _html_document(
         }});
       }}
       document.addEventListener("click", function (ev) {{
-        var bookLink = ev.target.closest("a.title-link, a.cover-link");
+        var bookLink = ev.target.closest("a.title-link");
         if (bookLink) {{
           var card = ev.target.closest(".card");
           saveListPos({{ card: card ? card.id : "" }});
