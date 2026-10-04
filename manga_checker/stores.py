@@ -36,13 +36,15 @@ from manga_checker.toranoana import evaluate_toranoana_detail, first_toranoana_d
 
 # 公式一覧を正とし、未掲載なら「特典なし」にする店
 STRICT_OFFICIAL_STORES = frozenset({"kikuya"})
-DETAIL_PAGE_STORES = frozenset({"animate", "melonbooks", "toranoana"})
+DETAIL_PAGE_STORES = frozenset()
 # 検索結果ページを常に取得し、ヒット済みなら特典語なしを「特典なし」にする店
-LISTING_FETCH_STORES = frozenset({"gamers"})
+LISTING_FETCH_STORES = frozenset()
 # ISBN検索が0件なら取り扱いなし（タイトル検索に落とさない）
-ISBN_NO_HIT_IS_ABSENT = frozenset({"animate", "melonbooks", "gamers"})
+ISBN_NO_HIT_IS_ABSENT = frozenset()
 # 入荷カレンダー／特典一覧を一括取得する店
-BULK_LISTING_STORES = frozenset({"comiczin", "comirano"})
+BULK_LISTING_STORES = frozenset(
+    {"animate", "melonbooks", "gamers", "toranoana", "comiczin", "comirano"}
+)
 
 
 @dataclass
@@ -62,15 +64,22 @@ def _search_term(comic: Comic) -> str:
 
 
 def _gamers_url(comic: Comic) -> str:
-    params = {"mode": "search", "smt": _search_term(comic), "spc": "4"}
-    return "https://www.gamers.co.jp/products/list.php?" + urlencode(params)
+    isbn = isbn_search_query(comic.isbn)
+    if isbn:
+        return "https://www.gamers.co.jp/products/list.php?" + urlencode(
+            {"mode": "search", "smt": isbn}
+        )
+    return "https://www.gamers.co.jp/products/privilege_list.php"
 
 
 def _animate_url(comic: Comic) -> str:
-    return (
-        "https://www.animate-onlineshop.jp/products/list.php"
-        f"?mode=search&smt={quote(_search_term(comic))}"
-    )
+    isbn = isbn_search_query(comic.isbn)
+    if isbn:
+        return (
+            "https://www.animate-onlineshop.jp/products/list.php"
+            f"?mode=search&smt={quote(isbn)}"
+        )
+    return "https://www.animate-onlineshop.jp/products/privilege_list.php"
 
 
 def _animate_title_url(comic: Comic) -> str:
@@ -84,21 +93,11 @@ def _melon_isbn_url(comic: Comic) -> str:
     isbn = isbn_search_query(comic.isbn)
     if not isbn:
         return ""
-    return (
-        "https://www.melonbooks.co.jp/search/search.php?"
-        + urlencode({"name": isbn, "text_type": "all"})
-    )
-
-
-def _melon_title_url(comic: Comic) -> str:
-    return (
-        "https://www.melonbooks.co.jp/search/search.php?"
-        + urlencode({"name": _q(comic), "text_type": "title"})
-    )
+    return "https://www.melonbooks.co.jp/search/search.php?" + urlencode({"name": isbn})
 
 
 def _melon_url(comic: Comic) -> str:
-    return _melon_isbn_url(comic) or _melon_title_url(comic)
+    return _melon_isbn_url(comic) or "https://www.melonbooks.co.jp/privilege/privilege.php"
 
 
 def _toranoana_list_url(word: str, *, books: bool = False) -> str:
@@ -109,8 +108,13 @@ def _toranoana_list_url(word: str, *, books: bool = False) -> str:
 
 
 def _toranoana_url(comic: Comic) -> str:
-    word = toranoana_search_word(comic.title, comic.volume)
-    return _toranoana_list_url(word, books=True)
+    isbn = isbn_search_query(comic.isbn)
+    if isbn:
+        return "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=" + quote(isbn)
+    return (
+        "https://ecs.toranoana.jp/tora/ec/bok/pages/all/item/standard/calendar/1/"
+        "?withBenefitsFlg=1"
+    )
 
 
 def _comiczin_url(comic: Comic) -> str:
@@ -294,11 +298,15 @@ def _is_store_product_url(store_id: str, url: str) -> bool:
     if store_id == "melonbooks":
         return "detail.php" in target and "product_id=" in target
     if store_id == "animate":
-        return "/pd/" in target or "/pn/" in target
+        return (
+            "/pd/" in target
+            or "/pn/" in target
+            or "privilege_detail.php" in target
+        )
     if store_id == "toranoana":
         return "/tora/ec/item/" in target
     if store_id == "gamers":
-        return "/pd/" in target or "product_id=" in target
+        return "/pd/" in target or "product_id=" in target or "privilege_detail.php" in target
     if store_id == "comiczin":
         return "shop.comiczin.jp" in target and "product_id=" in target
     if store_id == "comirano":

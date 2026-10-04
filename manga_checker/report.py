@@ -26,13 +26,13 @@ from manga_checker.publishers import (
 from manga_checker.readings import search_index_text
 from manga_checker.stores import STORES
 
-SITE_NAME = "イチコミ特典＋"
-SITE_TAGLINE = "新刊コミック第1巻 書店特典チェック"
+SITE_NAME = "イッコミ特典＋"
+SITE_TAGLINE = "コミック第1巻 書店特典チェック"
 SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand23"
+ASSET_VER = "brand24"
 
 # A8タグは配布HTMLのまま使う（属性・改行・計測用1pxを改変しない）。
 INDEX_AD_TAGS = [
@@ -45,7 +45,7 @@ INDEX_AD_TAGS = [
     '<a href="https://px.a8.net/svt/ejp?a8mat=4BCDBO+UD4MQ+37DC+60WN5" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www29.a8.net/svt/bgt?aid=260917620051&wid=001&eno=01&mid=s00000014952001012000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www12.a8.net/0.gif?a8mat=4BCDBO+UD4MQ+37DC+60WN5" alt="">',
     '<a href="https://px.a8.net/svt/ejp?a8mat=4BCL42+5CB16A+41ZK+661TT" rel="nofollow">\n<img border="0" width="468" height="60" alt="" src="https://www27.a8.net/svt/bgt?aid=260927714323&wid=001&eno=01&mid=s00000018920001036000&mc=1"></a>\n<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4BCL42+5CB16A+41ZK+661TT" alt="">',
 ]
-INTRO_HEADING = "【イチコミ特典＋の説明】"
+INTRO_HEADING = "【イッコミ特典＋の説明】"
 INTRO_NOTES = [
     "第1巻の各書店の特典情報をまとめたチェッカーサイトです。",
     "特典があるのに『特典なし』となる場合がございます。",

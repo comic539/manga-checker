@@ -189,3 +189,19 @@ def iter_month_offsets(
     if not 1 <= m <= 12:
         raise ValueError("month は 1〜12 です。")
     return [add_months(y, m, offset) for offset in range(-before, after + 1)]
+
+
+def privilege_months(today: date | None = None) -> list[tuple[int, int]]:
+    """特典一覧の走査窓: 前月・当月・翌月・翌々月。"""
+    return iter_month_offsets(before=1, after=2, today=today)
+
+
+def iter_month_days(months: list[tuple[int, int]]) -> list[date]:
+    days: list[date] = []
+    for year, month in months:
+        start, end = month_bounds(year, month)
+        current = start
+        while current <= end:
+            days.append(current)
+            current += timedelta(days=1)
+    return days

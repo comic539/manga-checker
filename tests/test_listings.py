@@ -100,3 +100,75 @@ class BulkListingLookupTests(unittest.TestCase):
         )
         self.assertEqual(comirano.status, STATUS_YES)
         self.assertIn("アンデッドさん", comirano.url)
+
+
+class PrivilegeListParseTests(unittest.TestCase):
+    def test_animate_cards(self) -> None:
+        from manga_checker.privilege_index import parse_animate_privilege_list
+
+        html = """
+        <div class="prize_list"><ul><li>
+          <div class="prize_list_detail">
+            <p class="release">2026/10/01 発売</p>
+            <p class="release">【コミック】アンデッドさんの不器用な青春 1</p>
+            <p class="release">アニメイト特典</p>
+            <h3><a href="/products/privilege_detail.php?id=1">イラストカード(B7サイズ)</a></h3>
+          </div>
+        </li></ul></div>
+        """
+        items = parse_animate_privilege_list(html)
+        self.assertEqual(len(items), 1)
+        self.assertIn("アンデッドさん", items[0].title)
+        self.assertIn("privilege_detail.php", items[0].url)
+        self.assertIn("イラストカード", items[0].extra)
+
+    def test_melon_cards(self) -> None:
+        from manga_checker.privilege_index import parse_melon_privilege_list
+
+        html = """
+        <div class="item-list"><ul>
+          <li class="product_3810284">
+            <div class="privilege_title">描き下ろし箔押しポスター</div>
+            <a href="/detail/detail.php?product_id=3810284" title="To LOVEる -とらぶる- 短編集 Parade"></a>
+            <p class="item-ttl product_title">To LOVEる -とらぶる- 短編集 Parade</p>
+          </li>
+        </ul></div>
+        """
+        items = parse_melon_privilege_list(html)
+        self.assertEqual(len(items), 1)
+        self.assertIn("To LOVEる", items[0].title)
+        self.assertIn("product_id=3810284", items[0].url)
+        self.assertIn("ポスター", items[0].extra)
+
+    def test_gamers_cards(self) -> None:
+        from manga_checker.privilege_index import parse_gamers_privilege_list
+
+        html = """
+        <ul>
+          <li class="list_product">
+            <h3><span class="tokuten_ttl_icon_list">特典</span>
+              <a href="/products/privilege_detail.php?id=1" class="a_line">描き下ろしブロマイド</a></h3>
+            <a class="txt_wrap" href="/products/privilege_detail.php?id=1">【コミック】あたらよのほし</a>
+          </li>
+        </ul>
+        """
+        items = parse_gamers_privilege_list(html)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].title, "あたらよのほし")
+        self.assertIn("privilege_detail.php", items[0].url)
+        self.assertIn("ブロマイド", items[0].extra)
+
+    def test_toranoana_cards(self) -> None:
+        from manga_checker.privilege_index import parse_toranoana_calendar
+
+        html = """
+        <li class="product-list-item catalog-item-card">
+          <h3 class="product-list-title">
+            <a href="/tora/ec/item/200012826267/">アンデッドさんの不器用な青春 1</a>
+          </h3>
+        </li>
+        """
+        items = parse_toranoana_calendar(html)
+        self.assertEqual(len(items), 1)
+        self.assertIn("アンデッドさん", items[0].title)
+        self.assertIn("/tora/ec/item/200012826267/", items[0].url)

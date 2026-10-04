@@ -52,8 +52,8 @@ class BookPageTests(unittest.TestCase):
             page = books / "9784832200001.html"
             self.assertTrue(page.is_file())
             body = page.read_text(encoding="utf-8")
-            self.assertIn("<title>『初凪ヒメリウム 1』店舗別購入特典・発売日情報まとめ｜イチコミ特典＋</title>", body)
-            self.assertIn('og:site_name" content="イチコミ特典＋"', body)
+            self.assertIn("<title>『初凪ヒメリウム 1』店舗別購入特典・発売日情報まとめ｜イッコミ特典＋</title>", body)
+            self.assertIn('og:site_name" content="イッコミ特典＋"', body)
             self.assertIn("一覧へ戻る", body)
             self.assertIn('href="../index.html"', body)
             self.assertIn('id="fav-list-btn"', body)

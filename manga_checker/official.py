@@ -72,8 +72,6 @@ class OfficialIndex:
             return
         print("公式特典ページを照合用に取得しています…")
         self.entries["kikuya"] = _load_kikuya(session)
-        self.entries["melonbooks"].extend(_load_link_list(session, MELON_PRIVILEGE, "melonbooks"))
-        self.entries["gamers"].extend(_load_link_list(session, GAMERS_PRIVILEGE, "gamers"))
         for page in PUBLISHER_PAGES:
             for hit in _load_publisher_page(session, page):
                 self.entries.setdefault(hit.store_id, []).append(hit)

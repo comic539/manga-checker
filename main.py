@@ -16,7 +16,7 @@ from manga_checker.catalog import (
     merge_catalog_months,
     write_catalog_json,
 )
-from manga_checker.dates import format_year_month, iter_month_offsets, iter_months, today_jst
+from manga_checker.dates import format_year_month, iter_month_offsets, iter_months, privilege_months, today_jst
 from manga_checker.http import configure_ssl, make_session
 from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
@@ -164,7 +164,7 @@ def main() -> None:
     )
 
     listings = BulkListingIndex()
-    listings.load(session, windows)
+    listings.load(session, windows, privilege_months_window=privilege_months())
 
     checks_cache_path = args.out_dir / "store_checks.json"
     checks_cache = load_checks_cache(checks_cache_path)

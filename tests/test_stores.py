@@ -51,35 +51,28 @@ class StoreListTests(unittest.TestCase):
         self.assertEqual(parse_qs(animate.query).get("smt"), ["9784000000000"])
         melon = urlparse(by_id["melonbooks"])
         self.assertEqual(parse_qs(melon.query).get("name"), ["9784000000000"])
-        self.assertEqual(parse_qs(melon.query).get("text_type"), ["all"])
+        self.assertIsNone(parse_qs(melon.query).get("text_type"))
         self.assertNotIn("category_id", parse_qs(melon.query))
         comic_title = Comic(title="初凪ヒメリウム")
-        melon_title = urlparse(
-            {store.store_id: store.search_url(comic_title) for store in STORES}["melonbooks"]
-        )
-        self.assertEqual(parse_qs(melon_title.query).get("name"), ["初凪ヒメリウム"])
-        self.assertEqual(parse_qs(melon_title.query).get("text_type"), ["title"])
-        self.assertNotIn("category_id", parse_qs(melon_title.query))
+        melon_title = {store.store_id: store.search_url(comic_title) for store in STORES}[
+            "melonbooks"
+        ]
+        self.assertIn("privilege.php", melon_title)
 
-    def test_toranoana_query_uses_title_not_isbn(self) -> None:
+    def test_toranoana_query_uses_isbn(self) -> None:
         comic = Comic(title="ヒトナー 1", isbn="9784088852317")
         by_id = {store.store_id: store.search_url(comic) for store in STORES}
         from urllib.parse import unquote
 
         q = unquote(by_id["toranoana"])
-        self.assertIn("searchWord=ヒトナー", q)
-        self.assertIn("searchCategoryCode=bok", q)
-        self.assertNotIn("9784088852317", q)
+        self.assertIn("searchWord=9784088852317", q)
+        self.assertNotIn("searchCategoryCode=bok", q)
 
-    def test_toranoana_query_strips_wave_dash(self) -> None:
+    def test_toranoana_without_isbn_uses_calendar(self) -> None:
         comic = Comic(title="この世界の顔面偏差値が高すぎて目が痛い〜突然始まる異世界溺愛生活〜")
         by_id = {store.store_id: store.search_url(comic) for store in STORES}
-        from urllib.parse import unquote
-
-        q = unquote(by_id["toranoana"])
-        self.assertNotIn("〜", q)
-        self.assertNotIn("～", q)
-        self.assertIn("目が痛い", q)
+        self.assertIn("calendar", by_id["toranoana"])
+        self.assertIn("withBenefitsFlg=1", by_id["toranoana"])
 
 
 class DetailFetchTests(unittest.TestCase):
