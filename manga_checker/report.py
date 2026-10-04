@@ -32,7 +32,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand26"
+ASSET_VER = "brand27"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -223,7 +223,6 @@ def write_html(
             index_links,
             active_total,
             active_counts,
-            rakuten_credit=_uses_rakuten(all_reports),
             tabs_html=tabs_html,
             summary=summary,
         ),
@@ -522,7 +521,6 @@ def _html_document(
     index_links: str,
     total: int,
     counts: Counter,
-    rakuten_credit: bool = False,
     tabs_html: str = "",
     summary: str = "",
 ) -> str:
@@ -602,17 +600,17 @@ def _html_document(
     }}
     .site-top-inner {{
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 16px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 8px 24px;
+      padding: 4px 24px;
       box-sizing: border-box;
     }}
     .header-actions {{
-      align-self: flex-start;
-      margin-top: 8px;
+      align-self: center;
+      margin-top: 0;
     }}
     .site-intro {{
       width: 100%;
@@ -632,13 +630,15 @@ def _html_document(
       width: 220px;
       max-width: 100%;
       margin: 0;
+      line-height: 0;
     }}
     .site-logo {{
       display: block;
-      width: 100%;
-      height: auto;
+      width: 220px;
       max-width: 100%;
+      height: 56px;
       object-fit: contain;
+      object-position: center;
     }}
     .kicker {{
       color: var(--accent);
@@ -760,14 +760,14 @@ def _html_document(
       display: flex;
       flex: 1 1 auto;
       flex-wrap: nowrap;
-      align-items: flex-end;
+      align-items: center;
       gap: 10px 16px;
       margin: 0;
       min-width: 0;
     }}
     .search-cluster {{
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 8px;
       flex: 1 1 auto;
       max-width: 720px;
@@ -1836,6 +1836,9 @@ def _html_document(
         width: 92px;
         max-width: 92px;
       }}
+      .site-logo {{
+        height: 28px;
+      }}
     }}
   </style>
 </head>
@@ -1900,7 +1903,6 @@ def _html_document(
     <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
-  {"<footer class='api-credit'>Supported by Rakuten Developers</footer>" if rakuten_credit else ""}
   {legal_html}
   <button type="button" class="back-to-top" id="back-to-top" aria-label="TOPに戻る">
     <span class="back-to-top-icon" aria-hidden="true">↑</span>

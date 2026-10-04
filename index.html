@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-build="brand26">
+<html lang="ja" data-build="brand27">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -15,8 +15,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="イッコミ特典＋｜コミック第1巻 書店特典チェック">
   <meta name="twitter:image" content="https://comic539.github.io/manga-checker/logo.png">
-  <link rel="icon" type="image/png" href="icon-3.png?v=brand26">
-  <link rel="shortcut icon" href="favicon.ico?v=brand26">
+  <link rel="icon" type="image/png" href="icon-3.png?v=brand27">
+  <link rel="shortcut icon" href="favicon.ico?v=brand27">
   <style>
     :root {
       --bg: #ffffff;
@@ -64,17 +64,17 @@
     }
     .site-top-inner {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 16px;
       width: 100%;
       max-width: 1360px;
       margin: 0 auto;
-      padding: 8px 24px;
+      padding: 4px 24px;
       box-sizing: border-box;
     }
     .header-actions {
-      align-self: flex-start;
-      margin-top: 8px;
+      align-self: center;
+      margin-top: 0;
     }
     .site-intro {
       width: 100%;
@@ -94,13 +94,15 @@
       width: 220px;
       max-width: 100%;
       margin: 0;
+      line-height: 0;
     }
     .site-logo {
       display: block;
-      width: 100%;
-      height: auto;
+      width: 220px;
       max-width: 100%;
+      height: 56px;
       object-fit: contain;
+      object-position: center;
     }
     .kicker {
       color: var(--accent);
@@ -222,14 +224,14 @@
       display: flex;
       flex: 1 1 auto;
       flex-wrap: nowrap;
-      align-items: flex-end;
+      align-items: center;
       gap: 10px 16px;
       margin: 0;
       min-width: 0;
     }
     .search-cluster {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 8px;
       flex: 1 1 auto;
       max-width: 720px;
@@ -1298,6 +1300,9 @@
         width: 92px;
         max-width: 92px;
       }
+      .site-logo {
+        height: 28px;
+      }
     }
   </style>
 </head>
@@ -1305,7 +1310,7 @@
   <div class="site-top">
     <div class="site-top-inner">
       <a class="logo-link" href="./index.html">
-        <img class="site-logo" src="logo.png?v=brand26" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
+        <img class="site-logo" src="logo.png?v=brand27" alt="イッコミ特典＋ コミック第1巻 書店特典チェック">
       </a>
       <div class="search-bar">
         <div class="search-cluster">
@@ -1317,7 +1322,7 @@
             <ul class="search-suggest" id="search-suggest" hidden role="listbox"></ul>
           </div>
           <button type="button" class="search-go" id="search-go" aria-label="検索する">
-            <img src="search-icon.png?v=brand26" alt="" width="44" height="44">
+            <img src="search-icon.png?v=brand27" alt="" width="44" height="44">
           </button>
         </div>
         <p class="search-hit" id="search-hit">195件中 1〜50件表示</p>
@@ -1498,7 +1503,6 @@
     <div class="pager-pages"></div>
     <button type="button" class="pager-btn pager-next">次へ</button>
   </nav>
-  <footer class='api-credit'>Supported by Rakuten Developers</footer>
   
   <footer class="site-legal">
     <nav class="site-legal-nav" aria-label="サイト情報">

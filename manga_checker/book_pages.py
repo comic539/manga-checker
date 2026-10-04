@@ -243,13 +243,15 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
       width: 220px;
       max-width: 100%;
       margin: 0;
+      line-height: 0;
     }}
     .site-logo {{
       display: block;
-      width: 100%;
-      height: auto;
+      width: 220px;
       max-width: 100%;
+      height: 56px;
       object-fit: contain;
+      object-position: center;
     }}
     .cal-btn {{
       flex: 0 0 auto;
@@ -596,6 +598,9 @@ def _book_document(report: ComicReport, preview: dict[str, str] | None = None) -
         flex: none;
         width: 108px;
         max-width: 108px;
+      }}
+      .site-logo {{
+        height: 32px;
       }}
       .header-actions {{
         flex-direction: column;

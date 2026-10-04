@@ -272,6 +272,7 @@ class HtmlSearchTests(unittest.TestCase):
             write_html(reports, path, "test")
             html = path.read_text(encoding="utf-8")
         self.assertIn("出典: 楽天ブックス", html)
+        self.assertNotIn("<footer class='api-credit'>", html)
         self.assertIn("Supported by Rakuten Developers", html)
         self.assertIn('loading="lazy"', html)
         self.assertIn('id="comic-search"', html)
