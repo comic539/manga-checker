@@ -24,6 +24,7 @@ from urllib.parse import urlencode
 import requests
 
 from manga_checker.dates import month_query_range, today_jst, year_month_from_pubdate
+from manga_checker.title_match import titles_match
 from manga_checker.http import make_session
 from manga_checker.models import Comic
 from manga_checker.publishers import canonical_publisher, publisher_sort_key
@@ -312,6 +313,43 @@ def merge_catalog_months(
     merged = dict(saved)
     merged.update(updated)
     return merged
+
+
+def merge_privilege_listings_into_catalog(
+    comics_by_month: dict[tuple[int, int], list[Comic]],
+    items,
+    *,
+    source: str = "melonbooks",
+) -> int:
+    """特典カレンダーの第1巻を、楽天に無い月へ補完する。単巻・続刊は入れない。"""
+    added = 0
+    for item in items or []:
+        title = getattr(item, "title", "") or ""
+        if not is_volume_one(title):
+            continue
+        ym = year_month_from_pubdate(getattr(item, "pubdate", "") or "")
+        if ym is None:
+            continue
+        existing = comics_by_month.setdefault(ym, [])
+        if any(
+            titles_match(comic.title, title, comic.isbn, comic.author)
+            or titles_match(title, comic.title, comic.isbn, comic.author)
+            for comic in existing
+        ):
+            continue
+        existing.append(
+            Comic(
+                title=title,
+                author="",
+                publisher="",
+                pubdate=getattr(item, "pubdate", "") or "",
+                isbn=getattr(item, "isbn", "") or "",
+                source=source,
+                ndl_url=getattr(item, "url", "") or "",
+            )
+        )
+        added += 1
+    return added
 
 
 def catalog_display_months(

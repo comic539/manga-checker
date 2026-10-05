@@ -6,7 +6,7 @@ import json
 import re
 import time
 from dataclasses import dataclass
-from urllib.parse import parse_qs, quote, urljoin, urlparse
+from urllib.parse import parse_qs, parse_qsl, quote, urlencode, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -27,7 +27,8 @@ from manga_checker.title_match import titles_match
 from manga_checker.volume import normalize_text
 
 ANIMATE_LIST = "https://www.animate-onlineshop.jp/products/privilege_list.php"
-MELON_LIST = "https://www.melonbooks.co.jp/privilege/privilege.php"
+MELON_LIST = "https://www.melonbooks.co.jp/new/privilege.php"
+MELON_LIST_LEGACY = "https://www.melonbooks.co.jp/privilege/privilege.php"
 GAMERS_LIST = "https://www.gamers.co.jp/products/privilege_list.php"
 TORA_CALENDAR = (
     "https://ecs.toranoana.jp/tora/ec/bok/pages/all/item/standard/calendar/{page}/"
@@ -50,6 +51,17 @@ TORA_HEADERS = {
 }
 _COMIC_PREFIX = re.compile(r"^【[^】]*】")
 _PAGEN = re.compile(r"[?&]pageno=(\d+)", re.I)
+_LIMITED_EDITION = re.compile(r"『[^』]*限定版[^』]*』")
+_VOLUME_SET = re.compile(r"\[全\d+冊セット\]")
+_SKIP_BUNDLE = re.compile(r"全巻セット|同時購入セット")
+
+
+def melon_work_title(title: str) -> str:
+    """限定版・全巻セット表記を除いた照合用タイトル。"""
+    text = normalize_text(title)
+    text = _LIMITED_EDITION.sub(" ", text)
+    text = _VOLUME_SET.sub(" ", text)
+    return normalize_text(text)
 
 
 @dataclass
@@ -58,6 +70,7 @@ class PrivilegeItem:
     url: str
     extra: str = ""
     isbn: str = ""
+    pubdate: str = ""
 
 
 def load_animate_privileges(
@@ -125,16 +138,21 @@ def load_melon_privileges(
     months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
-    seed = f"{MELON_LIST}?category=4&disp_number=100&pageno=1"
-    _walk_pages(
-        session, seed, parse_melon_privilege_list, seen, items, delay_sec, label="メロン特典"
-    )
+    session.cookies.set("adult_check", "1", domain="www.melonbooks.co.jp")
+    base = MELON_LIST
+    probe_url = f"{MELON_LIST}?category=4&disp_number=100&pageno=1"
+    probe_html = _get(session, probe_url, "メロン特典")
+    time.sleep(delay_sec)
+    if probe_html and not parse_melon_privilege_list(probe_html, probe_url):
+        print("メロン特典: 新URLが空のため従来URLで取り直します")
+        base = MELON_LIST_LEGACY
     for day in iter_month_days(months):
         url = (
-            f"{MELON_LIST}?category=4&is_sp_view=&sort_type=&orderby="
+            f"{base}?category=4&is_sp_view=&sort_type=&orderby="
             f"&disp_number=100&pageno=1&mode=&picker_date={day:%Y/%m/%d}"
         )
-        _walk_pages(
+        before = len(items)
+        added = _walk_pages(
             session,
             url,
             parse_melon_privilege_list,
@@ -143,6 +161,12 @@ def load_melon_privileges(
             delay_sec,
             label="メロン特典",
         )
+        stamp = f"{day:%Y-%m-%d}"
+        for item in items[before:]:
+            if not item.pubdate:
+                item.pubdate = stamp
+        if day.day == 1 or added:
+            print(f"メロン特典: {day:%Y/%m/%d} +{added} 件（累計 {len(items)}）")
     print(f"メロンブックス特典: {len(items)} 件")
     return items
 
@@ -154,7 +178,14 @@ def parse_melon_privilege_list(
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
     for card in soup.select(".item-list li, li[class^='product_']"):
-        title_node = card.select_one(".product_title, a[title]")
+        folder = normalize_text(
+            " ".join(a.get_text(" ", strip=True) for a in card.select("a[href*='category_id=']"))
+        )
+        if "ノベル" in folder and "コミック" not in folder:
+            continue
+        if "全巻セット" in folder:
+            continue
+        title_node = card.select_one(".product_title, .item-ttl, a[title]")
         title = ""
         if title_node:
             title = normalize_text(
@@ -167,8 +198,16 @@ def parse_melon_privilege_list(
             continue
         url = urljoin("https://www.melonbooks.co.jp/", str(link.get("href"))).split("#")[0]
         if not title:
-            title = normalize_text(str(link.get("title") or link.get_text(" ", strip=True)))
+            img = card.select_one("img[alt]")
+            title = normalize_text(
+                str(link.get("title") or (img.get("alt") if img else "") or link.get_text(" ", strip=True))
+            )
         if not title or url in seen:
+            continue
+        if _SKIP_BUNDLE.search(title):
+            continue
+        title = melon_work_title(title) or title
+        if not title:
             continue
         seen.add(url)
         items.append(PrivilegeItem(title=title, url=url, extra=extra or "メロンブックス特典"))
@@ -421,6 +460,21 @@ def _walk_pages(
     return added_total
 
 
+def _keep_list_query(current_url: str, next_url: str) -> str:
+    """ページャが category / picker_date を落とすので、現在の絞り込みを引き継ぐ。"""
+    current = urlparse(current_url)
+    nxt = urlparse(next_url)
+    query = dict(parse_qsl(current.query, keep_blank_values=True))
+    next_query = dict(parse_qsl(nxt.query, keep_blank_values=True))
+    if "pageno" in next_query:
+        query["pageno"] = next_query["pageno"]
+    path = nxt.path or current.path
+    return urljoin(
+        f"{current.scheme}://{current.netloc}{path}",
+        "?" + urlencode(query),
+    )
+
+
 def _next_page_url(html: str, page_url: str) -> str:
     soup = BeautifulSoup(html or "", "html.parser")
     current = _page_number(page_url)
@@ -430,15 +484,17 @@ def _next_page_url(html: str, page_url: str) -> str:
         href = urljoin(page_url, str(tag.get("href") or "")).split("#")[0]
         number = _page_number(href)
         if number == current + 1:
-            return href
+            return _keep_list_query(page_url, href)
         if number > best_n:
             best_n = number
             best = href
     nxt = soup.select_one("a.next, p.next a, .content_pager a")
     text = normalize_text(nxt.get_text(" ", strip=True) if nxt else "")
     if nxt and "次" in text and nxt.get("href"):
-        return urljoin(page_url, str(nxt.get("href"))).split("#")[0]
-    return best if best_n > current else ""
+        return _keep_list_query(
+            page_url, urljoin(page_url, str(nxt.get("href"))).split("#")[0]
+        )
+    return _keep_list_query(page_url, best) if best_n > current else ""
 
 
 def _page_number(url: str) -> int:

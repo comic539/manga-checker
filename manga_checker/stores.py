@@ -113,7 +113,11 @@ def _melon_isbn_url(comic: Comic) -> str:
 
 
 def _melon_url(comic: Comic) -> str:
-    return _melon_isbn_url(comic) or "https://www.melonbooks.co.jp/privilege/privilege.php"
+    return _melon_isbn_url(comic) or "https://www.melonbooks.co.jp/new/privilege.php"
+
+
+def _melon_title_url(comic: Comic) -> str:
+    return "https://www.melonbooks.co.jp/search/search.php?" + urlencode({"name": _q(comic)})
 
 
 def _toranoana_list_url(word: str, *, books: bool = False) -> str:
@@ -152,7 +156,7 @@ STORES: list[Store] = [
         store_id="melonbooks",
         name="メロンブックス",
         search_url=_melon_url,
-        privilege_index_url="https://www.melonbooks.co.jp/privilege/privilege.php",
+        privilege_index_url="https://www.melonbooks.co.jp/new/privilege.php",
     ),
     Store(
         store_id="gamers",
@@ -228,7 +232,7 @@ def check_stores(
             )
             continue
         if store.store_id in BULK_LISTING_STORES:
-            if listings is not None and store.store_id in listings.items:
+            if listings is not None and listings.items.get(store.store_id):
                 check = listings.check(store.store_id, store.name, comic, url)
                 if check.status != STATUS_YES and not listing_covers_comic(
                     store.store_id, comic

@@ -156,6 +156,102 @@ class PrivilegeListParseTests(unittest.TestCase):
         self.assertIn("product_id=3810284", items[0].url)
         self.assertIn("ポスター", items[0].extra)
 
+    def test_melon_skips_novel_only_cards(self) -> None:
+        from manga_checker.privilege_index import parse_melon_privilege_list
+
+        html = """
+        <div class="item-list"><ul>
+          <li class="product_1">
+            <div class="privilege_title">設定集</div>
+            <a href="/detail/detail.php?product_id=1" title="監獄遊戯"></a>
+            <p class="item-ttl product_title">監獄遊戯</p>
+            <a href="/comic/list.php?category_id=43">ノベル</a>
+          </li>
+          <li class="product_2">
+            <div class="privilege_title">イラストカード</div>
+            <a href="/detail/detail.php?product_id=2" title="ルノリータ 1"></a>
+            <p class="item-ttl product_title">ルノリータ 1</p>
+            <a href="/comic/list.php?category_id=12">コミック</a>
+          </li>
+        </ul></div>
+        """
+        items = parse_melon_privilege_list(html)
+        self.assertEqual(len(items), 1)
+        self.assertIn("ルノリータ", items[0].title)
+
+    def test_melon_skips_sets_and_strips_limited_edition(self) -> None:
+        from manga_checker.privilege_index import parse_melon_privilege_list
+
+        html = """
+        <div class="item-list"><ul>
+          <li class="product_1">
+            <div class="privilege_title">タペストリー</div>
+            <a href="/detail/detail.php?product_id=1" title="[全7冊セット]才女のお世話"></a>
+            <p class="item-ttl product_title">[全7冊セット]才女のお世話『7巻メロン限定版』</p>
+            <a href="/comic/list.php?category_id=12">コミック(全巻セット)</a>
+          </li>
+          <li class="product_2">
+            <div class="privilege_title">アクリルスタンド</div>
+            <a href="/detail/detail.php?product_id=2" title="アンデッドさんの不器用な青春 1『描き下ろしアクリルスタンドフィギュア付きメロンブックス限定版』"></a>
+            <p class="item-ttl product_title">アンデッドさんの不器用な青春 1『描き下ろしアクリルスタンドフィギュア付きメロンブックス限定版』</p>
+            <a href="/comic/list.php?category_id=12">コミック</a>
+          </li>
+        </ul></div>
+        """
+        items = parse_melon_privilege_list(html)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].title, "アンデッドさんの不器用な青春 1")
+
+    def test_privilege_calendar_fills_missing_volume_one(self) -> None:
+        from manga_checker.catalog import merge_privilege_listings_into_catalog
+        from manga_checker.privilege_index import PrivilegeItem
+
+        by_month: dict[tuple[int, int], list[Comic]] = {
+            (2026, 10): [Comic(title="ルノリータ 第1巻", isbn="9784088852621")]
+        }
+        added = merge_privilege_listings_into_catalog(
+            by_month,
+            [
+                PrivilegeItem(
+                    title="アンデッドさんの不器用な青春 1",
+                    url="https://www.melonbooks.co.jp/detail/detail.php?product_id=3810320",
+                    extra="描き下ろし4Pリーフレット",
+                    pubdate="2026-10-01",
+                ),
+                PrivilegeItem(
+                    title="ルノリータ 第1巻",
+                    url="https://www.melonbooks.co.jp/detail/detail.php?product_id=9",
+                    pubdate="2026-10-02",
+                ),
+                PrivilegeItem(
+                    title="あたらよのほし",
+                    url="https://www.melonbooks.co.jp/detail/detail.php?product_id=8",
+                    pubdate="2026-10-01",
+                ),
+            ],
+        )
+        self.assertEqual(added, 1)
+        titles = [c.title for c in by_month[(2026, 10)]]
+        self.assertIn("アンデッドさんの不器用な青春 1", titles)
+        self.assertNotIn("あたらよのほし", titles)
+        self.assertEqual(len(titles), 2)
+
+    def test_melon_next_page_keeps_picker_date(self) -> None:
+        from urllib.parse import parse_qs, urlparse
+
+        from manga_checker.privilege_index import _next_page_url
+
+        html = '<a href="/new/privilege.php?chara=&pageno=2">2</a>'
+        current = (
+            "https://www.melonbooks.co.jp/new/privilege.php"
+            "?category=4&disp_number=100&pageno=1&picker_date=2026/10/09"
+        )
+        nxt = _next_page_url(html, current)
+        query = parse_qs(urlparse(nxt).query)
+        self.assertEqual(query.get("pageno"), ["2"])
+        self.assertEqual(query.get("picker_date"), ["2026/10/09"])
+        self.assertEqual(query.get("category"), ["4"])
+
     def test_gamers_cards(self) -> None:
         from manga_checker.privilege_index import parse_gamers_privilege_list
 

@@ -10,12 +10,13 @@ from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
 
-from manga_checker.bulk_listings import BulkListingIndex
+from manga_checker.bulk_listings import BulkListingIndex, ListingItem
 from manga_checker.catalog import (
     catalog_display_months,
     fetch_months_volume_ones,
     load_catalog_json,
     merge_catalog_months,
+    merge_privilege_listings_into_catalog,
     write_catalog_json,
 )
 from manga_checker.dates import (
@@ -31,6 +32,7 @@ from manga_checker.models import ComicReport
 from manga_checker.official import OfficialIndex
 from manga_checker.publishers import publisher_sort_key
 from manga_checker.rakuten_books import refresh_prices_from_rakuten
+from manga_checker.privilege_index import load_melon_privileges
 from manga_checker.report import SITE_TITLE, write_csv, write_html
 from manga_checker.store_cache import load_checks_cache, save_checks_cache
 from manga_checker.stores import check_stores
@@ -306,6 +308,30 @@ def main() -> None:
     )
 
     listings = BulkListingIndex()
+    priv_months = privilege_rematch_months()
+    only_listings = {part.strip() for part in (args.listings or "").split(",") if part.strip()}
+    melon_wanted = (not only_listings) or ("melonbooks" in only_listings)
+    if args.fetch and melon_wanted:
+        try:
+            melon_raw = load_melon_privileges(session, priv_months)
+            for year, month in priv_months:
+                comics_by_month[(year, month)] = [
+                    comic
+                    for comic in comics_by_month.get((year, month), [])
+                    if comic.source != "melonbooks"
+                ]
+            added = merge_privilege_listings_into_catalog(comics_by_month, melon_raw)
+            listings.items["melonbooks"] = [
+                ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)
+                for item in melon_raw
+            ]
+            if not listings.items["melonbooks"]:
+                listings.items.pop("melonbooks", None)
+            print(f"メロン特典カレンダーの第1巻をカタログへ {added} 件補完しました。")
+            windows = catalog_display_months(live_windows, comics_by_month)
+        except Exception as exc:
+            print(f"メロン特典カレンダーの取得に失敗しました: {exc}")
+            traceback.print_exc()
     all_comics = [comic for comics in comics_by_month.values() for comic in comics]
     try:
         refresh_prices_from_rakuten(all_comics, session=session)
@@ -313,12 +339,11 @@ def main() -> None:
         print(f"楽天価格の補完に失敗しました: {exc}")
         traceback.print_exc()
     write_catalog_json(catalog_json, comics_by_month)
-    only_listings = {part.strip() for part in (args.listings or "").split(",") if part.strip()}
     try:
         listings.load(
             session,
             windows,
-            privilege_months_window=privilege_rematch_months(),
+            privilege_months_window=priv_months,
             comics=all_comics,
             only=only_listings or None,
         )
