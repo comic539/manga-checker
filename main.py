@@ -237,6 +237,7 @@ def main() -> None:
             raise SystemExit(f"書誌JSONがありません: {catalog_json}")
         print("保存済み書誌・特典からHTMLだけ書き出します（書店取得なし）。")
         comics_by_month = load_catalog_json(catalog_json, refresh_covers=False)
+        write_catalog_json(catalog_json, comics_by_month)
         windows = catalog_display_months(live_windows, comics_by_month)
         write_published_site(
             args,

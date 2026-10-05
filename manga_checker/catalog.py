@@ -295,6 +295,7 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
                 "item_price": comic.item_price,
             }
             for comic in comics
+            if is_volume_one(comic.title, comic.volume)
         ]
         for (year, month), comics in by_month.items()
     }
@@ -352,25 +353,29 @@ def load_catalog_json(
         if not isinstance(rows, list):
             continue
         result[(year, month)] = [
-            Comic(
-                title=str(row.get("title") or ""),
-                volume=str(row.get("volume") or ""),
-                author=str(row.get("author") or ""),
-                publisher=str(row.get("publisher") or ""),
-                pubdate=str(row.get("pubdate") or ""),
-                isbn=str(row.get("isbn") or ""),
-                source=str(row.get("source") or "json"),
-                ndl_url=str(row.get("ndl_url") or ""),
-                series=str(row.get("series") or ""),
-                cover_url=str(row.get("cover_url") or ""),
-                cover_source=str(row.get("cover_source") or ""),
-                rakuten_item_url=str(row.get("rakuten_item_url") or ""),
-                title_kana=str(row.get("title_kana") or ""),
-                author_kana=str(row.get("author_kana") or ""),
-                item_price=_row_item_price(row),
+            comic
+            for comic in (
+                Comic(
+                    title=str(row.get("title") or ""),
+                    volume=str(row.get("volume") or ""),
+                    author=str(row.get("author") or ""),
+                    publisher=str(row.get("publisher") or ""),
+                    pubdate=str(row.get("pubdate") or ""),
+                    isbn=str(row.get("isbn") or ""),
+                    source=str(row.get("source") or "json"),
+                    ndl_url=str(row.get("ndl_url") or ""),
+                    series=str(row.get("series") or ""),
+                    cover_url=str(row.get("cover_url") or ""),
+                    cover_source=str(row.get("cover_source") or ""),
+                    rakuten_item_url=str(row.get("rakuten_item_url") or ""),
+                    title_kana=str(row.get("title_kana") or ""),
+                    author_kana=str(row.get("author_kana") or ""),
+                    item_price=_row_item_price(row),
+                )
+                for row in rows
+                if isinstance(row, dict) and row.get("title")
             )
-            for row in rows
-            if isinstance(row, dict) and row.get("title")
+            if is_volume_one(comic.title, comic.volume)
         ]
     if months:
         for key in months:

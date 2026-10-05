@@ -21,14 +21,6 @@ _VOLUME_ONE_EXTRA = [
     re.compile(r"(?<!\d)volume\s*0*1(?!\d)", re.IGNORECASE),
 ]
 
-_INCLUDE_WORDS = (
-    "短編集",
-    "傑作選",
-    "アンソロジー",
-    "上巻",
-    "前編",
-    "公式ファンブック",
-)
 _EXCLUDE_WORDS = ("下巻", "後編", "中巻")
 
 _VOLUME_NUMBERS = re.compile(
@@ -48,12 +40,12 @@ def normalize_text(value: str | None) -> str:
 
 
 def is_volume_one(title: str, volume: str = "") -> bool:
-    """第1巻・単巻・短編集などを対象にする。
+    """タイトルまたは巻次に第1巻相当の表記があるものだけを対象にする。
 
     単なる数字の『1』（例: 『1日10分で〜』）は巻数とは見ない。
+    巻数のない単巻、短編集・上巻などは入れない。
     『下巻』『後編』や2巻以降の巻数がある作品は除外する。
     """
-    title_n = normalize_text(title)
     volume_n = normalize_text(volume)
     combined = normalize_text(f"{title} {volume}")
 
@@ -76,10 +68,6 @@ def is_volume_one(title: str, volume: str = "") -> bool:
         if any(pattern.search(haystack) for pattern in _VOLUME_ONE_EXTRA):
             return True
 
-    if any(word in combined for word in _INCLUDE_WORDS):
-        return True
-    if not numbers:
-        return True
     return 1 in numbers
 
 

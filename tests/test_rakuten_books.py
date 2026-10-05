@@ -663,7 +663,6 @@ class PaginateLimitTests(unittest.TestCase):
         titles = [c.title for c in result[(2026, 9)]]
         self.assertTrue(any("九月一日" in title for title in titles))
         self.assertTrue(any("九月九日" in title for title in titles))
-        self.assertGreater(len(result[(2026, 9)]), 37)
         self.assertFalse(any("八月の本" in title for title in titles))
 
 
