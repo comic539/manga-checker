@@ -38,9 +38,9 @@ def load_checks_cache(path: Path) -> dict[str, dict[str, str]]:
             continue
         result[str(key)] = {
             "status": status,
-            "detail": str(row.get("detail") or ""),
-            "url": str(row.get("url") or ""),
-            "store_name": str(row.get("store_name") or ""),
+            "detail": _utf8_text(row.get("detail") or ""),
+            "url": _utf8_text(row.get("url") or ""),
+            "store_name": _utf8_text(row.get("store_name") or ""),
         }
     return result
 
@@ -52,7 +52,11 @@ def save_checks_cache(path: Path, cache: dict[str, dict[str, str]]) -> None:
         for key, row in cache.items()
         if isinstance(row, dict) and row.get("status") != STATUS_UNKNOWN
     }
-    path.write_text(json.dumps(cleaned, ensure_ascii=False, indent=2), encoding="utf-8")
+    try:
+        text = json.dumps(cleaned, ensure_ascii=False, indent=2, default=str)
+    except (TypeError, ValueError):
+        text = json.dumps(cleaned, ensure_ascii=True, indent=2, default=str)
+    path.write_text(text, encoding="utf-8", errors="replace")
 
 
 def cached_check(
@@ -89,7 +93,11 @@ def remember_check(cache: dict[str, dict[str, str]] | None, check: StoreCheck, c
         return
     cache[cache_key(comic, check.store_id)] = {
         "status": check.status,
-        "detail": check.detail,
-        "url": check.url,
-        "store_name": check.store_name,
+        "detail": _utf8_text(check.detail),
+        "url": _utf8_text(check.url),
+        "store_name": _utf8_text(check.store_name),
     }
+
+
+def _utf8_text(value: object) -> str:
+    return str(value or "").encode("utf-8", "replace").decode("utf-8")

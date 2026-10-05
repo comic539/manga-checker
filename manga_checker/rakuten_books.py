@@ -557,7 +557,12 @@ def _request(session: requests.Session, extra: dict[str, str]) -> dict:
                 except ValueError:
                     message = response.text
                 raise RuntimeError(f"楽天API HTTP {response.status_code}: {message}")
-            payload = response.json()
+            try:
+                payload = response.json()
+            except ValueError as exc:
+                last_error = RuntimeError(f"楽天APIのJSONが不正です: {exc}")
+                time.sleep(2)
+                continue
             if not isinstance(payload, dict):
                 raise RuntimeError("楽天APIの応答形式が不正です")
             if payload.get("error"):

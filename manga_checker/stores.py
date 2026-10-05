@@ -331,7 +331,16 @@ def check_stores(
             store.store_id in DETAIL_PAGE_STORES or store.store_id in LISTING_FETCH_STORES
         )
         if needs_product_page or fetch:
-            fetched = _fetch_store(store, comic, url, session)
+            try:
+                fetched = _fetch_store(store, comic, url, session)
+            except Exception as exc:
+                fetched = StoreCheck(
+                    store.store_id,
+                    store.name,
+                    STATUS_UNKNOWN,
+                    f"判定中に失敗: {exc}",
+                    url,
+                )
             if official_yes == STATUS_YES:
                 fetched = _merge_official_product(
                     fetched,

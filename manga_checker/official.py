@@ -74,9 +74,18 @@ class OfficialIndex:
         if self.loaded:
             return
         print("公式特典ページを照合用に取得しています…")
-        self.entries["kikuya"] = _load_kikuya(session)
+        try:
+            self.entries["kikuya"] = _load_kikuya(session)
+        except Exception as exc:
+            print(f"  喜久屋書店の公式ページ取得に失敗しました: {exc}")
+            self.entries["kikuya"] = []
         for page in PUBLISHER_PAGES:
-            for hit in _load_publisher_page(session, page):
+            try:
+                hits = _load_publisher_page(session, page)
+            except Exception as exc:
+                print(f"  出版社ページ取得に失敗しました ({page}): {exc}")
+                continue
+            for hit in hits:
                 self.entries.setdefault(hit.store_id, []).append(hit)
             time.sleep(0.3)
         self.loaded = True

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import sys
+import traceback
 import warnings
 from pathlib import Path
 
@@ -146,20 +148,26 @@ def write_published_site(
         reports: list[ComicReport] = []
         for i, comic in enumerate(comics, start=1):
             if fetch:
-                print(f"[{i}/{len(comics)}] {comic.display_title}")
+                print(f"[{i}/{len(comics)}] {comic.display_title}", flush=True)
+            try:
+                checks = check_stores(
+                    comic,
+                    fetch=fetch and rematch,
+                    delay_sec=1.5 if fetch and rematch else 0,
+                    session=session,
+                    catalog=catalog,
+                    cache=checks_cache,
+                    listings=listings if rematch else None,
+                    rematch=rematch,
+                )
+            except Exception as exc:
+                print(f"  特典判定に失敗しました: {exc}")
+                traceback.print_exc()
+                checks = []
             reports.append(
                 ComicReport(
                     comic=comic,
-                    checks=check_stores(
-                        comic,
-                        fetch=fetch and rematch,
-                        delay_sec=1.5 if fetch and rematch else 0,
-                        session=session,
-                        catalog=catalog,
-                        cache=checks_cache,
-                        listings=listings if rematch else None,
-                        rematch=rematch,
-                    ),
+                    checks=checks,
                     period_year=year,
                     period_month=month,
                 )
@@ -199,6 +207,11 @@ def write_published_site(
 
 
 def main() -> None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     args = parse_args()
     if not 1 <= args.month <= 12:
         raise SystemExit("month は 1〜12 で指定してください。")
@@ -244,7 +257,11 @@ def main() -> None:
 
     session = make_session()
     catalog = OfficialIndex()
-    catalog.load(session)
+    try:
+        catalog.load(session)
+    except Exception as exc:
+        print(f"公式特典ページの取得に失敗しました: {exc}")
+        traceback.print_exc()
 
     catalog_json = args.out_dir / "catalog_by_month.json"
     keep_saved_months = args.months is None
@@ -289,31 +306,51 @@ def main() -> None:
 
     listings = BulkListingIndex()
     all_comics = [comic for comics in comics_by_month.values() for comic in comics]
-    refresh_prices_from_rakuten(all_comics, session=session)
+    try:
+        refresh_prices_from_rakuten(all_comics, session=session)
+    except Exception as exc:
+        print(f"楽天価格の補完に失敗しました: {exc}")
+        traceback.print_exc()
     write_catalog_json(catalog_json, comics_by_month)
     only_listings = {part.strip() for part in (args.listings or "").split(",") if part.strip()}
-    listings.load(
-        session,
-        windows,
-        privilege_months_window=privilege_rematch_months(),
-        comics=all_comics,
-        only=only_listings or None,
-    )
+    try:
+        listings.load(
+            session,
+            windows,
+            privilege_months_window=privilege_rematch_months(),
+            comics=all_comics,
+            only=only_listings or None,
+        )
+    except Exception as exc:
+        print(f"書店特典一覧の取得に失敗しました: {exc}")
+        traceback.print_exc()
     checks_cache = load_checks_cache(args.out_dir / "store_checks.json")
     if checks_cache:
         print(f"判定キャッシュを読みました: {args.out_dir / 'store_checks.json'}（特典あり／なしのみ再利用。未確認は再取得します）")
-    write_published_site(
-        args,
-        comics_by_month,
-        windows,
-        active_period,
-        fetch=bool(args.fetch),
-        rematch_ok=True,
-        session=session,
-        catalog=catalog,
-        listings=listings,
-        checks_cache=checks_cache,
-    )
+    try:
+        write_published_site(
+            args,
+            comics_by_month,
+            windows,
+            active_period,
+            fetch=bool(args.fetch),
+            rematch_ok=True,
+            session=session,
+            catalog=catalog,
+            listings=listings,
+            checks_cache=checks_cache,
+        )
+    except Exception as exc:
+        print(f"サイト生成に失敗したため、保存済みデータからHTMLだけ書き出します: {exc}")
+        traceback.print_exc()
+        write_published_site(
+            args,
+            comics_by_month,
+            windows,
+            active_period,
+            fetch=False,
+            rematch_ok=False,
+        )
     print("HTMLをブラウザで開くと、月タブと各書店の検索リンクから特典を確認できます。")
 
 

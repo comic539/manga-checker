@@ -970,7 +970,10 @@ def _pick_official_from_query(fn: SearchFn, query: str) -> str:
 def search_official_preview(comic: Comic, *, search_fn: SearchFn | None = None) -> str:
     """出版社の公式配信サイトを先に探し、無ければウェブの『タイトル 1話』へ。"""
     if search_fn is None:
-        url = search_giga_preview(comic)
+        try:
+            url = search_giga_preview(comic)
+        except Exception:
+            url = ""
         if url:
             return url
     fn = search_fn or default_web_search
@@ -1092,9 +1095,14 @@ def resolve_preview_cache(
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = [pool.submit(_one, comic) for comic in pending]
             for future in as_completed(futures):
-                rows.append(future.result())
+                try:
+                    row = future.result()
+                except Exception as exc:
+                    print(f"  試し読み検索に失敗しました: {exc}")
+                    continue
+                rows.append(row)
                 searched = len(rows)
-                key, url, title = rows[-1]
+                key, url, title = row
                 cache[key] = {"official_url": url, "title": title}
                 if cache_path is not None and searched % 10 == 0:
                     save_preview_cache(cache_path, cache)

@@ -29,7 +29,11 @@ def fill_missing_pubdates(comics: list[Comic], session: requests.Session) -> lis
         return comics
     print(f"発売日の日次を楽天ブックス/Amazonから補完しています… {len(missing)} 件")
     for i, comic in enumerate(missing, start=1):
-        found = fetch_retail_pubdate(comic, session)
+        try:
+            found = fetch_retail_pubdate(comic, session)
+        except Exception as exc:
+            print(f"  [{i}/{len(missing)}] {comic.search_query}: 発売日補完失敗 ({exc})")
+            found = ""
         if found:
             comic.pubdate = prefer_pubdate(found, comic.pubdate)
             print(f"  [{i}/{len(missing)}] {comic.search_query}: {comic.pubdate}")

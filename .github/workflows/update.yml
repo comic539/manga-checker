@@ -17,6 +17,8 @@ concurrency:
 
 env:
   TZ: Asia/Tokyo
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: utf-8
 
 jobs:
   update:
@@ -61,8 +63,14 @@ jobs:
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APPLICATION_ID }}
         timeout-minutes: 280
-        continue-on-error: true
-        run: python main.py --limit 0 --fetch --fetch-preview --preview-limit 80
+        run: |
+          set +e
+          python main.py --limit 0 --fetch --fetch-preview --preview-limit 80
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo "fetch exited $status; continuing with saved catalog HTML"
+          fi
 
       - name: Rebuild HTML after fetch
         if: always()

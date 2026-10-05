@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import traceback
 from dataclasses import dataclass, field
 
 import requests
 
-from manga_checker.comiczin import ZinItem, load_comiczin_items
-from manga_checker.comirano import ComiranoItem, load_comirano_items
+from manga_checker.comiczin import load_comiczin_items
+from manga_checker.comirano import load_comirano_items
 from manga_checker.dates import comiczin_months, privilege_rematch_months
 from manga_checker.models import Comic, StoreCheck
 from manga_checker.privilege import STATUS_NO, STATUS_YES
@@ -54,12 +55,6 @@ class BulkListingIndex:
             "toranoana",
         }
         print("書店特典一覧を一括取得します…")
-        zin: list[ListingItem] = []
-        comirano: list[ListingItem] = []
-        animate: list[ListingItem] = []
-        melon: list[ListingItem] = []
-        gamers: list[ListingItem] = []
-        tora: list[ListingItem] = []
         if "comiczin" in wanted:
             zin_months = comiczin_months(catalog_months=months)
             print(
@@ -67,45 +62,58 @@ class BulkListingIndex:
                 + "、".join(f"{y}年{m}月" for y, m in zin_months)
                 + "（当月〜翌月）で取得します"
             )
-            zin = [
+            zin_raw = _load_store_list(
+                "COMIC ZIN",
+                lambda: load_comiczin_items(session, zin_months),
+            )
+            self.items["comiczin"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)
-                for item in load_comiczin_items(session, zin_months)
+                for item in zin_raw
                 if is_volume_one(item.title)
             ]
-            self.items["comiczin"] = zin
         if "comirano" in wanted:
-            comirano = [
+            comirano_raw = _load_store_list("こみらの！", lambda: load_comirano_items(session))
+            self.items["comirano"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra)
-                for item in load_comirano_items(session)
+                for item in comirano_raw
                 if is_volume_one(item.title)
             ]
-            self.items["comirano"] = comirano
         if "animate" in wanted:
-            animate = [
+            animate_raw = _load_store_list(
+                "アニメイト特典",
+                lambda: load_animate_privileges(session, priv_months),
+            )
+            self.items["animate"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra)
-                for item in load_animate_privileges(session, priv_months)
+                for item in animate_raw
             ]
-            self.items["animate"] = animate
         if "melonbooks" in wanted:
-            melon = [
+            melon_raw = _load_store_list(
+                "メロンブックス特典",
+                lambda: load_melon_privileges(session, priv_months),
+            )
+            self.items["melonbooks"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra)
-                for item in load_melon_privileges(session, priv_months)
+                for item in melon_raw
             ]
-            self.items["melonbooks"] = melon
         if "gamers" in wanted:
-            gamers = [
+            gamers_raw = _load_store_list(
+                "ゲーマーズ特典",
+                lambda: load_gamers_privileges(session, priv_months),
+            )
+            self.items["gamers"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra)
-                for item in load_gamers_privileges(session, priv_months)
+                for item in gamers_raw
             ]
-            self.items["gamers"] = gamers
         if "toranoana" in wanted:
-            tora = [
+            tora_raw = _load_store_list(
+                "とらのあな特典",
+                lambda: load_toranoana_privileges(session, months, comics=comics or []),
+            )
+            self.items["toranoana"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra)
-                for item in load_toranoana_privileges(
-                    session, months, comics=comics or []
-                )
+                for item in tora_raw
             ]
-            self.items["toranoana"] = tora
         self.loaded = True
         print(
             "  一覧件数: "
@@ -147,3 +155,12 @@ class BulkListingIndex:
             "特典一覧に該当タイトルはありません。",
             fallback_url,
         )
+
+
+def _load_store_list(label: str, loader):
+    try:
+        return list(loader() or [])
+    except Exception as exc:
+        print(f"  {label}の一覧取得に失敗しました: {exc}")
+        traceback.print_exc()
+        return []

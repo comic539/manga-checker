@@ -331,13 +331,25 @@ def load_catalog_json(
     *,
     refresh_covers: bool = True,
 ) -> dict[tuple[int, int], list[Comic]]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"書誌JSONを読めませんでした: {path} ({exc})")
+        return {}
+    if not isinstance(payload, dict):
+        print(f"書誌JSONの形式が不正なため読み飛ばします: {path}")
+        return {}
     month_set = set(months) if months else None
     result: dict[tuple[int, int], list[Comic]] = {}
     for key, rows in payload.items():
-        year_s, month_s = key.split("-", 1)
-        year, month = int(year_s), int(month_s)
+        try:
+            year_s, month_s = str(key).split("-", 1)
+            year, month = int(year_s), int(month_s)
+        except ValueError:
+            continue
         if month_set is not None and (year, month) not in month_set:
+            continue
+        if not isinstance(rows, list):
             continue
         result[(year, month)] = [
             Comic(
@@ -358,7 +370,7 @@ def load_catalog_json(
                 item_price=_row_item_price(row),
             )
             for row in rows
-            if row.get("title")
+            if isinstance(row, dict) and row.get("title")
         ]
     if months:
         for key in months:
