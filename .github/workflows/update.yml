@@ -2,9 +2,7 @@ name: Update catalog
 
 on:
   schedule:
-    # 毎日 0:00 JST。GitHub の cron は数時間遅れることがある。
-    - cron: "0 15 * * *"
-    # 毎日 1:00 JST（遅延・失敗時の予備）。前ジョブが動いていれば完了後に実行。
+    # 毎日 1:00 JST。GitHub の cron は数分〜数時間遅れることがある。
     - cron: "0 16 * * *"
   workflow_dispatch:
 
