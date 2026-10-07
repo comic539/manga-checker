@@ -22,6 +22,7 @@ class Comic:
     title_kana: str = ""
     author_kana: str = ""
     item_price: int = 0
+    added_at: str = ""
 
     @property
     def display_title(self) -> str:

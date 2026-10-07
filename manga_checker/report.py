@@ -32,7 +32,7 @@ SITE_TITLE = SITE_NAME
 PAGE_TITLE = f"{SITE_NAME}｜{SITE_TAGLINE}"
 LOGO_ALT = f"{SITE_NAME} {SITE_TAGLINE}"
 SITE_BASE = "https://comic539.github.io/manga-checker"
-ASSET_VER = "brand41"
+ASSET_VER = "brand42"
 CONTACT_FORM_URL = "https://forms.gle/WF7cNtHZTpr4zGBu5"
 CONTACT_EMAIL = "1comi.tokuten.plus@gmail.com"
 
@@ -406,7 +406,8 @@ def _card_html(
         f'data-publisher="{html.escape(comic.publisher or "出版社未登録", quote=True)}" '
         f'data-pub-group="{html.escape(publisher_group_label(comic.publisher), quote=True)}" '
         f'data-date="{release}" data-release-month="{release_month_attr}" '
-        f'data-pubdate="{html.escape(pub_iso, quote=True)}">'
+        f'data-pubdate="{html.escape(pub_iso, quote=True)}" '
+        f'data-added="{html.escape(comic.added_at or "", quote=True)}">'
         '<div class="cover-col">'
         f"{cover}"
         f"{credit}"
@@ -1396,6 +1397,33 @@ def _html_document(
     }}
     .cal-cell.is-zero .cal-count {{
       display: none;
+    }}
+    .cal-recent-bar {{
+      margin: 14px 0 0;
+      padding: 12px 0 0;
+      border-top: 1px solid #ececec;
+    }}
+    .cal-recent-btn {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 1px solid #e4d6c6;
+      border-radius: 12px;
+      background: #fff8f1;
+      color: #1a1a1a;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+    }}
+    .cal-recent-btn:hover,
+    .cal-recent-btn.is-on {{
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }}
     .cal-day-list {{
       margin: 14px 0 0;
@@ -2477,6 +2505,9 @@ def _html_document(
       </div>
       <div class="cal-week" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
       <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-recent-bar">
+        <button type="button" class="cal-recent-btn" id="cal-recent-btn" aria-pressed="false">直近１週間で追加された書籍</button>
+      </div>
       <div class="cal-day-list" id="cal-day-list" hidden></div>
     </div>
   </div>
@@ -3214,6 +3245,7 @@ def _html_document(
       function cardsByDate() {{
         var map = {{}};
         allCards().forEach(function (card) {{
+          if (calRecentOnly && !isRecentAdded(card.getAttribute("data-added") || "")) return;
           var d = card.getAttribute("data-pubdate") || "";
           if (!d) return;
           if (!map[d]) map[d] = [];
@@ -3223,6 +3255,15 @@ def _html_document(
       }}
       var calYear = 0;
       var calMonth = 0;
+      var calRecentOnly = false;
+      function isRecentAdded(iso) {{
+        if (!iso) return false;
+        var added = Date.parse(iso + "T00:00:00+09:00");
+        if (isNaN(added)) return false;
+        var now = Date.now();
+        var oldest = now - 7 * 24 * 60 * 60 * 1000;
+        return added >= oldest && added <= now + 24 * 60 * 60 * 1000;
+      }}
       function openCalendar() {{
         var modal = document.getElementById("cal-modal");
         if (!modal) return;
@@ -3294,7 +3335,11 @@ def _html_document(
         }}
         grid.innerHTML = html;
         var totalEl = document.getElementById("cal-month-total");
-        if (totalEl) totalEl.textContent = monthTotal + "作品";
+        if (totalEl) {{
+          totalEl.textContent = calRecentOnly
+            ? "直近1週間 " + monthTotal + "作品"
+            : monthTotal + "作品";
+        }}
       }}
       function renderCalDayList(iso) {{
         var box = document.getElementById("cal-day-list");
@@ -3351,6 +3396,17 @@ def _html_document(
         renderCalendar();
         renderCalDayList(iso);
         saveListPos();
+      }}
+      var calRecentBtn = document.getElementById("cal-recent-btn");
+      if (calRecentBtn) {{
+        calRecentBtn.addEventListener("click", function () {{
+          calRecentOnly = !calRecentOnly;
+          calRecentBtn.classList.toggle("is-on", calRecentOnly);
+          calRecentBtn.setAttribute("aria-pressed", calRecentOnly ? "true" : "false");
+          var list = document.getElementById("cal-day-list");
+          if (list) {{ list.hidden = true; list.innerHTML = ""; }}
+          renderCalendar();
+        }});
       }}
       var calBtn = document.getElementById("cal-btn");
       if (calBtn) calBtn.addEventListener("click", openCalendar);

@@ -107,6 +107,31 @@ class CatalogParseTests(unittest.TestCase):
         self.assertIn((2026, 10), months)
         self.assertIn((2027, 1), months)
 
+    def test_merge_adds_missing_titles_without_dropping_saved(self) -> None:
+        kept = Comic(
+            title="残す本 1",
+            isbn="9784000000001",
+            pubdate="2026-10-02",
+            added_at="2026-09-01",
+        )
+        incoming_same = Comic(
+            title="残す本 1",
+            isbn="9784000000001",
+            pubdate="2026-10-02",
+            item_price=770,
+        )
+        added = Comic(title="新しい本 1", isbn="9784000000002", pubdate="2026-10-08")
+        merged = merge_catalog_months(
+            {(2026, 10): [kept]},
+            {(2026, 10): [incoming_same, added]},
+            added_on="2026-10-07",
+        )
+        titles = {comic.title: comic for comic in merged[(2026, 10)]}
+        self.assertEqual(len(titles), 2)
+        self.assertEqual(titles["残す本 1"].added_at, "2026-09-01")
+        self.assertEqual(titles["残す本 1"].item_price, 770)
+        self.assertEqual(titles["新しい本 1"].added_at, "2026-10-07")
+
     def test_past_month_with_saved_rows_is_frozen(self) -> None:
         today = date(2026, 9, 28)
         self.assertTrue(catalog_month_is_frozen(2026, 8, 12, today=today))

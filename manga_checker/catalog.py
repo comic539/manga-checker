@@ -7,6 +7,7 @@
 
 書影は楽天ブックスAPIのみ。openBDからは取得しない。
 保存済みの過去月は再走査しない（当月・未来月と、未保存の過去月だけ取り直す）。
+当月・未来月も、既にある書誌は消さず、楽天にあってサイトに無い第1巻だけ追加する。
 """
 
 from __future__ import annotations
@@ -294,6 +295,7 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
                 "title_kana": comic.title_kana,
                 "author_kana": comic.author_kana,
                 "item_price": comic.item_price,
+                "added_at": comic.added_at,
             }
             for comic in comics
             if is_volume_one(comic.title, comic.volume)
@@ -308,10 +310,29 @@ def write_catalog_json(path: Path, by_month: dict[tuple[int, int], list[Comic]])
 def merge_catalog_months(
     saved: dict[tuple[int, int], list[Comic]],
     updated: dict[tuple[int, int], list[Comic]],
+    *,
+    added_on: str = "",
 ) -> dict[tuple[int, int], list[Comic]]:
-    """走査対象月で上書きし、JSONに残っている過去月は消さない。"""
-    merged = dict(saved)
-    merged.update(updated)
+    """保存済み書誌は残し、楽天側にだけある第1巻を足す。既存月を空で上書きしない。"""
+    merged: dict[tuple[int, int], list[Comic]] = {
+        key: list(comics) for key, comics in saved.items()
+    }
+    known: dict[str, Comic] = {}
+    for comics in merged.values():
+        for comic in comics:
+            known[_comic_identity(comic)] = comic
+    for ym, comics in updated.items():
+        merged.setdefault(ym, [])
+        for comic in comics:
+            ident = _comic_identity(comic)
+            existing = known.get(ident)
+            if existing is not None:
+                _enrich_saved_comic(existing, comic)
+                continue
+            if added_on and not comic.added_at:
+                comic.added_at = added_on
+            merged[ym].append(comic)
+            known[ident] = comic
     return merged
 
 
@@ -320,6 +341,7 @@ def merge_privilege_listings_into_catalog(
     items,
     *,
     source: str = "melonbooks",
+    added_on: str = "",
 ) -> int:
     """特典カレンダーの第1巻を、楽天に無い月へ補完する。単巻・続刊は入れない。"""
     added = 0
@@ -346,6 +368,7 @@ def merge_privilege_listings_into_catalog(
                 isbn=getattr(item, "isbn", "") or "",
                 source=source,
                 ndl_url=getattr(item, "url", "") or "",
+                added_at=added_on,
             )
         )
         added += 1
@@ -409,6 +432,7 @@ def load_catalog_json(
                     title_kana=str(row.get("title_kana") or ""),
                     author_kana=str(row.get("author_kana") or ""),
                     item_price=_row_item_price(row),
+                    added_at=str(row.get("added_at") or ""),
                 )
                 for row in rows
                 if isinstance(row, dict) and row.get("title")
@@ -618,11 +642,45 @@ def _text(item: ET.Element, path: str) -> str:
     return (el.text or "").strip() if el is not None else ""
 
 
+def _comic_identity(comic: Comic) -> str:
+    digits = "".join(ch for ch in (comic.isbn or "") if ch.isdigit())
+    if len(digits) >= 10:
+        return f"isbn:{digits}"
+    return f"title:{comic.display_title}"
+
+
+def _enrich_saved_comic(saved: Comic, incoming: Comic) -> None:
+    """既存書誌は残し、空欄だけ楽天側の新しい値で埋める。"""
+    if incoming.isbn and not saved.isbn:
+        saved.isbn = incoming.isbn
+    if incoming.author and not saved.author:
+        saved.author = incoming.author
+    if incoming.publisher and not saved.publisher:
+        saved.publisher = incoming.publisher
+    if incoming.pubdate and not saved.pubdate:
+        saved.pubdate = incoming.pubdate
+    if incoming.series and not saved.series:
+        saved.series = incoming.series
+    if incoming.cover_url and "rakuten" in incoming.cover_url:
+        saved.cover_url = incoming.cover_url
+        saved.cover_source = incoming.cover_source or "rakuten"
+    if incoming.rakuten_item_url:
+        saved.rakuten_item_url = incoming.rakuten_item_url
+    if incoming.title_kana and not saved.title_kana:
+        saved.title_kana = incoming.title_kana
+    if incoming.author_kana and not saved.author_kana:
+        saved.author_kana = incoming.author_kana
+    if incoming.item_price > 0:
+        saved.item_price = incoming.item_price
+    if incoming.ndl_url and not saved.ndl_url:
+        saved.ndl_url = incoming.ndl_url
+
+
 def _dedupe(comics: list[Comic]) -> list[Comic]:
     seen: set[str] = set()
     unique: list[Comic] = []
     for comic in comics:
-        key = comic.isbn or comic.display_title
+        key = _comic_identity(comic)
         if key in seen:
             continue
         seen.add(key)

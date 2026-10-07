@@ -293,10 +293,10 @@ def main() -> None:
             today=today_jst(),
             refetch_past=args.refetch_past,
         )
-        comics_by_month = (
-            merge_catalog_months(saved_catalog, fetched)
-            if keep_saved_months
-            else fetched
+        comics_by_month = merge_catalog_months(
+            saved_catalog,
+            fetched,
+            added_on=today_jst().isoformat(),
         )
         if keep_saved_months:
             windows = catalog_display_months(live_windows, comics_by_month)
@@ -314,13 +314,11 @@ def main() -> None:
     if args.fetch and melon_wanted:
         try:
             melon_raw = load_melon_privileges(session, priv_months)
-            for year, month in priv_months:
-                comics_by_month[(year, month)] = [
-                    comic
-                    for comic in comics_by_month.get((year, month), [])
-                    if comic.source != "melonbooks"
-                ]
-            added = merge_privilege_listings_into_catalog(comics_by_month, melon_raw)
+            added = merge_privilege_listings_into_catalog(
+                comics_by_month,
+                melon_raw,
+                added_on=today_jst().isoformat(),
+            )
             listings.items["melonbooks"] = [
                 ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)
                 for item in melon_raw
