@@ -37986,9 +37986,9 @@
     "store_name": "メロンブックス"
   },
   "9784824207753|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824207753",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(物理型白魔導師の軌跡 ~ソロの支援職、自分にバフを盛って攻撃特化無双。後方支援?そんな事より暴力です!~ 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830156/",
     "store_name": "とらのあな"
   },
   "9784824207753|kikuya": {
@@ -38046,9 +38046,9 @@
     "store_name": "メロンブックス"
   },
   "9784824207746|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824207746",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(魔女姫クレアは人形と踊る ~身の回りで大国の陰謀やらが蠢いてますが、ぶっ潰して大切な人達と平穏で幸せに生きたいと思います~ 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830155/",
     "store_name": "とらのあな"
   },
   "9784824207746|kikuya": {
@@ -51510,9 +51510,9 @@
     "store_name": "こみらの！"
   },
   "9784592231653|comirano": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://comirano.info/category/comic/",
+    "status": "特典あり",
+    "detail": "特典:イラストカード付",
+    "url": "https://comirano.info/%e9%ad%94%e5%b0%8e%e6%9b%b8%e4%bb%a4%e5%ac%a2%ef%bd%9e%e4%bc%9d%e8%aa%ac%e3%81%ae%e9%ad%94%e5%b0%8e%e6%9b%b8%e3%82%92%e4%bf%ae%e5%be%a9%e3%81%97%e3%81%9f%e3%82%89%e6%9c%80%e5%bc%b7%e3%81%ae%e7%b2%be/",
     "store_name": "こみらの！"
   },
   "9784592161004|comirano": {
@@ -51684,9 +51684,9 @@
     "store_name": "こみらの！"
   },
   "9784867209295|comirano": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://comirano.info/category/comic/",
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e3%83%aa%e3%83%bc%e3%82%ac%e3%83%ab%e3%83%89%e3%83%83%e3%82%af-%e5%8c%bb%e7%99%82%e5%bc%81%e8%ad%b7%e5%a3%ab%e3%82%a2%e3%83%a9%e3%82%bf%e3%81%ae%e8%a8%bc%e6%98%8e%ef%bc%881%ef%bc%89/",
     "store_name": "こみらの！"
   },
   "9784868541356|comirano": {
@@ -58032,9 +58032,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784065450048|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】100年留年してる.. フタロウ 講談社 B6判 2026/10/20",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043770",
     "store_name": "COMIC ZIN"
   },
   "9784065446744|comiczin": {
@@ -58050,9 +58050,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784065450031|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】ポッピン・ポッピ.. あろめみ 講談社 B6判 2026/10/20",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043769",
     "store_name": "COMIC ZIN"
   },
   "9784065451946|comiczin": {
@@ -58627,7 +58627,7 @@
   },
   "9784575425208|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】アイテムダンジョ.. ティーヴァ・ファング/か.. 双葉社 B6判 2026/10/15",
+    "detail": "アイテムダンジョン!~俺.. ティーヴァ・ファング/か.. 双葉社 B6判 2026/10/15",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043708",
     "store_name": "COMIC ZIN"
   },
