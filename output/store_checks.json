@@ -36702,9 +36702,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784434373671|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434373671",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(側妃のお仕事は終了です。 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830455/",
     "store_name": "とらのあな"
   },
   "9784434373671|kikuya": {
@@ -36738,9 +36738,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784434373633|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434373633",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(処刑された悪役令嬢は、時を遡り復讐する。 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830456/",
     "store_name": "とらのあな"
   },
   "9784434373633|kikuya": {
@@ -36972,9 +36972,9 @@
     "store_name": "アニメイト"
   },
   "9784866579719|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784866579719",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(俺、冒険者! ~無双スキルは平面魔法~ 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012834438/",
     "store_name": "とらのあな"
   },
   "9784866579719|kikuya": {
@@ -58692,9 +58692,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784825101746|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】おちこぼれ勇者パ.. まもウィリアムズ 一迅社 B6判 2026/10/27",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043793",
     "store_name": "COMIC ZIN"
   },
   "9784825101814|comiczin": {
@@ -58909,13 +58909,13 @@
   },
   "9784866755281|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】イケメン女子でも.. つみきつき フレックスコミックス B6判 2026/10/15",
+    "detail": "イケメン女子でもかわいい.. つみきつき フレックスコミックス B6判 2026/10/15",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043704",
     "store_name": "COMIC ZIN"
   },
   "9784866755274|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】モップ無双~ナメ.. 原田靖生/妹尾尻尾 フレックスコミックス B6判 2026/10/15",
+    "detail": "モップ無双~ナメられてい.. 原田靖生/妹尾尻尾 フレックスコミックス B6判 2026/10/15",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043703",
     "store_name": "COMIC ZIN"
   },
@@ -80182,5 +80182,11 @@
     "detail": "小学館 吉永ゆう",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012834654/",
     "store_name": "とらのあな"
+  },
+  "9784065456934|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
