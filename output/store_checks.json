@@ -18775,8 +18775,8 @@
   },
   "9784041178454|toranoana": {
     "status": "特典あり",
-    "detail": "特典付き",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012742146/",
+    "detail": "KADOKAWA 漫画 momoru 原作 水卜みう キャラクター原案 おりょう",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012827696/",
     "store_name": "とらのあな"
   },
   "9784049722628|animate": {
@@ -40057,8 +40057,8 @@
   },
   "9784040766348|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA スパ郎",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012789198/",
+    "detail": "KADOKAWA 作画 石田彩 原作 スパ郎 キャラクター原案 すざく",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012828094/",
     "store_name": "とらのあな"
   },
   "9784040766348|kikuya": {
@@ -42240,9 +42240,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784785983246|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784785983246",
+    "status": "特典あり",
+    "detail": "少年画報社 藤川よつ葉/桑佳あさ",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833708/",
     "store_name": "とらのあな"
   },
   "9784785983246|kikuya": {
@@ -51030,9 +51030,9 @@
     "store_name": "こみらの！"
   },
   "9784065451946|comirano": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://comirano.info/category/comic/",
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/24%e6%99%82%e9%96%93%e7%95%8c%e9%9a%88%ef%bc%881%ef%bc%89/",
     "store_name": "こみらの！"
   },
   "9784065450970|comirano": {
@@ -80188,5 +80188,11 @@
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
     "store_name": "COMIC ZIN"
+  },
+  "9784098641895|toranoana": {
+    "status": "特典あり",
+    "detail": "小学館 秋ヨシカ",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012835802/",
+    "store_name": "とらのあな"
   }
 }
