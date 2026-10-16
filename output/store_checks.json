@@ -34314,9 +34314,9 @@
     "store_name": "メロンブックス"
   },
   "9784046605009|toranoana": {
-    "status": "特典あり",
-    "detail": "【特典】描き下ろし両面イラストカード(ヒロインに婚約者を取られるみたいなので、悪役令息(ヤンデレキャラ)を狙います 1)",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012822141/",
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046605009",
     "store_name": "とらのあな"
   },
   "9784046605009|kikuya": {
@@ -34716,9 +34716,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784046606273|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046606273",
+    "status": "特典あり",
+    "detail": "【特典】特製両面イラストカード(僕は君とユメをみる。 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012823050/",
     "store_name": "とらのあな"
   },
   "9784046606273|kikuya": {
@@ -38694,9 +38694,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784088552774|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088552774",
+    "status": "特典あり",
+    "detail": "集英社 上原有紗/カヅキハルカ",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833626/",
     "store_name": "とらのあな"
   },
   "9784088552774|kikuya": {
@@ -40561,8 +40561,8 @@
   },
   "9784046608260|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 夏目みや/作",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012749348/",
+    "detail": "KADOKAWA 著者 アナゴちん 原作 夏目みや キャラクター原案 桑島黎音",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831281/",
     "store_name": "とらのあな"
   },
   "9784046608260|kikuya": {
@@ -40669,8 +40669,8 @@
   },
   "9784046606839|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 富士田けやき",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012736437/",
+    "detail": "KADOKAWA 著者 D.P 原作 富士田けやき キャラクター原案 toi8",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831308/",
     "store_name": "とらのあな"
   },
   "9784046606839|kikuya": {
@@ -41664,9 +41664,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784301009054|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009054",
+    "status": "特典あり",
+    "detail": "スクウェア・エニックス 藍依青糸/諸星サロ",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833695/",
     "store_name": "とらのあな"
   },
   "9784301009054|kikuya": {
@@ -57900,9 +57900,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784088942957|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】ただのおっさん×.. かなりつ/斎藤由翔 集英社 B6判 2026/10/19",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043748",
     "store_name": "COMIC ZIN"
   },
   "9784088943947|comiczin": {
@@ -58015,7 +58015,7 @@
   },
   "9784065450987|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】ズレた解釈のぼく.. 柏木香乃 講談社 新書判 2026/10/16",
+    "detail": "ズレた解釈のぼくら 第1巻 柏木香乃 講談社 新書判 2026/10/16",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043718",
     "store_name": "COMIC ZIN"
   },
@@ -58320,9 +58320,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784041178492|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】イケメンお姉さん.. ヨウハ KADOKAWA B6 2026/10/23",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043863",
     "store_name": "COMIC ZIN"
   },
   "9784041178485|comiczin": {
@@ -58585,7 +58585,7 @@
   },
   "9784801991125|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】エルフの湯 第1巻 宮古蜂 竹書房 B6判 2026/10/16",
+    "detail": "エルフの湯 第1巻 宮古蜂 竹書房 B6判 2026/10/16",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043734",
     "store_name": "COMIC ZIN"
   },
@@ -58645,7 +58645,7 @@
   },
   "9784785983031|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】東の魔女は討たれ.. 藍葉悠気/佐藤貴彬 少年画報社 B6判 2026/10/16",
+    "detail": "東の魔女は討たれたい 第1巻 藍葉悠気/佐藤貴彬 少年画報社 B6判 2026/10/16",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043729",
     "store_name": "COMIC ZIN"
   },
@@ -80193,6 +80193,12 @@
     "status": "特典あり",
     "detail": "小学館 秋ヨシカ",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012835802/",
+    "store_name": "とらのあな"
+  },
+  "9784065454770|toranoana": {
+    "status": "特典あり",
+    "detail": "講談社 麻井あらた",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012836067/",
     "store_name": "とらのあな"
   }
 }
