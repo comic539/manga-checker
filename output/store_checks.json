@@ -36948,9 +36948,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784824018984|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824018984",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(カナンの城 1 ~亡国の王女と世界の秘宝、それを巡る最強盗賊団と覇権国家の大活劇~)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012827252/",
     "store_name": "とらのあな"
   },
   "9784824018984|kikuya": {
@@ -37987,7 +37987,7 @@
   },
   "9784824207753|toranoana": {
     "status": "特典あり",
-    "detail": "【特典】応援書店特典イラストカード(物理型白魔導師の軌跡 ソロの支援職、自分にバフを盛って攻撃特化無双。後方支援?そんな事より暴力です! 1)",
+    "detail": "【特典】応援書店特典イラストカード(物理型白魔導師の軌跡 ~ソロの支援職、自分にバフを盛って攻撃特化無双。後方支援?そんな事より暴力です!~ 1)",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012830156/",
     "store_name": "とらのあな"
   },
@@ -38047,7 +38047,7 @@
   },
   "9784824207746|toranoana": {
     "status": "特典あり",
-    "detail": "【特典】応援書店特典イラストカード(魔女姫クレアは人形と踊る 身の回りで大国の陰謀やらが蠢いてますが、ぶっ潰して大切な人達と平穏で幸せに生きたいと思います 1)",
+    "detail": "【特典】応援書店特典イラストカード(魔女姫クレアは人形と踊る ~身の回りで大国の陰謀やらが蠢いてますが、ぶっ潰して大切な人達と平穏で幸せに生きたいと思います~ 1)",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012830155/",
     "store_name": "とらのあな"
   },
@@ -58321,7 +58321,7 @@
   },
   "9784041178492|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】イケメンお姉さん.. ヨウハ KADOKAWA B6 2026/10/23",
+    "detail": "イケメンお姉さんはそーゆ.. ヨウハ KADOKAWA B6 2026/10/23",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043863",
     "store_name": "COMIC ZIN"
   },
@@ -80224,5 +80224,41 @@
     "detail": "小学館 藤生ナミ",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012837011/",
     "store_name": "とらのあな"
+  },
+  "9784065456712|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784098641673|toranoana": {
+    "status": "特典あり",
+    "detail": "小学館 野火けーたろ",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012837437/",
+    "store_name": "とらのあな"
+  },
+  "9784824019127|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784824019134|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784824019424|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784824019417|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
