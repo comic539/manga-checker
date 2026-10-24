@@ -59616,9 +59616,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784801991248|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】異世界まったり日.. フレデリック/さとうユーキ 竹書房 B6判 2026/11/06",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043922",
     "store_name": "COMIC ZIN"
   },
   "9784801991194|comiczin": {
@@ -79824,9 +79824,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784065456729|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】灯火からスパーク.. 雨隠ギド 講談社 B6判 2026/11/06",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043903",
     "store_name": "COMIC ZIN"
   },
   "9784065458969|animate": {
@@ -80266,5 +80266,17 @@
     "detail": "【予約】蒼天 第1巻 アンソロジー リイド社 B5判 2026/10/29",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043804",
     "store_name": "COMIC ZIN"
+  },
+  "9784098550166|toranoana": {
+    "status": "特典あり",
+    "detail": "小学館 かすが龍。/猫文字隼人",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838430/",
+    "store_name": "とらのあな"
+  },
+  "9784091543943|toranoana": {
+    "status": "特典あり",
+    "detail": "小学館 松本しげのぶ/佐島勤",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838429/",
+    "store_name": "とらのあな"
   }
 }
