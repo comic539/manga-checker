@@ -36703,7 +36703,7 @@
   },
   "9784434373671|toranoana": {
     "status": "特典あり",
-    "detail": "【特典】描き下ろしイラストカード(側妃のお仕事は終了です。 1)",
+    "detail": "【特典】イラストカード(側妃のお仕事は終了です。 1)",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012830455/",
     "store_name": "とらのあな"
   },
@@ -36739,7 +36739,7 @@
   },
   "9784434373633|toranoana": {
     "status": "特典あり",
-    "detail": "【特典】描き下ろしイラストカード(処刑された悪役令嬢は、時を遡り復讐する。 1)",
+    "detail": "【特典】イラストカード(処刑された悪役令嬢は、時を遡り復讐する。 1)",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012830456/",
     "store_name": "とらのあな"
   },
@@ -36774,9 +36774,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784434367076|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434367076",
+    "status": "特典あり",
+    "detail": "【特典】イラストカード(婚約者を奪われた伯爵令嬢、そろそろ好きに生きてみようと思います 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830473/",
     "store_name": "とらのあな"
   },
   "9784434367076|kikuya": {
@@ -36810,9 +36810,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784434375361|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434375361",
+    "status": "特典あり",
+    "detail": "【特典】イラストカード(後宮の隠れ薬師は闇夜を照らす 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831634/",
     "store_name": "とらのあな"
   },
   "9784434375361|kikuya": {
@@ -36846,9 +36846,9 @@
     "store_name": "ゲーマーズ"
   },
   "9784434369742|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434369742",
+    "status": "特典あり",
+    "detail": "【特典】イラストカード(月華後宮伝 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831635/",
     "store_name": "とらのあな"
   },
   "9784434369742|kikuya": {
@@ -39739,7 +39739,7 @@
   },
   "9784041180136|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 天夏炉心 橋本つかさ",
+    "detail": "KADOKAWA 天夏炉心/原作 橋本つかさ/漫画",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012827695/",
     "store_name": "とらのあな"
   },
@@ -39805,7 +39805,7 @@
   },
   "9784046606969|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 漫画 sohu",
+    "detail": "KADOKAWA sohu",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828530/",
     "store_name": "とらのあな"
   },
@@ -39985,8 +39985,8 @@
   },
   "9784040766393|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 作画 仙道八 原作 千賀史貴",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012828091/",
+    "detail": "特典付き",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838728/",
     "store_name": "とらのあな"
   },
   "9784040766393|kikuya": {
@@ -40093,8 +40093,8 @@
   },
   "9784040766386|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 原作 白崎カル 作画 黒糖ニッケ",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012828092/",
+    "detail": "特典付き",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838727/",
     "store_name": "とらのあな"
   },
   "9784040766386|kikuya": {
@@ -40129,8 +40129,8 @@
   },
   "9784040766256|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 著者 観音リツ",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830476/",
+    "detail": "特典付き",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838724/",
     "store_name": "とらのあな"
   },
   "9784040766256|kikuya": {
@@ -40165,8 +40165,8 @@
   },
   "9784049723038|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012834374/",
+    "detail": "特典付き",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838730/",
     "store_name": "とらのあな"
   },
   "9784049723038|kikuya": {
@@ -40346,7 +40346,7 @@
   "9784049722802|toranoana": {
     "status": "特典あり",
     "detail": "KADOKAWA 原作 四葉夕卜 漫画 青木裕",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830889/",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012839070/",
     "store_name": "とらのあな"
   },
   "9784049722802|kikuya": {
@@ -41023,8 +41023,8 @@
   },
   "9784049722628|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 漫画 ヨシカ 原作 折口良乃 キャラクター原案 ろうか",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012832000/",
+    "detail": "KADOKAWA 折口良乃/作",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012750547/",
     "store_name": "とらのあな"
   },
   "9784049722628|kikuya": {
@@ -58357,7 +58357,7 @@
   },
   "9784046607379|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】あたし達って付き.. 涼風そら KADOKAWA B6版 2026/10/27",
+    "detail": "あたし達って付き合ってる.. 涼風そら KADOKAWA B6版 2026/10/27",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043866",
     "store_name": "COMIC ZIN"
   },
@@ -58693,7 +58693,7 @@
   },
   "9784825101746|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】おちこぼれ勇者パ.. まもウィリアムズ 一迅社 B6判 2026/10/27",
+    "detail": "おちこぼれ勇者パーティの.. まもウィリアムズ 一迅社 B6判 2026/10/27",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043793",
     "store_name": "COMIC ZIN"
   },
@@ -59298,9 +59298,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784049722253|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】ひとりみです 第1巻 森島明子 KADOKAWA B6判 2026/11/06",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043841",
     "store_name": "COMIC ZIN"
   },
   "9784048119832|comiczin": {
@@ -59628,9 +59628,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784801991255|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】聞き間違いから始.. 西洋躑躅/かにすき 竹書房 B6判 2026/11/06",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043924",
     "store_name": "COMIC ZIN"
   },
   "9784801991293|comiczin": {
@@ -59934,9 +59934,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784866755373|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】辺境のお風呂屋さ.. 吉村竜巻 フレックスコミックス B6判 2026/11/13",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043982",
     "store_name": "COMIC ZIN"
   },
   "9784866755335|comiczin": {
@@ -80197,8 +80197,8 @@
   },
   "9784065454770|toranoana": {
     "status": "特典あり",
-    "detail": "講談社 麻井あらた",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012836067/",
+    "detail": "特典付き",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838732/",
     "store_name": "とらのあな"
   },
   "9784065453810|toranoana": {
@@ -80263,7 +80263,7 @@
   },
   "9784065462782|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】蒼天 第1巻 アンソロジー リイド社 B5判 2026/10/29",
+    "detail": "蒼天 第1巻 アンソロジー リイド社 B5判 2026/10/29",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043804",
     "store_name": "COMIC ZIN"
   },
