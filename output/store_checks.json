@@ -39805,7 +39805,7 @@
   },
   "9784046606969|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA sohu",
+    "detail": "KADOKAWA sohu/漫画",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828530/",
     "store_name": "とらのあな"
   },
@@ -39841,7 +39841,7 @@
   },
   "9784049722253|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 著者 森島明子",
+    "detail": "KADOKAWA 森島明子",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828542/",
     "store_name": "とらのあな"
   },
@@ -39877,7 +39877,7 @@
   },
   "9784048119832|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 著者 masterlynx",
+    "detail": "KADOKAWA masterlynx",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828538/",
     "store_name": "とらのあな"
   },
@@ -39913,7 +39913,7 @@
   },
   "9784049723205|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 著 イチゼン",
+    "detail": "KADOKAWA イチゼン",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828546/",
     "store_name": "とらのあな"
   },
@@ -39949,7 +39949,7 @@
   },
   "9784049723106|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 著者 夏燈サガリ",
+    "detail": "KADOKAWA 夏燈サガリ",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828545/",
     "store_name": "とらのあな"
   },
@@ -40057,7 +40057,7 @@
   },
   "9784040766348|toranoana": {
     "status": "特典あり",
-    "detail": "KADOKAWA 作画 石田彩 原作 スパ郎 キャラクター原案 すざく",
+    "detail": "KADOKAWA スパ郎 石田彩",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012828094/",
     "store_name": "とらのあな"
   },
@@ -41239,8 +41239,8 @@
   },
   "9784253019941|toranoana": {
     "status": "特典あり",
-    "detail": "秋田書店 もりみや仁",
-    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833873/",
+    "detail": "特典付き",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012839430/",
     "store_name": "とらのあな"
   },
   "9784253019941|kikuya": {
@@ -52584,9 +52584,9 @@
     "store_name": "こみらの！"
   },
   "9784592231752|comirano": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://comirano.info/category/comic/",
+    "status": "特典あり",
+    "detail": "特典:イラストカード付",
+    "url": "https://comirano.info/%e5%a4%a9%e9%9f%b3%e3%81%8a%e5%ac%a2%e6%a7%98%e3%81%ae%e8%a8%80%e3%81%86%e3%81%93%e3%81%a8%e3%81%ab%e3%81%af%ef%bc%88%ef%bc%91%ef%bc%89/",
     "store_name": "こみらの！"
   },
   "9784801991248|comirano": {
@@ -52824,9 +52824,9 @@
     "store_name": "こみらの！"
   },
   "9784824207906|comirano": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://comirano.info/category/comic/",
+    "status": "特典あり",
+    "detail": "特典:イラストカード",
+    "url": "https://comirano.info/%e4%bc%9d%e8%aa%ac%e3%81%ae%e6%82%aa%e5%bd%b9%e4%bb%a4%e5%ac%a2%e3%82%89%e3%81%97%e3%81%84%e3%81%ae%e3%81%a7%e6%9c%ac%e7%b7%a8%e3%81%ab%e3%81%af%e5%87%ba%e3%81%aa%e3%81%84%e3%81%93%e3%81%a8%e3%81%ab/",
     "store_name": "こみらの！"
   },
   "9784824207920|comirano": {
@@ -58177,7 +58177,7 @@
   },
   "9784778034252|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】キリコの生き物探.. さとかつ 小学館クリエイティブ B6判 2026/10/30",
+    "detail": "キリコの生き物探訪 第1巻 さとかつ 小学館クリエイティブ B6判 2026/10/30",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043817",
     "store_name": "COMIC ZIN"
   },
@@ -58549,7 +58549,7 @@
   },
   "9784592167235|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】追放荷物持ちの逆.. あるみらん/すかいふぁーむ 白泉社 B6判 2026/10/29",
+    "detail": "追放荷物持ちの逆転無双 .. あるみらん/すかいふぁーむ 白泉社 B6判 2026/10/29",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043810",
     "store_name": "COMIC ZIN"
   },
@@ -80278,5 +80278,11 @@
     "detail": "小学館 松本しげのぶ/佐島勤",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012838429/",
     "store_name": "とらのあな"
+  },
+  "9784074644841|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
