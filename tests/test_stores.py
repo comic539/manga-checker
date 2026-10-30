@@ -992,6 +992,131 @@ class DetailFetchTests(unittest.TestCase):
             {c.store_id: c.status for c in miss_checks}["comirano"], STATUS_YES
         )
 
+    def test_future_month_listing_miss_is_unknown_unless_month_covered(self) -> None:
+        from datetime import date
+
+        from manga_checker.bulk_listings import BulkListingIndex, ListingItem
+        from manga_checker.official import OfficialIndex
+        from manga_checker.stores import check_stores, listing_covers_comic
+
+        future = Comic(title="来月の本 1", isbn="9784000999999", pubdate="2026-11-12")
+        today = date(2026, 10, 30)
+        self.assertFalse(
+            listing_covers_comic("toranoana", future, today=today)
+        )
+        self.assertFalse(listing_covers_comic("animate", future, today=today))
+        self.assertTrue(
+            listing_covers_comic(
+                "toranoana", future, today=today, covered_months={(2026, 11)}
+            )
+        )
+        listings = BulkListingIndex()
+        listings.loaded = True
+        listings.items["toranoana"] = [
+            ListingItem(
+                title="別作品 1",
+                url="https://ecs.toranoana.jp/tora/ec/item/1/",
+                extra="【特典】ペーパー",
+            )
+        ]
+        listings.covered_months["toranoana"] = {(2026, 10)}
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        cache = {
+            f"{future.isbn}|toranoana": {
+                "status": STATUS_NO,
+                "detail": "古いなし",
+                "url": "https://ecs.toranoana.jp/",
+                "store_name": "とらのあな",
+            }
+        }
+        checks = check_stores(
+            future,
+            fetch=False,
+            delay_sec=0,
+            catalog=catalog,
+            listings=listings,
+            cache=cache,
+        )
+        by_id = {c.store_id: c for c in checks}
+        self.assertEqual(by_id["toranoana"].status, STATUS_UNKNOWN)
+        listings.covered_months["toranoana"] = {(2026, 11)}
+        covered_checks = check_stores(
+            future,
+            fetch=False,
+            delay_sec=0,
+            catalog=catalog,
+            listings=listings,
+            cache={},
+        )
+        covered_by_id = {c.store_id: c for c in covered_checks}
+        self.assertEqual(covered_by_id["toranoana"].status, STATUS_NO)
+
+    def test_empty_listing_does_not_keep_stale_no(self) -> None:
+        from manga_checker.bulk_listings import BulkListingIndex
+        from manga_checker.official import OfficialIndex
+        from manga_checker.stores import check_stores
+
+        future = Comic(title="来月の本 1", isbn="9784000999998", pubdate="2026-11-12")
+        listings = BulkListingIndex()
+        listings.loaded = True
+        listings.items["animate"] = []
+        listings.items["toranoana"] = []
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        cache = {
+            f"{future.isbn}|animate": {
+                "status": STATUS_NO,
+                "detail": "古いなし",
+                "url": "https://www.animate-onlineshop.jp/",
+                "store_name": "アニメイト",
+            },
+            f"{future.isbn}|toranoana": {
+                "status": STATUS_YES,
+                "detail": "誤判定",
+                "url": "https://ecs.toranoana.jp/",
+                "store_name": "とらのあな",
+            },
+        }
+        checks = check_stores(
+            future,
+            fetch=False,
+            delay_sec=0,
+            catalog=catalog,
+            listings=listings,
+            cache=cache,
+        )
+        by_id = {c.store_id: c for c in checks}
+        self.assertEqual(by_id["animate"].status, STATUS_UNKNOWN)
+        self.assertEqual(by_id["toranoana"].status, STATUS_UNKNOWN)
+        self.assertNotIn(f"{future.isbn}|animate", cache)
+        self.assertNotIn(f"{future.isbn}|toranoana", cache)
+
+    def test_current_month_empty_listing_is_unknown(self) -> None:
+        from datetime import date
+
+        from manga_checker.bulk_listings import BulkListingIndex
+        from manga_checker.official import OfficialIndex
+        from manga_checker.stores import check_stores
+
+        current = Comic(title="今月の本 1", isbn="9784000999997", pubdate="2026-10-15")
+        listings = BulkListingIndex()
+        listings.loaded = True
+        listings.items["animate"] = []
+        catalog = OfficialIndex()
+        catalog.loaded = True
+        with patch("manga_checker.stores.today_jst", return_value=date(2026, 10, 30)):
+            checks = check_stores(
+                current,
+                fetch=False,
+                delay_sec=0,
+                catalog=catalog,
+                listings=listings,
+                cache={},
+            )
+        by_id = {c.store_id: c for c in checks}
+        self.assertEqual(by_id["animate"].status, STATUS_UNKNOWN)
+
 
 if __name__ == "__main__":
     unittest.main()

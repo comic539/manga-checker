@@ -313,7 +313,10 @@ def main() -> None:
     melon_wanted = (not only_listings) or ("melonbooks" in only_listings)
     if args.fetch and melon_wanted:
         try:
-            melon_raw = load_melon_privileges(session, priv_months)
+            melon_covered: set[tuple[int, int]] = set()
+            melon_raw = load_melon_privileges(
+                session, priv_months, covered=melon_covered
+            )
             added = merge_privilege_listings_into_catalog(
                 comics_by_month,
                 melon_raw,
@@ -323,8 +326,8 @@ def main() -> None:
                 ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)
                 for item in melon_raw
             ]
-            if not listings.items["melonbooks"]:
-                listings.items.pop("melonbooks", None)
+            if melon_covered:
+                listings.covered_months["melonbooks"] = melon_covered
             print(f"メロン特典カレンダーの第1巻をカタログへ {added} 件補完しました。")
             windows = catalog_display_months(live_windows, comics_by_month)
         except Exception as exc:

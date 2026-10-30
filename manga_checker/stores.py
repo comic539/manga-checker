@@ -46,7 +46,12 @@ ISBN_NO_HIT_IS_ABSENT = frozenset()
 BULK_LISTING_STORES = frozenset(
     {"animate", "melonbooks", "gamers", "toranoana", "comiczin", "comirano"}
 )
-def listing_covers_comic(store_id: str, comic: Comic, today=None) -> bool:
+def listing_covers_comic(
+    store_id: str,
+    comic: Comic,
+    today=None,
+    covered_months: set[tuple[int, int]] | None = None,
+) -> bool:
     """一覧走査がその作品の月を完全に覆うなら、未ヒットを特典なしにしてよい。"""
     if store_id in {"comirano", "kikuya"}:
         return False
@@ -54,9 +59,11 @@ def listing_covers_comic(store_id: str, comic: Comic, today=None) -> bool:
     current_date = today or today_jst()
     current = (current_date.year, current_date.month)
     nxt = add_months(current_date.year, current_date.month, 1)
+    if covered_months is not None:
+        return ym in covered_months if ym is not None else False
     if ym is None:
-        return store_id not in {"toranoana", "comiczin"}
-    if store_id == "toranoana":
+        return store_id not in {"toranoana", "comiczin", "animate", "melonbooks", "gamers"}
+    if store_id in {"toranoana", "animate", "melonbooks", "gamers"}:
         return ym == current
     if store_id == "comiczin":
         return current <= ym <= nxt
@@ -232,24 +239,21 @@ def check_stores(
             )
             continue
         if store.store_id in BULK_LISTING_STORES:
-            if listings is not None and listings.items.get(store.store_id):
+            if listings is not None and store.store_id in listings.items:
                 check = listings.check(store.store_id, store.name, comic, url)
+                covered = listings.covered_months.get(store.store_id, set())
                 if check.status != STATUS_YES and not listing_covers_comic(
-                    store.store_id, comic
+                    store.store_id, comic, covered_months=covered
                 ):
-                    remembered = cached_check(cache, comic, store.store_id)
-                    if remembered is not None:
-                        results.append(remembered)
-                        continue
-                    results.append(
-                        StoreCheck(
-                            store.store_id,
-                            store.name,
-                            STATUS_UNKNOWN,
-                            "新着一覧の走査範囲に未掲載のため未確認。",
-                            url,
-                        )
+                    unknown = StoreCheck(
+                        store.store_id,
+                        store.name,
+                        STATUS_UNKNOWN,
+                        "新着一覧の走査範囲に未掲載のため未確認。",
+                        url,
                     )
+                    remember_check(cache, unknown, comic)
+                    results.append(unknown)
                     continue
                 remember_check(cache, check, comic)
                 results.append(check)
@@ -260,15 +264,15 @@ def check_stores(
             if remembered is not None:
                 results.append(remembered)
                 continue
-            results.append(
-                StoreCheck(
-                    store.store_id,
-                    store.name,
-                    STATUS_UNKNOWN,
-                    "入荷・特典一覧を取得できていません。",
-                    url,
-                )
+            unknown = StoreCheck(
+                store.store_id,
+                store.name,
+                STATUS_UNKNOWN,
+                "入荷・特典一覧を取得できていません。",
+                url,
             )
+            remember_check(cache, unknown, comic)
+            results.append(unknown)
             continue
         official_yes, detail, official_url = lookup_status(
             catalog,

@@ -270,7 +270,7 @@ class HtmlSearchTests(unittest.TestCase):
         self.assertGreater(html.find('class="site-legal"'), html.find('id="pager"'))
         self.assertLess(html.find('class="site-legal"'), html.find("</body>"))
 
-    def test_unknown_store_status_shows_as_no_privilege(self) -> None:
+    def test_unknown_store_status_shows_as_unconfirmed(self) -> None:
         reports = [
             ComicReport(
                 Comic(title="未確認作品 1", isbn="9784000000001"),
@@ -289,9 +289,9 @@ class HtmlSearchTests(unittest.TestCase):
             html = (Path(tmp) / "out.html")
             write_html(reports, html, "test")
             text = html.read_text(encoding="utf-8")
-        self.assertIn("class=\"badge no btn-press\"", text)
-        self.assertIn("<span class='status'>特典なし</span>", text)
-        self.assertNotIn("<span class='status'>未確認</span>", text)
+        self.assertIn("class=\"badge todo btn-press\"", text)
+        self.assertIn("<span class='status'>未確認</span>", text)
+        self.assertNotIn("<span class='status'>特典なし</span>", text)
         self.assertIn("📋 コピー", text)
         self.assertIn("</a><button type=\"button\" class=\"copy-title\"", text)
         self.assertIn('class="smart-header"', text)

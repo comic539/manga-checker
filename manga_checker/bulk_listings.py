@@ -33,6 +33,7 @@ class ListingItem:
 @dataclass
 class BulkListingIndex:
     items: dict[str, list[ListingItem]] = field(default_factory=dict)
+    covered_months: dict[str, set[tuple[int, int]]] = field(default_factory=dict)
     loaded: bool = False
 
     def load(
@@ -72,8 +73,7 @@ class BulkListingIndex:
                     for item in zin_raw
                     if is_volume_one(item.title)
                 ]
-                if not self.items["comiczin"]:
-                    self.items.pop("comiczin", None)
+                # 0件でも「取得済み」として残し、未ヒットをキャッシュの古い判定で埋めない。
         if "comirano" in wanted:
             comirano_raw = _load_store_list("こみらの！", lambda: load_comirano_items(session))
             if comirano_raw is not None:
@@ -82,56 +82,71 @@ class BulkListingIndex:
                     for item in comirano_raw
                     if is_volume_one(item.title)
                 ]
-                if not self.items["comirano"]:
-                    self.items.pop("comirano", None)
+                # 0件でも取得済みとして残す。
         if "animate" in wanted:
+            animate_covered: set[tuple[int, int]] = set()
             animate_raw = _load_store_list(
                 "アニメイト特典",
-                lambda: load_animate_privileges(session, priv_months),
+                lambda: load_animate_privileges(
+                    session, priv_months, covered=animate_covered
+                ),
             )
+            if animate_covered:
+                self.covered_months["animate"] = animate_covered
             if animate_raw is not None:
                 self.items["animate"] = [
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in animate_raw
                 ]
-                if not self.items["animate"]:
-                    self.items.pop("animate", None)
+                # 空一覧でもキーを残し、未確認へ落とせるようにする。
         if "melonbooks" in wanted and "melonbooks" not in self.items:
+            melon_covered: set[tuple[int, int]] = set()
             melon_raw = _load_store_list(
                 "メロンブックス特典",
-                lambda: load_melon_privileges(session, priv_months),
+                lambda: load_melon_privileges(
+                    session, priv_months, covered=melon_covered
+                ),
             )
+            if melon_covered:
+                self.covered_months["melonbooks"] = melon_covered
             if melon_raw is not None:
                 self.items["melonbooks"] = [
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in melon_raw
                 ]
-                if not self.items["melonbooks"]:
-                    self.items.pop("melonbooks", None)
+                # 空一覧でもキーを残す。
         if "gamers" in wanted:
+            gamers_covered: set[tuple[int, int]] = set()
             gamers_raw = _load_store_list(
                 "ゲーマーズ特典",
-                lambda: load_gamers_privileges(session, priv_months),
+                lambda: load_gamers_privileges(
+                    session, priv_months, covered=gamers_covered
+                ),
             )
+            if gamers_covered:
+                self.covered_months["gamers"] = gamers_covered
             if gamers_raw is not None:
                 self.items["gamers"] = [
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in gamers_raw
                 ]
-                if not self.items["gamers"]:
-                    self.items.pop("gamers", None)
+                # 空一覧でもキーを残す。
         if "toranoana" in wanted:
+            tora_covered: set[tuple[int, int]] = set()
             tora_raw = _load_store_list(
                 "とらのあな特典",
-                lambda: load_toranoana_privileges(session, months, comics=comics or []),
+                lambda: load_toranoana_privileges(
+                    session, priv_months, comics=comics or [], covered=tora_covered
+                ),
             )
+            if tora_covered:
+                self.covered_months["toranoana"] = tora_covered
             if tora_raw is not None:
                 self.items["toranoana"] = [
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in tora_raw
                 ]
-                if not self.items["toranoana"]:
-                    self.items.pop("toranoana", None)
+                # 空一覧でもキーを残す。
         self.loaded = True
         print(
             "  一覧件数: "

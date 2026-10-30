@@ -202,8 +202,8 @@ def write_html(
             f'<div class="month-panel{active}" id="month-{html.escape(month_id, quote=True)}" '
             f'data-month="{html.escape(month_id, quote=True)}" data-total="{len(month_items)}" '
             f'data-yes="{counts.get(STATUS_YES, 0)}" '
-            f'data-no="{counts.get(STATUS_NO, 0) + counts.get(STATUS_UNKNOWN, 0)}" '
-            f'data-todo="0" role="tabpanel"{hidden}>'
+            f'data-no="{counts.get(STATUS_NO, 0)}" '
+            f'data-todo="{counts.get(STATUS_UNKNOWN, 0)}" role="tabpanel"{hidden}>'
             f"{inner}"
             "</div>"
         )
@@ -773,6 +773,8 @@ def _badge_html(check: StoreCheck, *, press: bool = True, note: str | None = Non
 def _badge_view(status: str) -> tuple[str, str]:
     if status == STATUS_YES:
         return "yes", STATUS_YES
+    if status == STATUS_UNKNOWN:
+        return "todo", STATUS_UNKNOWN
     return "no", STATUS_NO
 
 

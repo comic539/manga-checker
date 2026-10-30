@@ -278,12 +278,20 @@ class PrivilegeListParseTests(unittest.TestCase):
           <h3 class="product-list-title">
             <a href="/tora/ec/item/200012826267/">アンデッドさんの不器用な青春 1</a>
           </h3>
+          <ul class="product-list-labels"><li>特典</li></ul>
+        </li>
+        <li class="product-list-item catalog-item-card">
+          <h3 class="product-list-title">
+            <a href="/tora/ec/item/200012776003/">モンキーハンティング 1</a>
+          </h3>
+          <ul class="product-list-labels"><li>宝島社</li><li>増田俊也</li></ul>
         </li>
         """
         items = parse_toranoana_calendar(html)
         self.assertEqual(len(items), 1)
         self.assertIn("アンデッドさん", items[0].title)
         self.assertIn("/tora/ec/item/200012826267/", items[0].url)
+        self.assertNotIn("モンキーハンティング", items[0].title)
 
     def test_toranoana_benefit_json(self) -> None:
         from manga_checker.privilege_index import parse_toranoana_benefit_json
@@ -321,3 +329,46 @@ class PrivilegeListParseTests(unittest.TestCase):
             catalog_issue_dates(comics, months=[(2026, 10)]),
             ["20261015", "20261016"],
         )
+
+    def test_toranoana_covers_json_months_not_generic_html(self) -> None:
+        from unittest.mock import MagicMock, patch
+
+        from manga_checker.privilege_index import (
+            PrivilegeItem,
+            load_toranoana_privileges,
+        )
+
+        covered: set[tuple[int, int]] = set()
+
+        def json_side(_session, year, month):
+            if (year, month) == (2026, 10):
+                return []
+            if (year, month) == (2026, 11):
+                return [
+                    PrivilegeItem(
+                        title="本 1",
+                        url="https://ecs.toranoana.jp/tora/ec/item/1/",
+                        extra="【特典】カード",
+                    )
+                ]
+            return None
+
+        with (
+            patch(
+                "manga_checker.privilege_index._load_toranoana_month_json",
+                side_effect=json_side,
+            ),
+            patch(
+                "manga_checker.privilege_index._get_tora",
+                return_value="<html>catalog</html>",
+            ),
+            patch("manga_checker.privilege_index.time.sleep"),
+        ):
+            items = load_toranoana_privileges(
+                MagicMock(),
+                months=[(2026, 10), (2026, 11), (2026, 12)],
+                delay_sec=0,
+                covered=covered,
+            )
+        self.assertEqual(len(items), 1)
+        self.assertEqual(covered, {(2026, 10), (2026, 11)})

@@ -51,6 +51,9 @@ TORA_HEADERS = {
 }
 _COMIC_PREFIX = re.compile(r"^【[^】]*】")
 _PAGEN = re.compile(r"[?&]pageno=(\d+)", re.I)
+_COOKIE_BOUNCE = re.compile(
+    r"document\.location\.href\s*=\s*decodeURIComponent\('([^']+)'\)"
+)
 _LIMITED_EDITION = re.compile(r"『[^』]*限定版[^』]*』")
 _VOLUME_SET = re.compile(r"\[全\d+冊セット\]")
 _SKIP_BUNDLE = re.compile(r"全巻セット|同時購入セット")
@@ -77,6 +80,7 @@ def load_animate_privileges(
     session: requests.Session,
     months: list[tuple[int, int]] | None = None,
     delay_sec: float = 1.2,
+    covered: set[tuple[int, int]] | None = None,
 ) -> list[PrivilegeItem]:
     months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
@@ -96,6 +100,8 @@ def load_animate_privileges(
             delay_sec,
             label="アニメイト特典",
         )
+        if covered is not None and added:
+            covered.add((year, month))
         print(f"アニメイト特典: {year}年{month}月 {added} 件（累計 {len(items)}）")
     return items
 
@@ -134,6 +140,7 @@ def load_melon_privileges(
     session: requests.Session,
     months: list[tuple[int, int]] | None = None,
     delay_sec: float = 1.2,
+    covered: set[tuple[int, int]] | None = None,
 ) -> list[PrivilegeItem]:
     months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
@@ -165,6 +172,8 @@ def load_melon_privileges(
         for item in items[before:]:
             if not item.pubdate:
                 item.pubdate = stamp
+        if covered is not None and added:
+            covered.add((day.year, day.month))
         if day.day == 1 or added:
             print(f"メロン特典: {day:%Y/%m/%d} +{added} 件（累計 {len(items)}）")
     print(f"メロンブックス特典: {len(items)} 件")
@@ -218,6 +227,7 @@ def load_gamers_privileges(
     session: requests.Session,
     months: list[tuple[int, int]] | None = None,
     delay_sec: float = 1.2,
+    covered: set[tuple[int, int]] | None = None,
 ) -> list[PrivilegeItem]:
     months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
@@ -238,6 +248,8 @@ def load_gamers_privileges(
             label="ゲーマーズ特典",
         )
         print(f"ゲーマーズ特典: {year}年{month}月 {added} 件（累計 {len(items)}）")
+        if covered is not None and added:
+            covered.add((year, month))
     return items
 
 
@@ -295,46 +307,39 @@ def load_toranoana_privileges(
     delay_sec: float = 1.0,
     issue_dates: list[str] | None = None,
     comics: list[Comic] | None = None,
+    covered: set[tuple[int, int]] | None = None,
 ) -> list[PrivilegeItem]:
     del issue_dates
-    del months
-    today = today_jst()
-    current = (today.year, today.month)
-    next_month = add_months(today.year, today.month, 1)
+    del comics
+    months = months or privilege_rematch_months()
     items: list[PrivilegeItem] = []
     seen: set[str] = set()
-
-    print(f"とらのあな特典: 当月カレンダー {current[0]}年{current[1]}月を取得します")
-    year, month = current
-    page_url = TORA_BENEFIT_PAGE.format(year=year, month=f"{month:02d}", page=1)
-    html = _get_tora(session, page_url, f"とらのあな特典カレンダー {year}/{month:02d}")
-    time.sleep(delay_sec)
-    for item in _load_toranoana_month_json(session, year, month):
-        if item.url in seen:
-            continue
-        seen.add(item.url)
-        items.append(item)
-    time.sleep(delay_sec)
-    if html:
-        for item in parse_toranoana_calendar(html, page_url):
-            if item.url in seen:
-                continue
-            seen.add(item.url)
-            items.append(item)
-    print(f"  当月カレンダー {len(items)} 件")
-
-    future_comics = [
-        comic
-        for comic in (comics or [])
-        if year_month_from_pubdate(comic.pubdate) == next_month
-    ]
-    print(f"とらのあな特典: 翌月タイトル検索 {len(future_comics)} 件")
-    for comic in future_comics:
-        item = search_toranoana_title_privilege(session, comic, delay_sec=delay_sec)
-        if item is None or item.url in seen:
-            continue
-        seen.add(item.url)
-        items.append(item)
+    for year, month in months:
+        before = len(items)
+        json_items = _load_toranoana_month_json(session, year, month)
+        time.sleep(delay_sec)
+        json_ok = json_items is not None
+        if json_ok:
+            for item in json_items:
+                if item.url in seen:
+                    continue
+                seen.add(item.url)
+                items.append(item)
+        page_url = TORA_BENEFIT_PAGE.format(year=year, month=f"{month:02d}", page=1)
+        html = _get_tora(session, page_url, f"とらのあな特典カレンダー {year}/{month:02d}")
+        time.sleep(delay_sec)
+        if html:
+            for item in parse_toranoana_calendar(html, page_url):
+                if item.url in seen:
+                    continue
+                seen.add(item.url)
+                items.append(item)
+        added = len(items) - before
+        print(f"とらのあな特典: {year}年{month}月 {added} 件（累計 {len(items)}）")
+        if covered is not None and json_ok:
+            covered.add((year, month))
+        elif covered is not None and added:
+            covered.add((year, month))
     print(f"とらのあな特典: {len(items)} 件")
     return items
 
@@ -366,10 +371,12 @@ def search_toranoana_title_privilege(
 
 def _load_toranoana_month_json(
     session: requests.Session, year: int, month: int
-) -> list[PrivilegeItem]:
+) -> list[PrivilegeItem] | None:
     url = TORA_BENEFIT_JSON.format(year=year, month=f"{month:02d}")
     raw = _get_tora(session, url, f"とらのあな特典JSON {year}/{month:02d}")
-    if not raw:
+    if raw is None:
+        return None
+    if not raw.strip():
         return []
     return parse_toranoana_benefit_json(raw)
 
@@ -421,6 +428,9 @@ def parse_toranoana_calendar(
         extra = normalize_text(
             " ".join(span.get_text(" ", strip=True) for span in card.select(".product-list-labels li"))
         )
+        card_text = normalize_text(card.get_text(" ", strip=True))
+        if "特典" not in extra and "特典" not in card_text:
+            continue
         items.append(
             PrivilegeItem(title=title, url=url, extra=extra or "特典付き")
         )
@@ -513,12 +523,40 @@ def _tora_max_page(html: str) -> int:
     return 1
 
 
+def _listing_html_ok(html: str) -> bool:
+    text = html or ""
+    if len(text) < 4000:
+        return False
+    if "cookietest" in text and "document.location.href" in text:
+        return False
+    return True
+
+
+def _follow_cookie_bounce(html: str, page_url: str) -> str:
+    match = _COOKIE_BOUNCE.search(html or "")
+    if not match:
+        return ""
+    from urllib.parse import unquote
+
+    return urljoin(page_url, unquote(match.group(1)))
+
+
 def _get(session: requests.Session, url: str, label: str) -> str:
     try:
         response = get_with_retry(session, url, timeout=25, retries=2, label=label)
         if response.status_code >= 400:
             return ""
-        return response.text or ""
+        html = response.text or ""
+        bounce = _follow_cookie_bounce(html, url)
+        if bounce:
+            time.sleep(0.3)
+            get_with_retry(session, bounce, timeout=25, retries=1, label=label)
+            time.sleep(0.3)
+            response = get_with_retry(session, url, timeout=25, retries=2, label=label)
+            if response.status_code >= 400:
+                return ""
+            html = response.text or ""
+        return html
     except requests.RequestException:
         return ""
 

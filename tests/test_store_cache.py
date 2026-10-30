@@ -32,6 +32,21 @@ class StoreCacheTests(unittest.TestCase):
         )
         self.assertIsNone(cached_check(cache, comic, "animate"))
 
+    def test_unknown_clears_cached_no(self) -> None:
+        comic = Comic(title="来月の本 1", isbn="9784000999999")
+        cache: dict = {}
+        remember_check(
+            cache,
+            StoreCheck("animate", "アニメイト", STATUS_NO, "古いなし", "https://a"),
+            comic,
+        )
+        remember_check(
+            cache,
+            StoreCheck("animate", "アニメイト", STATUS_UNKNOWN, "未取得", "https://a"),
+            comic,
+        )
+        self.assertIsNone(cached_check(cache, comic, "animate"))
+
     def test_yes_and_no_are_reused(self) -> None:
         comic = Comic(
             title="2年B組 勇者デストロイヤーず 1",
