@@ -18107,12 +18107,6 @@
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012827696/",
     "store_name": "とらのあな"
   },
-  "9784301008545|animate": {
-    "status": "特典あり",
-    "detail": "詳細ページで検出: 特典について フェア・キャンペーン：【9/5～開催】GA文庫20周年フェア seco",
-    "url": "https://www.animate-onlineshop.jp/pd/3036077/",
-    "store_name": "アニメイト"
-  },
   "9784088940342|gamers": {
     "status": "特典あり",
     "detail": "詳細ページで検出: ゲーマーズ特典 描き下ろしブロマイド ゲーマーズオンラインショップでは終了しました ※特典は無くなり次第、",
@@ -36305,24 +36299,6 @@
     "url": "https://www.search.kumabook.com/kumazawa/html/products/list?mode=books&name=9784301008507",
     "store_name": "くまざわ書店"
   },
-  "9784301008545|melonbooks": {
-    "status": "特典なし",
-    "detail": "検索結果が0件のため、取り扱いなし（特典なし）と扱います。",
-    "url": "https://www.melonbooks.co.jp/search/search.php?name=9784301008545&text_type=all&category_id=4",
-    "store_name": "メロンブックス"
-  },
-  "9784301008545|gamers": {
-    "status": "特典なし",
-    "detail": "検索結果が0件のため、取り扱いなし（特典なし）と扱います。",
-    "url": "https://www.gamers.co.jp/products/list.php?mode=search&smt=9784301008545&spc=4",
-    "store_name": "ゲーマーズ"
-  },
-  "9784301008545|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301008545",
-    "store_name": "とらのあな"
-  },
   "9784301008545|kikuya": {
     "status": "特典なし",
     "detail": "公式特典ページに該当タイトルはありません。",
@@ -43097,12 +43073,6 @@
     "url": "https://comirano.info/category/comic/",
     "store_name": "こみらの！"
   },
-  "9784301008545|comirano": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://comirano.info/category/comic/",
-    "store_name": "こみらの！"
-  },
   "9784088850863|comiczin": {
     "status": "特典なし",
     "detail": "特典一覧に該当タイトルはありません。",
@@ -47724,12 +47694,6 @@
     "store_name": "COMIC ZIN"
   },
   "9784045001260|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
-    "store_name": "COMIC ZIN"
-  },
-  "9784301008545|comiczin": {
     "status": "特典なし",
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
@@ -66653,10 +66617,10 @@
     "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784074644841",
     "store_name": "とらのあな"
   },
-  "9784065462782|comiczin": {
+  "9784107729941|comiczin": {
     "status": "特典あり",
-    "detail": "蒼天 第1巻 アンソロジー リイド社 B5判 2026/10/29",
-    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043804",
+    "detail": "【予約】モンスターストラ.. 麦野イヌ 新潮社 B6判 2026/11/09",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043948",
     "store_name": "COMIC ZIN"
   }
 }
