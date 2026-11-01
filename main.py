@@ -322,12 +322,15 @@ def main() -> None:
                 melon_raw,
                 added_on=today_jst().isoformat(),
             )
-            listings.items["melonbooks"] = [
-                ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)
-                for item in melon_raw
-            ]
+            if melon_raw:
+                listings.items["melonbooks"] = [
+                    ListingItem(title=item.title, url=item.url, extra=item.extra, isbn=item.isbn)
+                    for item in melon_raw
+                ]
             if melon_covered:
                 listings.covered_months["melonbooks"] = melon_covered
+            if not listings.items.get("melonbooks"):
+                listings.items.pop("melonbooks", None)
             print(f"メロン特典カレンダーの第1巻をカタログへ {added} 件補完しました。")
             windows = catalog_display_months(live_windows, comics_by_month)
         except Exception as exc:

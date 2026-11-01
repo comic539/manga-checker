@@ -73,7 +73,8 @@ class BulkListingIndex:
                     for item in zin_raw
                     if is_volume_one(item.title)
                 ]
-                # 0件でも「取得済み」として残し、未ヒットをキャッシュの古い判定で埋めない。
+                if not self.items["comiczin"]:
+                    self.items.pop("comiczin", None)
         if "comirano" in wanted:
             comirano_raw = _load_store_list("こみらの！", lambda: load_comirano_items(session))
             if comirano_raw is not None:
@@ -82,7 +83,8 @@ class BulkListingIndex:
                     for item in comirano_raw
                     if is_volume_one(item.title)
                 ]
-                # 0件でも取得済みとして残す。
+                if not self.items["comirano"]:
+                    self.items.pop("comirano", None)
         if "animate" in wanted:
             animate_covered: set[tuple[int, int]] = set()
             animate_raw = _load_store_list(
@@ -98,7 +100,8 @@ class BulkListingIndex:
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in animate_raw
                 ]
-                # 空一覧でもキーを残し、未確認へ落とせるようにする。
+                if not self.items["animate"]:
+                    self.items.pop("animate", None)
         if "melonbooks" in wanted and "melonbooks" not in self.items:
             melon_covered: set[tuple[int, int]] = set()
             melon_raw = _load_store_list(
@@ -114,7 +117,8 @@ class BulkListingIndex:
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in melon_raw
                 ]
-                # 空一覧でもキーを残す。
+                if not self.items["melonbooks"]:
+                    self.items.pop("melonbooks", None)
         if "gamers" in wanted:
             gamers_covered: set[tuple[int, int]] = set()
             gamers_raw = _load_store_list(
@@ -130,7 +134,8 @@ class BulkListingIndex:
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in gamers_raw
                 ]
-                # 空一覧でもキーを残す。
+                if not self.items["gamers"]:
+                    self.items.pop("gamers", None)
         if "toranoana" in wanted:
             tora_covered: set[tuple[int, int]] = set()
             tora_raw = _load_store_list(
@@ -146,7 +151,8 @@ class BulkListingIndex:
                     ListingItem(title=item.title, url=item.url, extra=item.extra)
                     for item in tora_raw
                 ]
-                # 空一覧でもキーを残す。
+                if not self.items["toranoana"]:
+                    self.items.pop("toranoana", None)
         self.loaded = True
         print(
             "  一覧件数: "

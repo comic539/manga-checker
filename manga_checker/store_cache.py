@@ -89,7 +89,13 @@ def remember_check(cache: dict[str, dict[str, str]] | None, check: StoreCheck, c
     if cache is None:
         return
     if check.status == STATUS_UNKNOWN:
-        cache.pop(cache_key(comic, check.store_id), None)
+        key = cache_key(comic, check.store_id)
+        row = cache.get(key)
+        if row:
+            kept = _STATUS_ALIASES.get(row.get("status") or "", row.get("status") or "")
+            if kept == STATUS_YES:
+                return
+        cache.pop(key, None)
         return
     cache[cache_key(comic, check.store_id)] = {
         "status": check.status,

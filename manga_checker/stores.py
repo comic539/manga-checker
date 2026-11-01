@@ -239,12 +239,16 @@ def check_stores(
             )
             continue
         if store.store_id in BULK_LISTING_STORES:
-            if listings is not None and store.store_id in listings.items:
+            if listings is not None and listings.items.get(store.store_id):
                 check = listings.check(store.store_id, store.name, comic, url)
-                covered = listings.covered_months.get(store.store_id, set())
+                covered = listings.covered_months.get(store.store_id)
                 if check.status != STATUS_YES and not listing_covers_comic(
                     store.store_id, comic, covered_months=covered
                 ):
+                    remembered = cached_check(cache, comic, store.store_id)
+                    if remembered is not None:
+                        results.append(remembered)
+                        continue
                     unknown = StoreCheck(
                         store.store_id,
                         store.name,
@@ -252,7 +256,6 @@ def check_stores(
                         "新着一覧の走査範囲に未掲載のため未確認。",
                         url,
                     )
-                    remember_check(cache, unknown, comic)
                     results.append(unknown)
                     continue
                 remember_check(cache, check, comic)
@@ -264,6 +267,20 @@ def check_stores(
             if remembered is not None:
                 results.append(remembered)
                 continue
+            official_yes, detail, official_url = lookup_status(
+                catalog,
+                store.store_id,
+                comic.search_query,
+                comic.isbn,
+                url,
+            )
+            if official_yes == STATUS_YES:
+                check = StoreCheck(
+                    store.store_id, store.name, official_yes, detail, official_url
+                )
+                remember_check(cache, check, comic)
+                results.append(check)
+                continue
             unknown = StoreCheck(
                 store.store_id,
                 store.name,
@@ -271,7 +288,6 @@ def check_stores(
                 "入荷・特典一覧を取得できていません。",
                 url,
             )
-            remember_check(cache, unknown, comic)
             results.append(unknown)
             continue
         official_yes, detail, official_url = lookup_status(

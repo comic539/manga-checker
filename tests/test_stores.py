@@ -1039,7 +1039,7 @@ class DetailFetchTests(unittest.TestCase):
             cache=cache,
         )
         by_id = {c.store_id: c for c in checks}
-        self.assertEqual(by_id["toranoana"].status, STATUS_UNKNOWN)
+        self.assertEqual(by_id["toranoana"].status, STATUS_NO)
         listings.covered_months["toranoana"] = {(2026, 11)}
         covered_checks = check_stores(
             future,
@@ -1052,7 +1052,7 @@ class DetailFetchTests(unittest.TestCase):
         covered_by_id = {c.store_id: c for c in covered_checks}
         self.assertEqual(covered_by_id["toranoana"].status, STATUS_NO)
 
-    def test_empty_listing_does_not_keep_stale_no(self) -> None:
+    def test_empty_listing_keeps_cached_yes(self) -> None:
         from manga_checker.bulk_listings import BulkListingIndex
         from manga_checker.official import OfficialIndex
         from manga_checker.stores import check_stores
@@ -1061,21 +1061,21 @@ class DetailFetchTests(unittest.TestCase):
         listings = BulkListingIndex()
         listings.loaded = True
         listings.items["animate"] = []
-        listings.items["toranoana"] = []
+        listings.items["gamers"] = []
         catalog = OfficialIndex()
         catalog.loaded = True
         cache = {
             f"{future.isbn}|animate": {
-                "status": STATUS_NO,
-                "detail": "古いなし",
-                "url": "https://www.animate-onlineshop.jp/",
+                "status": STATUS_YES,
+                "detail": "描き下ろし",
+                "url": "https://www.animate-onlineshop.jp/pd/1/",
                 "store_name": "アニメイト",
             },
-            f"{future.isbn}|toranoana": {
-                "status": STATUS_YES,
-                "detail": "誤判定",
-                "url": "https://ecs.toranoana.jp/",
-                "store_name": "とらのあな",
+            f"{future.isbn}|gamers": {
+                "status": STATUS_NO,
+                "detail": "なし",
+                "url": "https://www.gamers.co.jp/",
+                "store_name": "ゲーマーズ",
             },
         }
         checks = check_stores(
@@ -1087,25 +1087,23 @@ class DetailFetchTests(unittest.TestCase):
             cache=cache,
         )
         by_id = {c.store_id: c for c in checks}
-        self.assertEqual(by_id["animate"].status, STATUS_UNKNOWN)
-        self.assertEqual(by_id["toranoana"].status, STATUS_UNKNOWN)
-        self.assertNotIn(f"{future.isbn}|animate", cache)
-        self.assertNotIn(f"{future.isbn}|toranoana", cache)
+        self.assertEqual(by_id["animate"].status, STATUS_YES)
+        self.assertEqual(by_id["gamers"].status, STATUS_NO)
 
-    def test_current_month_empty_listing_is_unknown(self) -> None:
+    def test_current_month_empty_listing_does_not_mark_no(self) -> None:
         from datetime import date
 
         from manga_checker.bulk_listings import BulkListingIndex
         from manga_checker.official import OfficialIndex
         from manga_checker.stores import check_stores
 
-        current = Comic(title="今月の本 1", isbn="9784000999997", pubdate="2026-10-15")
+        current = Comic(title="今月の本 1", isbn="9784000999997", pubdate="2026-11-15")
         listings = BulkListingIndex()
         listings.loaded = True
         listings.items["animate"] = []
         catalog = OfficialIndex()
         catalog.loaded = True
-        with patch("manga_checker.stores.today_jst", return_value=date(2026, 10, 30)):
+        with patch("manga_checker.stores.today_jst", return_value=date(2026, 11, 1)):
             checks = check_stores(
                 current,
                 fetch=False,

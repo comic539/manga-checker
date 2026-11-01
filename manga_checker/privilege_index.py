@@ -54,6 +54,7 @@ _PAGEN = re.compile(r"[?&]pageno=(\d+)", re.I)
 _COOKIE_BOUNCE = re.compile(
     r"document\.location\.href\s*=\s*decodeURIComponent\('([^']+)'\)"
 )
+_COOKIE_ASSIGN = re.compile(r"document\.cookie\s*=\s*['\"]([^'\"]+)['\"]")
 _LIMITED_EDITION = re.compile(r"『[^』]*限定版[^』]*』")
 _VOLUME_SET = re.compile(r"\[全\d+冊セット\]")
 _SKIP_BUNDLE = re.compile(r"全巻セット|同時購入セット")
@@ -100,6 +101,20 @@ def load_animate_privileges(
             delay_sec,
             label="アニメイト特典",
         )
+        if not added:
+            fallback = (
+                f"{ANIMATE_LIST}?mode=8&sl=80&ss=2&spc=4"
+                f"&start_date={start:%Y/%m/%d}&end_date={end:%Y/%m/%d}"
+            )
+            added = _walk_pages(
+                session,
+                fallback,
+                parse_animate_privilege_list,
+                seen,
+                items,
+                delay_sec,
+                label="アニメイト特典",
+            )
         if covered is not None and added:
             covered.add((year, month))
         print(f"アニメイト特典: {year}年{month}月 {added} 件（累計 {len(items)}）")
@@ -541,18 +556,49 @@ def _follow_cookie_bounce(html: str, page_url: str) -> str:
     return urljoin(page_url, unquote(match.group(1)))
 
 
+def _apply_js_cookies(session: requests.Session, html: str, page_url: str) -> None:
+    host = urlparse(page_url).hostname or ""
+    for raw in _COOKIE_ASSIGN.findall(html or ""):
+        first = raw.split(";", 1)[0]
+        if "=" not in first:
+            continue
+        name, value = first.split("=", 1)
+        name, value = name.strip(), value.strip()
+        if name:
+            session.cookies.set(name, value, domain=host)
+
+
 def _get(session: requests.Session, url: str, label: str) -> str:
     try:
         response = get_with_retry(session, url, timeout=25, retries=2, label=label)
         if response.status_code >= 400:
             return ""
         html = response.text or ""
-        bounce = _follow_cookie_bounce(html, url)
-        if bounce:
+        for _ in range(3):
+            _apply_js_cookies(session, html, url)
+            bounce = _follow_cookie_bounce(html, url)
+            if not bounce and "cookietest" not in html:
+                break
+            if bounce:
+                time.sleep(0.3)
+                bounce_headers = {"Referer": url}
+                get_with_retry(
+                    session,
+                    bounce,
+                    timeout=25,
+                    retries=1,
+                    headers=bounce_headers,
+                    label=label,
+                )
             time.sleep(0.3)
-            get_with_retry(session, bounce, timeout=25, retries=1, label=label)
-            time.sleep(0.3)
-            response = get_with_retry(session, url, timeout=25, retries=2, label=label)
+            response = get_with_retry(
+                session,
+                url,
+                timeout=25,
+                retries=2,
+                headers={"Referer": url},
+                label=label,
+            )
             if response.status_code >= 400:
                 return ""
             html = response.text or ""
