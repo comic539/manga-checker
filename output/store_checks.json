@@ -35868,9 +35868,9 @@
     "store_name": "くまざわ書店"
   },
   "9784046608260|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046608260",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(悪役令嬢に転生した私が、なぜか暴君侯爵に溺愛されてるんですけど 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831281/",
     "store_name": "とらのあな"
   },
   "9784046608260|kikuya": {
@@ -36228,9 +36228,9 @@
     "store_name": "くまざわ書店"
   },
   "9784832297647|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832297647",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(スチームドリーム 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833805/",
     "store_name": "とらのあな"
   },
   "9784832297647|kikuya": {
@@ -36246,9 +36246,9 @@
     "store_name": "くまざわ書店"
   },
   "9784832206724|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832206724",
+    "status": "特典あり",
+    "detail": "【特典】特製イラストカード(元教え子の二ノ瀬さん 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833746/",
     "store_name": "とらのあな"
   },
   "9784832206724|kikuya": {
@@ -66481,7 +66481,7 @@
   },
   "9784088852478|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】僕の彼女は決戦兵.. 田代哲也 集英社 新書判 2026/11/04",
+    "detail": "僕の彼女は決戦兵器 第1巻 田代哲也 集英社 新書判 2026/11/04",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043889",
     "store_name": "COMIC ZIN"
   },
@@ -71988,9 +71988,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784575862881|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】いつかはオールラ.. ゴトウユキコ 双葉社 B6判 2026/11/12",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043968",
     "store_name": "COMIC ZIN"
   },
   "9784575862904|comiczin": {
@@ -72282,9 +72282,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784065460108|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】悪役令嬢の四畳半.. 岡野く仔 星海社 B6判 2026/11/10",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043950",
     "store_name": "COMIC ZIN"
   },
   "9784803024128|comiczin": {
@@ -73650,6 +73650,18 @@
     "store_name": "COMIC ZIN"
   },
   "9784098735631|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784803024104|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e9%ad%94%e7%89%a9%ef%bc%88%e3%83%9e%e3%83%b3%e3%83%89%e3%83%a9%e3%82%b4%e3%83%a9%ef%bc%89%e3%81%a3%e3%81%a6%e3%83%90%e3%83%ac%e3%81%9f%e3%82%89%e8%a8%8e%e4%bc%90%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f/",
+    "store_name": "こみらの！"
+  },
+  "9784434390500|comiczin": {
     "status": "特典なし",
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
