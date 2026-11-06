@@ -37446,9 +37446,9 @@
     "store_name": "くまざわ書店"
   },
   "9784813766940|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813766940",
+    "status": "特典あり",
+    "detail": "【特典】応援店特典イラストカード(魔王様からは逃げられない 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012836519/",
     "store_name": "とらのあな"
   },
   "9784813766940|kikuya": {
@@ -37482,9 +37482,9 @@
     "store_name": "くまざわ書店"
   },
   "9784867871966|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784867871966",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(ただいま、おかえり 1 新装版)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012836504/",
     "store_name": "とらのあな"
   },
   "9784867871966|kikuya": {
@@ -66487,7 +66487,7 @@
   },
   "9784065456729|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】灯火からスパーク.. 雨隠ギド 講談社 B6判 2026/11/06",
+    "detail": "灯火からスパークル 第1巻 雨隠ギド 講談社 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043903",
     "store_name": "COMIC ZIN"
   },
@@ -66565,13 +66565,13 @@
   },
   "9784801991248|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】異世界まったり日.. フレデリック/さとうユーキ 竹書房 B6判 2026/11/06",
+    "detail": "異世界まったり日記 元伝.. フレデリック/さとうユーキ 竹書房 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043922",
     "store_name": "COMIC ZIN"
   },
   "9784801991255|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】聞き間違いから始.. 西洋躑躅/かにすき 竹書房 B6判 2026/11/06",
+    "detail": "聞き間違いから始まる異世.. 西洋躑躅/かにすき 竹書房 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043924",
     "store_name": "COMIC ZIN"
   },
@@ -71592,9 +71592,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784098548958|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】及第点でも青春を.. 月瀬しろ 小学館 B6判 2026/11/12",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043966",
     "store_name": "COMIC ZIN"
   },
   "9784098550166|comiczin": {
@@ -71875,13 +71875,13 @@
   },
   "9784253020572|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】ぴゅあぴゅあデビ.. 櫻井あつひと 秋田書店 B6判 2026/11/06",
+    "detail": "ぴゅあぴゅあデビル あく.. 櫻井あつひと 秋田書店 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043921",
     "store_name": "COMIC ZIN"
   },
   "9784253020589|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】拝田さんはヘタレ.. うらのりつ 秋田書店 B6判 2026/11/06",
+    "detail": "拝田さんはヘタレ顔が見た.. うらのりつ 秋田書店 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043918",
     "store_name": "COMIC ZIN"
   },
@@ -73684,5 +73684,23 @@
     "detail": "特典:A6ペーパー",
     "url": "https://comirano.info/%e8%bf%bd%e6%94%be%e3%81%95%e3%82%8c%e3%81%9f%e5%9b%9e%e5%be%a9%e5%b8%ab%e3%81%af%e3%80%90%e3%82%ad%e3%83%a3%e3%83%aa%e3%82%a2%e3%82%a2%e3%83%83%e3%83%97%e3%80%91%e3%81%a7%e7%84%a1%e5%8f%8c%e3%81%97/",
     "store_name": "こみらの！"
+  },
+  "9784832206724|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e5%85%83%e6%95%99%e3%81%88%e5%ad%90%e3%81%ae%e4%ba%8c%e3%83%8e%e7%80%ac%e3%81%95%e3%82%93%ef%bc%881%ef%bc%89/",
+    "store_name": "こみらの！"
+  },
+  "9784045003813|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784045003837|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
