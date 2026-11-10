@@ -36048,9 +36048,9 @@
     "store_name": "くまざわ書店"
   },
   "9784041178799|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784041178799",
+    "status": "特典あり",
+    "detail": "【特典】特製イラストカード(復讐令嬢の悪党狩り 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831610/",
     "store_name": "とらのあな"
   },
   "9784041178799|kikuya": {
@@ -36780,9 +36780,9 @@
     "store_name": "くまざわ書店"
   },
   "9784825101210|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825101210",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(残骸少女、きらきらな世界の底 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833747/",
     "store_name": "とらのあな"
   },
   "9784825101210|kikuya": {
@@ -66529,7 +66529,7 @@
   },
   "9784041178454|comiczin": {
     "status": "特典あり",
-    "detail": "純情ギャルはカノジョじゃ.. 水卜みう/momoru/おりょう KADOKAWA B6判 2026/11/04",
+    "detail": "・純情ギャルはカノジョじ.. 水卜みう/momoru/おりょう KADOKAWA B6判 2026/11/04",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043811",
     "store_name": "COMIC ZIN"
   },
@@ -73704,6 +73704,42 @@
     "store_name": "COMIC ZIN"
   },
   "9784065456897|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784065459775|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784065460924|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784065462249|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784065459591|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784065460870|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784065460641|comiczin": {
     "status": "特典なし",
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
