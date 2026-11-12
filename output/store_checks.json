@@ -35940,9 +35940,9 @@
     "store_name": "くまざわ書店"
   },
   "9784046606822|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046606822",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(午前5時のレコード 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831314/",
     "store_name": "とらのあな"
   },
   "9784046606822|kikuya": {
@@ -35976,9 +35976,9 @@
     "store_name": "くまざわ書店"
   },
   "9784046607126|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046607126",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(魔女ギャルの好きぴ! 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831315/",
     "store_name": "とらのあな"
   },
   "9784046607126|kikuya": {
@@ -66607,7 +66607,7 @@
   },
   "9784866755373|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】辺境のお風呂屋さ.. 吉村竜巻 フレックスコミックス B6判 2026/11/13",
+    "detail": "辺境のお風呂屋さん、ハー.. 吉村竜巻 フレックスコミックス B6判 2026/11/13",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043982",
     "store_name": "COMIC ZIN"
   },
@@ -71593,7 +71593,7 @@
   },
   "9784098548958|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】及第点でも青春を.. 月瀬しろ 小学館 B6判 2026/11/12",
+    "detail": "及第点でも青春を! 第1巻 月瀬しろ 小学館 B6判 2026/11/12",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043966",
     "store_name": "COMIC ZIN"
   },
@@ -71725,7 +71725,7 @@
   },
   "9784049722802|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】ボートガール! 第.. 四葉夕卜/青木裕 KADOKAWA B6判 2026/11/13",
+    "detail": "ボートガール! 第1巻 四葉夕卜/青木裕 KADOKAWA B6判 2026/11/13",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043851",
     "store_name": "COMIC ZIN"
   },
@@ -71905,7 +71905,7 @@
   },
   "9784832297647|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】スチームドリーム.. 絵茶漬け 芳文社 B6判 2026/11/12",
+    "detail": "スチームドリーム 第1巻 絵茶漬け 芳文社 B6判 2026/11/12",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043973",
     "store_name": "COMIC ZIN"
   },
@@ -71989,7 +71989,7 @@
   },
   "9784575862881|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】いつかはオールラ.. ゴトウユキコ 双葉社 B6判 2026/11/12",
+    "detail": "いつかはオールライト 第1巻 ゴトウユキコ 双葉社 B6判 2026/11/12",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043968",
     "store_name": "COMIC ZIN"
   },
@@ -72001,7 +72001,7 @@
   },
   "9784575862898|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】人魚姫の靴屋さん.. たなかのか 双葉社 B6判 2026/11/12",
+    "detail": "人魚姫の靴屋さん 第1巻 たなかのか 双葉社 B6判 2026/11/12",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043969",
     "store_name": "COMIC ZIN"
   },
@@ -73744,5 +73744,1235 @@
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
     "store_name": "COMIC ZIN"
+  },
+  "9784065448151|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e6%b6%9c%e7%a5%9e%e3%81%ae%e9%a8%8e%e5%a3%ab%ef%bc%881%ef%bc%89/",
+    "store_name": "こみらの！"
+  },
+  "9784253019941|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e5%a5%bd%e3%81%8d%e3%81%93%e3%81%9d%e6%9a%ae%e3%82%89%e3%81%97%e3%81%ae%e4%b8%8a%e6%89%8b%e3%81%aa%e3%82%8c%ef%bc%881%ef%bc%89/",
+    "store_name": "こみらの！"
+  },
+  "9784088853345|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088853345",
+    "store_name": "とらのあな"
+  },
+  "9784088853338|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088853338",
+    "store_name": "とらのあな"
+  },
+  "9784088944401|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088944401",
+    "store_name": "とらのあな"
+  },
+  "9784088944326|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088944326",
+    "store_name": "とらのあな"
+  },
+  "9784087930283|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784087930283",
+    "store_name": "とらのあな"
+  },
+  "9784088943923|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088943923",
+    "store_name": "とらのあな"
+  },
+  "9784088944593|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088944593",
+    "store_name": "とらのあな"
+  },
+  "9784088678528|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088678528",
+    "store_name": "とらのあな"
+  },
+  "9784088678535|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784088678535",
+    "store_name": "とらのあな"
+  },
+  "9784065461167|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065461167",
+    "store_name": "とらのあな"
+  },
+  "9784065459775|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065459775",
+    "store_name": "とらのあな"
+  },
+  "9784065456897|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065456897",
+    "store_name": "とらのあな"
+  },
+  "9784065459850|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065459850",
+    "store_name": "とらのあな"
+  },
+  "9784065460924|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065460924",
+    "store_name": "とらのあな"
+  },
+  "9784065462249|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065462249",
+    "store_name": "とらのあな"
+  },
+  "9784065462263|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065462263",
+    "store_name": "とらのあな"
+  },
+  "9784065462720|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065462720",
+    "store_name": "とらのあな"
+  },
+  "9784065459591|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065459591",
+    "store_name": "とらのあな"
+  },
+  "9784065460870|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065460870",
+    "store_name": "とらのあな"
+  },
+  "9784065462232|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065462232",
+    "store_name": "とらのあな"
+  },
+  "9784065460641|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065460641",
+    "store_name": "とらのあな"
+  },
+  "9784065462225|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065462225",
+    "store_name": "とらのあな"
+  },
+  "9784065447482|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065447482",
+    "store_name": "とらのあな"
+  },
+  "9784065461525|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065461525",
+    "store_name": "とらのあな"
+  },
+  "9784065463772|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065463772",
+    "store_name": "とらのあな"
+  },
+  "9784065465219|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784065465219",
+    "store_name": "とらのあな"
+  },
+  "9784065465219|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784098736072|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098736072",
+    "store_name": "とらのあな"
+  },
+  "9784098736614|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098736614",
+    "store_name": "とらのあな"
+  },
+  "9784098550418|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550418",
+    "store_name": "とらのあな"
+  },
+  "9784098550159|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550159",
+    "store_name": "とらのあな"
+  },
+  "9784098548873|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098548873",
+    "store_name": "とらのあな"
+  },
+  "9784098550432|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550432",
+    "store_name": "とらのあな"
+  },
+  "9784098641390|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098641390",
+    "store_name": "とらのあな"
+  },
+  "9784098550425|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550425",
+    "store_name": "とらのあな"
+  },
+  "9784098550371|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550371",
+    "store_name": "とらのあな"
+  },
+  "9784098550388|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550388",
+    "store_name": "とらのあな"
+  },
+  "9784098550449|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550449",
+    "store_name": "とらのあな"
+  },
+  "9784098550494|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550494",
+    "store_name": "とらのあな"
+  },
+  "9784098550357|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550357",
+    "store_name": "とらのあな"
+  },
+  "9784098550456|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550456",
+    "store_name": "とらのあな"
+  },
+  "9784098550470|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550470",
+    "store_name": "とらのあな"
+  },
+  "9784098550463|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098550463",
+    "store_name": "とらのあな"
+  },
+  "9784098736676|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098736676",
+    "store_name": "とらのあな"
+  },
+  "9784098735631|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098735631",
+    "store_name": "とらのあな"
+  },
+  "9784091543967|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784091543967",
+    "store_name": "とらのあな"
+  },
+  "9784091543950|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784091543950",
+    "store_name": "とらのあな"
+  },
+  "9784098641635|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784098641635",
+    "store_name": "とらのあな"
+  },
+  "9784045003547|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003547",
+    "store_name": "とらのあな"
+  },
+  "9784045003523|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003523",
+    "store_name": "とらのあな"
+  },
+  "9784041179468|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784041179468",
+    "store_name": "とらのあな"
+  },
+  "9784046607348|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046607348",
+    "store_name": "とらのあな"
+  },
+  "9784046606921|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046606921",
+    "store_name": "とらのあな"
+  },
+  "9784046858160|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046858160",
+    "store_name": "とらのあな"
+  },
+  "9784049723212|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723212",
+    "store_name": "とらのあな"
+  },
+  "9784040766942|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784040766942",
+    "store_name": "とらのあな"
+  },
+  "9784040766850|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784040766850",
+    "store_name": "とらのあな"
+  },
+  "9784040765402|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784040765402",
+    "store_name": "とらのあな"
+  },
+  "9784049722581|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049722581",
+    "store_name": "とらのあな"
+  },
+  "9784049722956|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049722956",
+    "store_name": "とらのあな"
+  },
+  "9784049723618|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723618",
+    "store_name": "とらのあな"
+  },
+  "9784049723625|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723625",
+    "store_name": "とらのあな"
+  },
+  "9784045003394|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003394",
+    "store_name": "とらのあな"
+  },
+  "9784045003417|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003417",
+    "store_name": "とらのあな"
+  },
+  "9784049722383|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049722383",
+    "store_name": "とらのあな"
+  },
+  "9784049723366|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723366",
+    "store_name": "とらのあな"
+  },
+  "9784045002601|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045002601",
+    "store_name": "とらのあな"
+  },
+  "9784046608185|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046608185",
+    "store_name": "とらのあな"
+  },
+  "9784046608291|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046608291",
+    "store_name": "とらのあな"
+  },
+  "9784046608314|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046608314",
+    "store_name": "とらのあな"
+  },
+  "9784046604200|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046604200",
+    "store_name": "とらのあな"
+  },
+  "9784046608208|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046608208",
+    "store_name": "とらのあな"
+  },
+  "9784046609151|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046609151",
+    "store_name": "とらのあな"
+  },
+  "9784045003585|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003585",
+    "store_name": "とらのあな"
+  },
+  "9784046603081|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046603081",
+    "store_name": "とらのあな"
+  },
+  "9784041175811|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784041175811",
+    "store_name": "とらのあな"
+  },
+  "9784041180570|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784041180570",
+    "store_name": "とらのあな"
+  },
+  "9784049723342|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723342",
+    "store_name": "とらのあな"
+  },
+  "9784049723359|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723359",
+    "store_name": "とらのあな"
+  },
+  "9784049525762|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049525762",
+    "store_name": "とらのあな"
+  },
+  "9784046609175|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046609175",
+    "store_name": "とらのあな"
+  },
+  "9784049723243|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723243",
+    "store_name": "とらのあな"
+  },
+  "9784041180082|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784041180082",
+    "store_name": "とらのあな"
+  },
+  "9784049723700|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723700",
+    "store_name": "とらのあな"
+  },
+  "9784045003813|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003813",
+    "store_name": "とらのあな"
+  },
+  "9784045003837|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003837",
+    "store_name": "とらのあな"
+  },
+  "9784253021098|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021098",
+    "store_name": "とらのあな"
+  },
+  "9784253021234|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021234",
+    "store_name": "とらのあな"
+  },
+  "9784253021241|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021241",
+    "store_name": "とらのあな"
+  },
+  "9784253021388|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021388",
+    "store_name": "とらのあな"
+  },
+  "9784253021487|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021487",
+    "store_name": "とらのあな"
+  },
+  "9784253021692|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021692",
+    "store_name": "とらのあな"
+  },
+  "9784832206762|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832206762",
+    "store_name": "とらのあな"
+  },
+  "9784832206755|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832206755",
+    "store_name": "とらのあな"
+  },
+  "9784832210615|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832210615",
+    "store_name": "とらのあな"
+  },
+  "9784832297715|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832297715",
+    "store_name": "とらのあな"
+  },
+  "9784832297722|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832297722",
+    "store_name": "とらのあな"
+  },
+  "9784832206809|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832206809",
+    "store_name": "とらのあな"
+  },
+  "9784832297760|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832297760",
+    "store_name": "とらのあな"
+  },
+  "9784301008439|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301008439",
+    "store_name": "とらのあな"
+  },
+  "9784301009573|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009573",
+    "store_name": "とらのあな"
+  },
+  "9784301009580|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009580",
+    "store_name": "とらのあな"
+  },
+  "9784301009603|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009603",
+    "store_name": "とらのあな"
+  },
+  "9784301009665|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009665",
+    "store_name": "とらのあな"
+  },
+  "9784301009702|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009702",
+    "store_name": "とらのあな"
+  },
+  "9784301009726|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009726",
+    "store_name": "とらのあな"
+  },
+  "9784301009696|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009696",
+    "store_name": "とらのあな"
+  },
+  "9784301009818|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009818",
+    "store_name": "とらのあな"
+  },
+  "9784301009863|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009863",
+    "store_name": "とらのあな"
+  },
+  "9784301009825|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784301009825",
+    "store_name": "とらのあな"
+  },
+  "9784592231844|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784592231844",
+    "store_name": "とらのあな"
+  },
+  "9784592721932|toranoana": {
+    "status": "特典あり",
+    "detail": "【特典】イラストカード(ヴァンパイア様の不味いご馳走 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831270/",
+    "store_name": "とらのあな"
+  },
+  "9784592721956|toranoana": {
+    "status": "特典あり",
+    "detail": "【特典】イラストカード(無愛想にもほどがある 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831271/",
+    "store_name": "とらのあな"
+  },
+  "9784592226093|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784592226093",
+    "store_name": "とらのあな"
+  },
+  "9784592226055|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784592226055",
+    "store_name": "とらのあな"
+  },
+  "9784801991385|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784801991385",
+    "store_name": "とらのあな"
+  },
+  "9784801991392|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784801991392",
+    "store_name": "とらのあな"
+  },
+  "9784801991422|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784801991422",
+    "store_name": "とらのあな"
+  },
+  "9784801991415|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784801991415",
+    "store_name": "とらのあな"
+  },
+  "9784801991408|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784801991408",
+    "store_name": "とらのあな"
+  },
+  "9784575425628|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784575425628",
+    "store_name": "とらのあな"
+  },
+  "9784575425666|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784575425666",
+    "store_name": "とらのあな"
+  },
+  "9784575425710|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784575425710",
+    "store_name": "とらのあな"
+  },
+  "9784575425765|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784575425765",
+    "store_name": "とらのあな"
+  },
+  "9784575863093|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784575863093",
+    "store_name": "とらのあな"
+  },
+  "9784785983451|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784785983451",
+    "store_name": "とらのあな"
+  },
+  "9784785983543|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784785983543",
+    "store_name": "とらのあな"
+  },
+  "9784785983550|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784785983550",
+    "store_name": "とらのあな"
+  },
+  "9784785983598|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784785983598",
+    "store_name": "とらのあな"
+  },
+  "9784785983635|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784785983635",
+    "store_name": "とらのあな"
+  },
+  "9784199611063|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784199611063",
+    "store_name": "とらのあな"
+  },
+  "9784825101289|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825101289",
+    "store_name": "とらのあな"
+  },
+  "9784825102521|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102521",
+    "store_name": "とらのあな"
+  },
+  "9784825102583|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102583",
+    "store_name": "とらのあな"
+  },
+  "9784825102668|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102668",
+    "store_name": "とらのあな"
+  },
+  "9784825102651|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102651",
+    "store_name": "とらのあな"
+  },
+  "9784825102644|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102644",
+    "store_name": "とらのあな"
+  },
+  "9784800018519|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784800018519",
+    "store_name": "とらのあな"
+  },
+  "9784800018557|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784800018557",
+    "store_name": "とらのあな"
+  },
+  "9784867209431|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784867209431",
+    "store_name": "とらのあな"
+  },
+  "9784867209301|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784867209301",
+    "store_name": "とらのあな"
+  },
+  "9784867209578|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784867209578",
+    "store_name": "とらのあな"
+  },
+  "9784867209585|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784867209585",
+    "store_name": "とらのあな"
+  },
+  "9784867209455|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784867209455",
+    "store_name": "とらのあな"
+  },
+  "9784868542094|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868542094",
+    "store_name": "とらのあな"
+  },
+  "9784868542148|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868542148",
+    "store_name": "とらのあな"
+  },
+  "9784868542155|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868542155",
+    "store_name": "とらのあな"
+  },
+  "9784868542131|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868542131",
+    "store_name": "とらのあな"
+  },
+  "9784868542124|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868542124",
+    "store_name": "とらのあな"
+  },
+  "9784434388217|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434388217",
+    "store_name": "とらのあな"
+  },
+  "9784434370038|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434370038",
+    "store_name": "とらのあな"
+  },
+  "9784824019554|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824019554",
+    "store_name": "とらのあな"
+  },
+  "9784824018205|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824018205",
+    "store_name": "とらのあな"
+  },
+  "9784798643526|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784798643526",
+    "store_name": "とらのあな"
+  },
+  "9784049212242|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049212242",
+    "store_name": "とらのあな"
+  },
+  "9784049212259|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049212259",
+    "store_name": "とらのあな"
+  },
+  "9784825000971|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825000971",
+    "store_name": "とらのあな"
+  },
+  "9784825000940|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825000940",
+    "store_name": "とらのあな"
+  },
+  "9784825000926|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825000926",
+    "store_name": "とらのあな"
+  },
+  "9784825000933|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825000933",
+    "store_name": "とらのあな"
+  },
+  "9784408642062|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784408642062",
+    "store_name": "とらのあな"
+  },
+  "ヴァンパイア様の不味いご馳走 1|toranoana": {
+    "status": "特典あり",
+    "detail": "【特典】イラストカード(ヴァンパイア様の不味いご馳走 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012831270/",
+    "store_name": "とらのあな"
+  },
+  "9784391169454|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784391169454",
+    "store_name": "とらのあな"
+  },
+  "9784391166583|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784391166583",
+    "store_name": "とらのあな"
+  },
+  "9784824208163|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208163",
+    "store_name": "とらのあな"
+  },
+  "9784824208200|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208200",
+    "store_name": "とらのあな"
+  },
+  "9784396751173|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784396751173",
+    "store_name": "とらのあな"
+  },
+  "9784892194757|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784892194757",
+    "store_name": "とらのあな"
+  },
+  "9784865183146|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784865183146",
+    "store_name": "とらのあな"
+  },
+  "花秘める君のメテオール 7『描き下ろしアクリルスタンド&描き下ろしSSリーフレット3 vol.1付き特別セット』|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/bok/pages/all/item/standard/calendar/1/?withBenefitsFlg=1",
+    "store_name": "とらのあな"
+  },
+  "9784803024357|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784803024357",
+    "store_name": "とらのあな"
+  },
+  "9784868660484|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868660484",
+    "store_name": "とらのあな"
+  },
+  "9784868460329|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868460329",
+    "store_name": "とらのあな"
+  },
+  "9784408642574|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784408642574",
+    "store_name": "とらのあな"
+  },
+  "9784408642499|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784408642499",
+    "store_name": "とらのあな"
+  },
+  "9784408642512|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784408642512",
+    "store_name": "とらのあな"
+  },
+  "9784434390494|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434390494",
+    "store_name": "とらのあな"
+  },
+  "9784434390524|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434390524",
+    "store_name": "とらのあな"
+  },
+  "9784434390500|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434390500",
+    "store_name": "とらのあな"
+  },
+  "9784845872756|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784845872756",
+    "store_name": "とらのあな"
+  },
+  "9784845872800|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784845872800",
+    "store_name": "とらのあな"
+  },
+  "9784845872770|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784845872770",
+    "store_name": "とらのあな"
+  },
+  "9784344858497|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784344858497",
+    "store_name": "とらのあな"
+  },
+  "9784434389757|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434389757",
+    "store_name": "とらのあな"
+  },
+  "9784434389740|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434389740",
+    "store_name": "とらのあな"
+  },
+  "9784434381188|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434381188",
+    "store_name": "とらのあな"
+  },
+  "9784302131631|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784302131631",
+    "store_name": "とらのあな"
+  },
+  "9784824208361|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208361",
+    "store_name": "とらのあな"
+  },
+  "9784813767107|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767107",
+    "store_name": "とらのあな"
+  },
+  "9784813767244|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767244",
+    "store_name": "とらのあな"
+  },
+  "9784868640233|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784868640233",
+    "store_name": "とらのあな"
+  },
+  "9784824208330|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208330",
+    "store_name": "とらのあな"
+  },
+  "9784537174618|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784537174618",
+    "store_name": "とらのあな"
+  },
+  "9784813767251|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767251",
+    "store_name": "とらのあな"
+  },
+  "9784813767169|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767169",
+    "store_name": "とらのあな"
+  },
+  "9784824208309|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208309",
+    "store_name": "とらのあな"
+  },
+  "9784813767060|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767060",
+    "store_name": "とらのあな"
+  },
+  "9784824208460|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208460",
+    "store_name": "とらのあな"
+  },
+  "9784813767176|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767176",
+    "store_name": "とらのあな"
+  },
+  "9784813767084|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767084",
+    "store_name": "とらのあな"
+  },
+  "9784911602294|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784911602294",
+    "store_name": "とらのあな"
+  },
+  "9784813767237|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813767237",
+    "store_name": "とらのあな"
+  },
+  "9784065470374|toranoana": {
+    "status": "特典あり",
+    "detail": "【特典】特製イラストカード(魔法使いの夜 ウィッチレコーズ)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012830859/",
+    "store_name": "とらのあな"
   }
 }
