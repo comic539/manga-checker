@@ -36066,9 +36066,9 @@
     "store_name": "くまざわ書店"
   },
   "9784049722642|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049722642",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(ちっちゃくてデカくて可愛い七瀬さんを勘違い元カレから奪って幸せにする 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012832001/",
     "store_name": "とらのあな"
   },
   "9784049722642|kikuya": {
@@ -36102,9 +36102,9 @@
     "store_name": "くまざわ書店"
   },
   "9784049722628|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049722628",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(俺の幼馴染がデッッッッかくなりすぎた 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012832000/",
     "store_name": "とらのあな"
   },
   "9784049722628|kikuya": {
@@ -66084,9 +66084,9 @@
     "store_name": "とらのあな"
   },
   "9784046607041|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046607041",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろし入り両面イラストカード(異世界では最推しになりたい 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012832528/",
     "store_name": "とらのあな"
   },
   "9784049525137|toranoana": {
@@ -66588,15 +66588,15 @@
     "store_name": "とらのあな"
   },
   "9784824019424|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824019424",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(優等生がアダルトグッズを買いに来た 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012834924/",
     "store_name": "とらのあな"
   },
   "9784824019417|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824019417",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(天下の大悪人に転生した少年、人たらしの大英雄になる 1 ~傾国の美少女たちと英雄軍団を作ります~)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012834923/",
     "store_name": "とらのあな"
   },
   "9784824207906|comirano": {
@@ -71334,9 +71334,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784088944098|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】つづら先輩は元カ.. すずの志侑 集英社 B6判 2026/11/18",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044008",
     "store_name": "COMIC ZIN"
   },
   "9784088943916|comiczin": {
@@ -71802,9 +71802,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784041179505|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】つつじの工業高校.. 渡辺伊織 KADOKAWA B6判 2026/11/25",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044066",
     "store_name": "COMIC ZIN"
   },
   "9784041177563|comiczin": {
@@ -71911,7 +71911,7 @@
   },
   "9784832206724|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】元教え子の二ノ瀬.. くろたま 芳文社 B6判 2026/11/13",
+    "detail": "元教え子の二ノ瀬さん 第1巻 くろたま 芳文社 B6判 2026/11/13",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043991",
     "store_name": "COMIC ZIN"
   },
@@ -72072,9 +72072,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784825101210|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】残骸少女、きらき.. うさみみき 一迅社 B6判 2026/11/18",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044014",
     "store_name": "COMIC ZIN"
   },
   "9784825100060|comiczin": {
@@ -72090,15 +72090,15 @@
     "store_name": "COMIC ZIN"
   },
   "9784825102194|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】ムラムラしてしま.. 黒瀬葵/椋/ゆうきそにすけ 一迅社 B6判 2026/11/27",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044086",
     "store_name": "COMIC ZIN"
   },
   "9784825102187|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】姫虐が止まらない.. 斉藤りょーパー 一迅社 B6判 2026/11/27",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044085",
     "store_name": "COMIC ZIN"
   },
   "9784825102316|comiczin": {
@@ -74974,5 +74974,17 @@
     "detail": "【特典】特製イラストカード(魔法使いの夜 ウィッチレコーズ)",
     "url": "https://ecs.toranoana.jp/tora/ec/item/200012830859/",
     "store_name": "とらのあな"
+  },
+  "9784040900537|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784040900537",
+    "store_name": "とらのあな"
+  },
+  "9784040900537|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
