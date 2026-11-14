@@ -74986,5 +74986,17 @@
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
     "store_name": "COMIC ZIN"
+  },
+  "9784867208922|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e4%b8%96%e6%b8%a1%e3%82%8c%ef%bc%81-%e9%ab%98%e8%99%8e-%ef%bd%9e%e6%88%a6%e5%9b%bd%e7%90%86%e4%b8%8d%e5%b0%bd%e8%bb%a2%e8%81%b7%e8%a8%98%ef%bd%9e%ef%bc%881%ef%bc%89/",
+    "store_name": "こみらの！"
+  },
+  "9784867209035|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e5%83%95%e3%81%a0%e3%81%91%e8%a9%a0%e3%82%81%e3%82%8b%e7%a6%81%e6%9b%b8%e9%ad%94%e8%a1%93%ef%bc%881%ef%bc%89/",
+    "store_name": "こみらの！"
   }
 }
