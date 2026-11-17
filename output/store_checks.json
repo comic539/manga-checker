@@ -36264,9 +36264,9 @@
     "store_name": "くまざわ書店"
   },
   "9784832297685|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832297685",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(あくまじょグリモワール 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833809/",
     "store_name": "とらのあな"
   },
   "9784832297685|kikuya": {
@@ -36852,9 +36852,9 @@
     "store_name": "くまざわ書店"
   },
   "9784825102187|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102187",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(姫虐が止まらない白桃さん 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833758/",
     "store_name": "とらのあな"
   },
   "9784825102187|kikuya": {
@@ -66444,9 +66444,9 @@
     "store_name": "ゲーマーズ"
   },
   "ムラムラしてしまう呪いの妖刀と一緒に異世界へ迷い込んでしまった件 -元の世界へ帰るために奴隷を率いてハーレムパーティでダンジョン攻略します- 1|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/bok/pages/all/item/standard/calendar/1/?withBenefitsFlg=1",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(ムラムラしてしまう呪いの妖刀と一緒に異世界へ迷い込んでしまった件 -元の世界へ帰るために奴隷を率いてハーレムパーティでダンジョン攻略します- 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833759/",
     "store_name": "とらのあな"
   },
   "無愛想にもほどがある 1|melonbooks": {
@@ -71604,9 +71604,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784098550128|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】無才の召喚士 第1巻 野村UFO 小学館 新書判 2026/11/18",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044018",
     "store_name": "COMIC ZIN"
   },
   "9784098736225|comiczin": {
@@ -71844,9 +71844,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784049525137|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】魔法少女に復讐を.. 浅岡しゅく/堤りん KADOKAWA B6判 2026/11/27",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044077",
     "store_name": "COMIC ZIN"
   },
   "9784049722642|comiczin": {
@@ -71862,9 +71862,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784049722628|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】俺の幼馴染がデッ.. ヨシカ/折口良乃 KADOKAWA B6判 2026/11/28",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044101",
     "store_name": "COMIC ZIN"
   },
   "9784049722666|comiczin": {
@@ -74058,9 +74058,9 @@
     "store_name": "とらのあな"
   },
   "9784041179468|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784041179468",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(イジめてイジられて 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012837799/",
     "store_name": "とらのあな"
   },
   "9784046607348|toranoana": {
@@ -74998,5 +74998,29 @@
     "detail": "特典:A6ペーパー",
     "url": "https://comirano.info/%e5%83%95%e3%81%a0%e3%81%91%e8%a9%a0%e3%82%81%e3%82%8b%e7%a6%81%e6%9b%b8%e9%ad%94%e8%a1%93%ef%bc%881%ef%bc%89/",
     "store_name": "こみらの！"
+  },
+  "9784040900544|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784040900544",
+    "store_name": "とらのあな"
+  },
+  "9784040900544|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784434389702|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434389702",
+    "store_name": "とらのあな"
+  },
+  "9784434389702|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
