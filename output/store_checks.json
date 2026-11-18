@@ -37608,9 +37608,9 @@
     "store_name": "くまざわ書店"
   },
   "9784824207975|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824207975",
+    "status": "特典あり",
+    "detail": "【特典】応援書店特典イラストカード(ハズレスキル『錬金工房』で始める奪還生活 実家を乗っ取られて放逐されたけど、スキルの真の力に目覚めたので全てを取り返そうと思う 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012843621/",
     "store_name": "とらのあな"
   },
   "9784824207975|kikuya": {
@@ -37626,9 +37626,9 @@
     "store_name": "くまざわ書店"
   },
   "9784824208019|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208019",
+    "status": "特典あり",
+    "detail": "【特典】応援書店特典イラストカード(リセマラ∞デスゲーマー 異世界転生前に行われたデスゲームは、俺にとって神ゲーでした 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012843625/",
     "store_name": "とらのあな"
   },
   "9784824208019|kikuya": {
@@ -37644,9 +37644,9 @@
     "store_name": "くまざわ書店"
   },
   "9784824208026|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208026",
+    "status": "特典あり",
+    "detail": "【特典】応援書店特典イラストカード(不敗の雑魚将軍 ハズレスキルだと実家を追放されましたが、「神解」スキルを使って帝国で成り上がります。気づけば帝国最強の大将軍として語られてました 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012843626/",
     "store_name": "とらのあな"
   },
   "9784824208026|kikuya": {
@@ -37662,9 +37662,9 @@
     "store_name": "くまざわ書店"
   },
   "9784824208064|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824208064",
+    "status": "特典あり",
+    "detail": "【特典】応援書店特典イラストカード(何の取り柄もない平凡な俺が美人双子姉妹を命懸けで助けた結果、実はヤンデレだった二人をガチ惚れさせてしまった件 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012843632/",
     "store_name": "とらのあな"
   },
   "9784824208064|kikuya": {
@@ -37680,9 +37680,9 @@
     "store_name": "くまざわ書店"
   },
   "9784824207869|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784824207869",
+    "status": "特典あり",
+    "detail": "【特典】応援書店特典イラストカード(冒険しない私の異世界マニュアル 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012843627/",
     "store_name": "とらのあな"
   },
   "9784824207869|kikuya": {
@@ -66481,13 +66481,13 @@
   },
   "9784088852478|comiczin": {
     "status": "特典あり",
-    "detail": "僕の彼女は決戦兵器 第1巻 田代哲也 集英社 新書判 2026/11/04",
+    "detail": "・僕の彼女は決戦兵器 第1巻 田代哲也 集英社 新書判 2026/11/04",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043889",
     "store_name": "COMIC ZIN"
   },
   "9784065456729|comiczin": {
     "status": "特典あり",
-    "detail": "灯火からスパークル 第1巻 雨隠ギド 講談社 B6判 2026/11/06",
+    "detail": "・灯火からスパークル 第1巻 雨隠ギド 講談社 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043903",
     "store_name": "COMIC ZIN"
   },
@@ -66535,25 +66535,25 @@
   },
   "9784049722253|comiczin": {
     "status": "特典あり",
-    "detail": "ひとりみです 第1巻 森島明子 KADOKAWA B6判 2026/11/06",
+    "detail": "・ひとりみです 第1巻 森島明子 KADOKAWA B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043841",
     "store_name": "COMIC ZIN"
   },
   "9784040766393|comiczin": {
     "status": "特典あり",
-    "detail": "デッッッカリアン 第1巻 千賀史貴/仙道八 KADOKAWA B6判 2026/11/05",
+    "detail": "・デッッッカリアン 第1巻 千賀史貴/仙道八 KADOKAWA B6判 2026/11/05",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043838",
     "store_name": "COMIC ZIN"
   },
   "9784040766386|comiczin": {
     "status": "特典あり",
-    "detail": "快談都市伝説~現代怪異の.. 白崎カル/黒糖ニッケ KADOKAWA B6判 2026/11/05",
+    "detail": "・快談都市伝説~現代怪異.. 白崎カル/黒糖ニッケ KADOKAWA B6判 2026/11/05",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043837",
     "store_name": "COMIC ZIN"
   },
   "9784040766256|comiczin": {
     "status": "特典あり",
-    "detail": "虚無ねーちゃんはかまって.. 観音リツ KADOKAWA B6判 2026/11/05",
+    "detail": "・虚無ねーちゃんはかまっ.. 観音リツ KADOKAWA B6判 2026/11/05",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043835",
     "store_name": "COMIC ZIN"
   },
@@ -66565,13 +66565,13 @@
   },
   "9784801991248|comiczin": {
     "status": "特典あり",
-    "detail": "異世界まったり日記 元伝.. フレデリック/さとうユーキ 竹書房 B6判 2026/11/06",
+    "detail": "・異世界まったり日記 元.. フレデリック/さとうユーキ 竹書房 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043922",
     "store_name": "COMIC ZIN"
   },
   "9784801991255|comiczin": {
     "status": "特典あり",
-    "detail": "聞き間違いから始まる異世.. 西洋躑躅/かにすき 竹書房 B6判 2026/11/06",
+    "detail": "・聞き間違いから始まる異.. 西洋躑躅/かにすき 竹書房 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043924",
     "store_name": "COMIC ZIN"
   },
@@ -66619,7 +66619,7 @@
   },
   "9784107729941|comiczin": {
     "status": "特典あり",
-    "detail": "モンスターストライク ル.. 麦野イヌ 新潮社 B6判 2026/11/09",
+    "detail": "・モンスターストライク .. 麦野イヌ 新潮社 B6判 2026/11/09",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043948",
     "store_name": "COMIC ZIN"
   },
@@ -71725,7 +71725,7 @@
   },
   "9784049722802|comiczin": {
     "status": "特典あり",
-    "detail": "ボートガール! 第1巻 四葉夕卜/青木裕 KADOKAWA B6判 2026/11/13",
+    "detail": "・ボートガール! 第1巻 四葉夕卜/青木裕 KADOKAWA B6判 2026/11/13",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043851",
     "store_name": "COMIC ZIN"
   },
@@ -71875,13 +71875,13 @@
   },
   "9784253020572|comiczin": {
     "status": "特典あり",
-    "detail": "ぴゅあぴゅあデビル あく.. 櫻井あつひと 秋田書店 B6判 2026/11/06",
+    "detail": "・ぴゅあぴゅあデビル あ.. 櫻井あつひと 秋田書店 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043921",
     "store_name": "COMIC ZIN"
   },
   "9784253020589|comiczin": {
     "status": "特典あり",
-    "detail": "拝田さんはヘタレ顔が見た.. うらのりつ 秋田書店 B6判 2026/11/06",
+    "detail": "・拝田さんはヘタレ顔が見.. うらのりつ 秋田書店 B6判 2026/11/06",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043918",
     "store_name": "COMIC ZIN"
   },
@@ -71916,9 +71916,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784832297685|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】あくまじょグリモ.. 仮死亡殺 芳文社 A5判 2026/11/27",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044097",
     "store_name": "COMIC ZIN"
   },
   "9784301008507|comiczin": {
@@ -72271,7 +72271,7 @@
   },
   "快談都市伝説 ~現代怪異の少女たち~ 1|comiczin": {
     "status": "特典あり",
-    "detail": "快談都市伝説~現代怪異の.. 白崎カル/黒糖ニッケ KADOKAWA B6判 2026/11/05",
+    "detail": "・快談都市伝説~現代怪異.. 白崎カル/黒糖ニッケ KADOKAWA B6判 2026/11/05",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043837",
     "store_name": "COMIC ZIN"
   },
@@ -72283,7 +72283,7 @@
   },
   "9784065460108|comiczin": {
     "status": "特典あり",
-    "detail": "悪役令嬢の四畳半 オフシ.. 岡野く仔 星海社 B6判 2026/11/10",
+    "detail": "・悪役令嬢の四畳半 オフ.. 岡野く仔 星海社 B6判 2026/11/10",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10043950",
     "store_name": "COMIC ZIN"
   },
@@ -75022,5 +75022,11 @@
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
     "store_name": "COMIC ZIN"
+  },
+  "9784344858374|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e4%bc%af%e7%88%b5%e4%bb%a4%e5%ac%a2%e3%81%af%e3%80%81%e5%a5%91%e7%b4%84%e7%b5%90%e5%a9%9a%e3%81%97%e3%81%9f%e4%bf%ba%e3%81%ab%e3%81%84%e3%81%a4%e6%81%8b%e3%82%92%e3%81%99%e3%82%8b%ef%bc%9f%ef%bc%881/",
+    "store_name": "こみらの！"
   }
 }
