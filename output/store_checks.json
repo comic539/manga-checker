@@ -36798,9 +36798,9 @@
     "store_name": "くまざわ書店"
   },
   "9784825100060|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825100060",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(CRBR -Crazy Raccoon Battle Royale- 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012826271/",
     "store_name": "とらのあな"
   },
   "9784825100060|kikuya": {
@@ -36816,9 +36816,9 @@
     "store_name": "くまざわ書店"
   },
   "9784825100077|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825100077",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(かるび、もまれる。 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012826272/",
     "store_name": "とらのあな"
   },
   "9784825100077|kikuya": {
@@ -36870,9 +36870,9 @@
     "store_name": "くまざわ書店"
   },
   "9784825102316|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784825102316",
+    "status": "特典あり",
+    "detail": "【特典】書店共通ペーパー(毒薬変じて愛となる ~転生したら男の嫁がいるクズ貴族~ 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012833768/",
     "store_name": "とらのあな"
   },
   "9784825102316|kikuya": {
@@ -71515,7 +71515,7 @@
   },
   "9784065452592|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】隠退した最強暗殺.. 平成オワリ/連打一人 講談社 B6判 2026/11/19",
+    "detail": "隠退した最強暗殺者は辺境.. 平成オワリ/連打一人 講談社 B6判 2026/11/19",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044026",
     "store_name": "COMIC ZIN"
   },
@@ -71773,7 +71773,7 @@
   },
   "9784046606839|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】勇者からは逃げら.. D.P/富士田けやき KADOKAWA B6判 2026/11/20",
+    "detail": "勇者からは逃げられない .. D.P/富士田けやき KADOKAWA B6判 2026/11/20",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044043",
     "store_name": "COMIC ZIN"
   },
@@ -71893,7 +71893,7 @@
   },
   "9784253020824|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】名探偵マーニー .. 木々津克久 秋田書店 B6判 2026/11/19",
+    "detail": "名探偵マーニー 第1巻 木々津克久 秋田書店 B6判 2026/11/19",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044032",
     "store_name": "COMIC ZIN"
   },
@@ -74064,15 +74064,15 @@
     "store_name": "とらのあな"
   },
   "9784046607348|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046607348",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(可愛い双子の子育てと契約妻は今日で終了予定です 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012837788/",
     "store_name": "とらのあな"
   },
   "9784046606921|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784046606921",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(転生淫魔王のハーレム育成 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012837784/",
     "store_name": "とらのあな"
   },
   "9784046858160|toranoana": {
@@ -74082,9 +74082,9 @@
     "store_name": "とらのあな"
   },
   "9784049723212|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723212",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(ポコとわたしの車旅 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012837821/",
     "store_name": "とらのあな"
   },
   "9784040766942|toranoana": {
@@ -74118,9 +74118,9 @@
     "store_name": "とらのあな"
   },
   "9784049723618|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723618",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(小さくて可愛い文芸部の知的な先輩を、膝の上に乗せたら毎日座ってくるようになった 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012838031/",
     "store_name": "とらのあな"
   },
   "9784049723625|toranoana": {
@@ -74286,9 +74286,9 @@
     "store_name": "とらのあな"
   },
   "9784253021241|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021241",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(せやかて珠世ちゃんは恋がしたい 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012840404/",
     "store_name": "とらのあな"
   },
   "9784253021388|toranoana": {
@@ -74454,9 +74454,9 @@
     "store_name": "とらのあな"
   },
   "9784801991392|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784801991392",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(エルフ、重騎士を拾う 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012840679/",
     "store_name": "とらのあな"
   },
   "9784801991422|toranoana": {
@@ -75045,6 +75045,12 @@
     "status": "特典あり",
     "detail": "特典:モノクロカード",
     "url": "https://comirano.info/%e4%bd%95%e3%81%ae%e5%8f%96%e3%82%8a%e6%9f%84%e3%82%82%e3%81%aa%e3%81%84%e5%b9%b3%e5%87%a1%e3%81%aa%e4%bf%ba%e3%81%8c%e7%be%8e%e4%ba%ba%e5%8f%8c%e5%ad%90%e5%a7%89%e5%a6%b9%e3%82%92%e5%91%bd%e6%87%b8/",
+    "store_name": "こみらの！"
+  },
+  "9784098736225|comirano": {
+    "status": "特典あり",
+    "detail": "特典:イラストカード",
+    "url": "https://comirano.info/%e3%81%95%e3%82%8c%e3%81%a9%e3%80%81%e3%81%b5%e3%81%9f%e3%82%8a%e3%81%af%e3%81%8f%e3%81%95%e3%82%8c%e6%81%8b%ef%bc%881%ef%bc%89/",
     "store_name": "こみらの！"
   }
 }
