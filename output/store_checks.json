@@ -37716,9 +37716,9 @@
     "store_name": "くまざわ書店"
   },
   "9784813766988|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784813766988",
+    "status": "特典あり",
+    "detail": "【特典】応援店特典イラストカード(ハズレギフト「下限突破」を授かった俺はゼロ以下のステータスで最強を目指す~HP・MP・アイテムが使い放題ってどう考えてもバグすぎません?~ 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012844422/",
     "store_name": "とらのあな"
   },
   "9784813766988|kikuya": {
@@ -72066,9 +72066,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784785983376|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】近畿霊務局 第1巻 ゆのこショウ/霧笛ノト 少年画報社 B6判 2026/11/30",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044113",
     "store_name": "COMIC ZIN"
   },
   "9784825101210|comiczin": {
@@ -72726,9 +72726,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784046606921|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】転生淫魔王のハー.. 瑠璃ららこ/天那光汰 KADOKAWA B6 2026/12/04",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044422",
     "store_name": "COMIC ZIN"
   },
   "9784046858160|comiczin": {
@@ -72774,9 +72774,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784049723618|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】小さくて可愛い文.. 甘露アメ/ゆめいげつ KADOKAWA B6判 2026/12/08",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044128",
     "store_name": "COMIC ZIN"
   },
   "9784049723625|comiczin": {
@@ -73110,9 +73110,9 @@
     "store_name": "COMIC ZIN"
   },
   "9784801991415|comiczin": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://shop.comiczin.jp/products/list.php",
+    "status": "特典あり",
+    "detail": "【予約】捨てられた転生令.. かわやばぐ/モチモチわんこ 竹書房 B6判 2026/12/07",
+    "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044169",
     "store_name": "COMIC ZIN"
   },
   "9784801991408|comiczin": {
@@ -74244,9 +74244,9 @@
     "store_name": "とらのあな"
   },
   "9784049723243|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784049723243",
+    "status": "特典あり",
+    "detail": "【特典】特製イラストカード(十文字くんしか見えない!! 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012842216/",
     "store_name": "とらのあな"
   },
   "9784041180082|toranoana": {
@@ -74280,9 +74280,9 @@
     "store_name": "とらのあな"
   },
   "9784253021234|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784253021234",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(6年生としたいこと 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012840403/",
     "store_name": "とらのあな"
   },
   "9784253021241|toranoana": {
@@ -74658,9 +74658,9 @@
     "store_name": "とらのあな"
   },
   "9784434370038|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434370038",
+    "status": "特典あり",
+    "detail": "【特典】書店共通描き下ろしイラストカード(異世界転生令嬢、出奔する 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012844493/",
     "store_name": "とらのあな"
   },
   "9784824019554|toranoana": {
@@ -75148,5 +75148,17 @@
     "detail": "特典一覧に該当タイトルはありません。",
     "url": "https://shop.comiczin.jp/products/list.php",
     "store_name": "COMIC ZIN"
+  },
+  "9784825102316|comirano": {
+    "status": "特典あり",
+    "detail": "特典:A6ペーパー",
+    "url": "https://comirano.info/%e6%af%92%e8%96%ac%e5%a4%89%e3%81%98%e3%81%a6%e6%84%9b%e3%81%a8%e3%81%aa%e3%82%8b%ef%bd%9e%e8%bb%a2%e7%94%9f%e3%81%97%e3%81%9f%e3%82%89%e7%94%b7%e3%81%ae%e5%ab%81%e3%81%8c%e3%81%84%e3%82%8b%e3%82%af/",
+    "store_name": "こみらの！"
+  },
+  "9784434370038|comirano": {
+    "status": "特典あり",
+    "detail": "特典:イラストカード",
+    "url": "https://comirano.info/%e7%95%b0%e4%b8%96%e7%95%8c%e8%bb%a2%e7%94%9f%e4%bb%a4%e5%ac%a2%e3%80%81%e5%87%ba%e5%a5%94%e3%81%99%e3%82%8b%ef%bc%881%ef%bc%89/",
+    "store_name": "こみらの！"
   }
 }
