@@ -71845,7 +71845,7 @@
   },
   "9784049525137|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】魔法少女に復讐を.. 浅岡しゅく/堤りん KADOKAWA B6判 2026/11/27",
+    "detail": "魔法少女に復讐を 第1巻 浅岡しゅく/堤りん KADOKAWA B6判 2026/11/27",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044077",
     "store_name": "COMIC ZIN"
   },
@@ -71917,7 +71917,7 @@
   },
   "9784832297685|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】あくまじょグリモ.. 仮死亡殺 芳文社 A5判 2026/11/27",
+    "detail": "あくまじょグリモワール .. 仮死亡殺 芳文社 A5判 2026/11/27",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044097",
     "store_name": "COMIC ZIN"
   },
@@ -72043,7 +72043,7 @@
   },
   "9784575425550|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】怠惰な悪役王子に.. 清成/どまどま 双葉社 B6判 2026/11/30",
+    "detail": "怠惰な悪役王子に転生した.. 清成/どまどま 双葉社 B6判 2026/11/30",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044116",
     "store_name": "COMIC ZIN"
   },
@@ -72091,13 +72091,13 @@
   },
   "9784825102194|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】ムラムラしてしま.. 黒瀬葵/椋/ゆうきそにすけ 一迅社 B6判 2026/11/27",
+    "detail": "ムラムラしてしまう呪いの.. 黒瀬葵/椋/ゆうきそにすけ 一迅社 B6判 2026/11/27",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044086",
     "store_name": "COMIC ZIN"
   },
   "9784825102187|comiczin": {
     "status": "特典あり",
-    "detail": "【予約】姫虐が止まらない.. 斉藤りょーパー 一迅社 B6判 2026/11/27",
+    "detail": "姫虐が止まらない白桃さん.. 斉藤りょーパー 一迅社 B6判 2026/11/27",
     "url": "https://shop.comiczin.jp/products/detail.php?product_id=10044085",
     "store_name": "COMIC ZIN"
   },
@@ -74046,9 +74046,9 @@
     "store_name": "とらのあな"
   },
   "9784045003547|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784045003547",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしペーパー(神子と夜叉嫁 一)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012837770/",
     "store_name": "とらのあな"
   },
   "9784045003523|toranoana": {
@@ -74328,9 +74328,9 @@
     "store_name": "とらのあな"
   },
   "9784832297715|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784832297715",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろしイラストカード(だめユニ!~だめだめなユニコーン娘を召喚してしまいました~ 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012840630/",
     "store_name": "とらのあな"
   },
   "9784832297722|toranoana": {
@@ -74820,9 +74820,9 @@
     "store_name": "とらのあな"
   },
   "9784434390524|toranoana": {
-    "status": "特典なし",
-    "detail": "特典一覧に該当タイトルはありません。",
-    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784434390524",
+    "status": "特典あり",
+    "detail": "【特典】描き下ろし4Pリーフレット(きみは誰にも見つからないで 1)",
+    "url": "https://ecs.toranoana.jp/tora/ec/item/200012844483/",
     "store_name": "とらのあな"
   },
   "9784434390500|toranoana": {
@@ -75160,5 +75160,29 @@
     "detail": "特典:イラストカード",
     "url": "https://comirano.info/%e7%95%b0%e4%b8%96%e7%95%8c%e8%bb%a2%e7%94%9f%e4%bb%a4%e5%ac%a2%e3%80%81%e5%87%ba%e5%a5%94%e3%81%99%e3%82%8b%ef%bc%881%ef%bc%89/",
     "store_name": "こみらの！"
+  },
+  "9784798643724|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784798643724",
+    "store_name": "とらのあな"
+  },
+  "9784798643724|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
+  },
+  "9784594104399|toranoana": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://ecs.toranoana.jp/tora/ec/app/catalog/list?searchWord=9784594104399",
+    "store_name": "とらのあな"
+  },
+  "9784594104399|comiczin": {
+    "status": "特典なし",
+    "detail": "特典一覧に該当タイトルはありません。",
+    "url": "https://shop.comiczin.jp/products/list.php",
+    "store_name": "COMIC ZIN"
   }
 }
